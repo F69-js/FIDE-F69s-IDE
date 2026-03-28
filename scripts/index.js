@@ -3,7 +3,6 @@ let lineID = 0;
 let cur = null;
 let raw = "";
 let g;
-let main = document.querySelector("#input");
 let error = document.querySelector("#error");
 let showraw = document.querySelector("#showraw");
 let settings = document.querySelector("#settings");
