@@ -3,18 +3,18 @@ let lineID = 0;
 let cur = null;
 let raw = "";
 let g;
-const main = document.querySelector("#input");
-const error = document.querySelector("#error");
-const showraw = document.querySelector("#showraw");
-const settings = document.querySelector("#settings");
-const settingscontainer = document.querySelector("#settingscontainer");
-const middlearea = document.querySelector("#middlearea");
-const maincontainer = document.querySelector("#maincontainer");
-const filenamei = document.querySelector("#filenamei");
-const openfile = document.querySelector("#openfile");
-const savefile = document.querySelector("#savefile");
-const maintheme = document.querySelector("#maintheme");
-const theme_area = document.querySelector("#theme_area");
+let main = document.querySelector("#input");
+let error = document.querySelector("#error");
+let showraw = document.querySelector("#showraw");
+let settings = document.querySelector("#settings");
+let settingscontainer = document.querySelector("#settingscontainer");
+let middlearea = document.querySelector("#middlearea");
+let maincontainer = document.querySelector("#maincontainer");
+let filenamei = document.querySelector("#filenamei");
+let openfile = document.querySelector("#openfile");
+let savefile = document.querySelector("#savefile");
+let maintheme = document.querySelector("#maintheme");
+let theme_area = document.querySelector("#theme_area");
 class EnvironmentError extends Error {
     constructor(...args) {
         super(...args)
