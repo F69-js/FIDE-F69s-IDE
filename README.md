@@ -34,4 +34,4 @@ Q:Tab文字が横棒になっているのはなぜですか
 Q:バグを見つけました。どうすればいいですか？
 > A:報告してください。
 ---
-# こちらのウェブサイトはF69が[Gemini](https://gemini.google.com/)を使用して作成しました
+# [FIDE](https://f69-js.github.io/FIDE-F69s-IDE/)はF69が[Gemini](https://gemini.google.com/)を使用して作成しました
