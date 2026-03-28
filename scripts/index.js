@@ -2,6 +2,19 @@ import{_jala ,_fjalu} from "./fjalu/index.js"
 let lineID = 0;
 let cur = null;
 let raw = "";
+let g;
+const main = document.querySelector("#input");
+const error = document.querySelector("#error");
+const showraw = document.querySelector("#showraw");
+const settings = document.querySelector("#settings");
+const settingscontainer = document.querySelector("#settingscontainer");
+const middlearea = document.querySelector("#middlearea");
+const maincontainer = document.querySelector("#maincontainer");
+const filenamei = document.querySelector("#filenamei");
+const openfile = document.querySelector("#openfile");
+const savefile = document.querySelector("#savefile");
+const maintheme = document.querySelector("#maintheme");
+const theme_area = document.querySelector("#theme_area");
 class EnvironmentError extends Error {
     constructor(...args) {
         super(...args)
