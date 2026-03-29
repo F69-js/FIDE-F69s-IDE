@@ -20,6 +20,10 @@ class EnvironmentError extends Error {
         this.name = "EnvironmentError"
     }
 }
+function ExecuteCode(c){
+    const blob = new Blob([c], { type: 'application/javascript' });
+    const worker = new Worker(URL.createObjectURL(blob));
+}
 let main = document?.querySelector("#input")
 if (!main) {
     if (!document?.body) {
@@ -285,4 +289,10 @@ maintheme.addEventListener("input", () => {
     let v = maintheme.value
     SwitchTheme(v);
     localStorage?.setItem?.("fide:theme", v);
+})
+console.log=(...t)=>{
+    error.innerText += t.length > 1?t.join(" "):t
+}
+rawexec.addEventListener("click",()=>{
+    log+=ExecuteCode(raw)
 })
