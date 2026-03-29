@@ -14,6 +14,7 @@ let openfile = document.querySelector("#openfile");
 let savefile = document.querySelector("#savefile");
 let maintheme = document.querySelector("#maintheme");
 let theme_area = document.querySelector("#theme_area");
+let rawexec = document.querySelector("#rawexec");
 class EnvironmentError extends Error {
     constructor(...args) {
         super(...args)
