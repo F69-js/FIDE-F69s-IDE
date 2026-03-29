@@ -295,5 +295,5 @@ console.log=(...t)=>{
     error.innerText += t.length > 1?t.join(" "):t
 }
 rawexec.addEventListener("click",()=>{
-    log+=ExecuteCode(raw)
+    error.innerText+=ExecuteCode(raw)
 })
