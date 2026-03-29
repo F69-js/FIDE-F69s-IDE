@@ -270,6 +270,8 @@ function SwitchTheme(v) {
          --line-no-border:#4e4240;
          --main-color:#8d8584;
          --ineditor-text-color:#000000;
+         --background-unit-color:#000000;
+         --out-unit-color:#FFFFFF;
        }
           `
             break;
@@ -281,6 +283,8 @@ function SwitchTheme(v) {
          --line-no-border:#b1bdbf;
          --main-color:#727a7b;
          --ineditor-text-color:#FFFFFF;
+         --background-unit-color:FFFFFF;
+         --out-unit-color:#000000;
        }
           `
             break;
