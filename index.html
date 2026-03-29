@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="ja" dir="ltr">
   <head>
@@ -7,6 +8,7 @@
      <meta name="description" content="A simple Fjalu/Fjala Engine equipped HTML IDE">
      <meta name="robots" content="index">
      <meta name="theme-color" content="#FFFFFF">
+     <meta name="keywords" content="F69,F69-js,FIDE,Editor,IDE,Notepad,HTML,F69's IDE,メモ帳,開発環境,統合開発環境">
     <link rel="icon" href="images/favicon.ico" type="image/x-icon">
      <link rel="apple-touch-icon" href="images/favicon.ico">
      <style id="theme_area">
@@ -16,6 +18,8 @@
          --line-no-border:#4e4240;
          --main-color:#8d8584;
          --ineditor-text-color:#000000;
+         --background-unit-color:#000000;
+         --out-unit-color:#FFFFFF;
        }
      </style>
      <style>
@@ -59,7 +63,7 @@
       }
       #maincontainer{
         background-color:var(--main-color);
-        color:white;
+        color:var(--out-unit-color);
       }
       #menu{
         display:flex;
@@ -75,6 +79,10 @@
       }
       #filename{
         margin:0px 0px;
+      }
+      #body>*{
+        background-color:var(--background-unit-color);
+        color:var(--out-unit-color);
       }
      </style>
   </head>
