@@ -264,28 +264,12 @@ function SwitchTheme(v) {
     switch (v) {
         case "d":
             theme_area.innerText = `
-        :root{
-         --cursol-color:#000000;
-         --line-no-color:#a9a4a2;
-         --line-no-border:#4e4240;
-         --main-color:#8d8584;
-         --ineditor-text-color:#000000;
-         --background-unit-color:#000000;
-         --out-unit-color:#FFFFFF;
-       }
+        :root{--cursol-color:#000000;--line-no-color:#a9a4a2;--line-no-border:#4e4240;--main-color:#8d8584;--ineditor-text-color:#000000;--background-unit-color:#000000;--out-unit-color:#FFFFFF;}
           `
             break;
         case "l":
             theme_area.innerText = `
-        :root{
-         --cursol-color:#FFFFFF;
-         --line-no-color:#565b5d;
-         --line-no-border:#b1bdbf;
-         --main-color:#727a7b;
-         --ineditor-text-color:#FFFFFF;
-         --background-unit-color:FFFFFF;
-         --out-unit-color:#000000;
-       }
+        :root{--cursol-color:#FFFFFF;--line-no-color:#565b5d;--line-no-border:#b1bdbf;--main-color:#727a7b;--ineditor-text-color:#FFFFFF;--background-unit-color:FFFFFF;--out-unit-color:#000000;}
           `
             break;
         default:
