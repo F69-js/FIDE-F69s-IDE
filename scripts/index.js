@@ -292,7 +292,7 @@ maintheme.addEventListener("input", () => {
     localStorage?.setItem?.("fide:theme", v);
 })
 console.log=(...t)=>{
-    error.innerText += t.length > 1?t.join(" "):t
+    error.innerText += t.length > 1?t.join(" "):t[0]
 }
 rawexec.addEventListener("click",()=>{
     error.innerText+=ExecuteCode(raw)
