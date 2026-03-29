@@ -1,3 +1,4 @@
+import {ReplaceEmoji} from "./emoji.js"
 const noop = () => { };
 (function (glThis) {
     // FJALU Area
@@ -141,14 +142,16 @@ const noop = () => { };
         if (p.length < 1) return;
         if (p.length < 2) {
             if (isJapanese(p[0])) {
-                return RomajiToJapanese(p[0])
+                let emojiprocessed = ReplaceEmoji(p[0])
+                return RomajiToJapanese(emojiprocessed)
             } else {
                 return p[0]
             }
         } else {
             return p.map(t => {
                 if (isJapanese(t)) {
-                    return RomajiToJapanese(t)
+                    let emojiprocessed = ReplaceEmoji(t)
+                    return RomajiToJapanese(emojiprocessed)
                 } else {
                     return t
                 }
