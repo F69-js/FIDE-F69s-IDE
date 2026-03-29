@@ -23,22 +23,20 @@ class EnvironmentError extends Error {
 }
 function ExecuteCode(c){
     const wrapper = `
-       const console = {
-           log: (...args) => self.postMessage({type: 'log', data: args}),
-           error: (...args) => self.postMessage({type: 'error', data: args})
-       };
-       ${raw} // F69さんの書いたコードをここに合体！
+　　　const console = {
+            log: (...args) => self.postMessage({log: args.join(" ")}),
+            error: (...args) => self.postMessage({err: args.join(" ")})
+        };
+       ${raw}
     `;
     const blob = new Blob([c], { type: 'application/javascript' });
     const worker = new Worker(URL.createObjectURL(blob));
-    // 2. Workerからの「声」を聴くにょ！
-    worker.onmessage = (e) => {
-        if (e.data.type === 'log') {
-            error.innerText += " > " + e.data.data + "\n";
-        }
+　　worker.onmessage = (e) => {
+        if (e.data.log) error.innerText += " > " + e.data.log + "\n";
+        if (e.data.err) error.innerText += " [ERR] " + e.data.err + "\n";
     };
-    worker.onerror = (e) => {
-        error.innerText += "[Engine][ERR] " + e.message + "\n";
+worker.onerror = (e) => {
+        error.innerText += " [Runtime][ERROR] " + e.message + "\n";
     };
 }
 let main = document?.querySelector("#input")
