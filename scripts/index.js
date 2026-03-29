@@ -21,22 +21,31 @@ class EnvironmentError extends Error {
         this.name = "EnvironmentError"
     }
 }
-function ExecuteCode(c){
-    const wrapper = `
-　　　const console = {
+function ExecuteCode(c) {
+    const wrap = `
+        self.console = {
             log: (...args) => self.postMessage({log: args.join(" ")}),
-            error: (...args) => self.postMessage({err: args.join(" ")})
-        };
-       ${raw}
+            error: (...args) => self.postMessage({err: args.join(" ")}),
+            warn: (...args) => self.postMessage({log: "⚠️ " + args.join(" ")})
+        };  
+        try {
+            ${c} 
+        } catch (e) {
+            console.error(e.message);
+        }
     `;
-    const blob = new Blob([c], { type: 'application/javascript' });
+    const blob = new Blob([wrap], { type: 'application/javascript' });
     const worker = new Worker(URL.createObjectURL(blob));
-　　worker.onmessage = (e) => {
-        if (e.data.log) error.innerText += " > " + e.data.log + "\n";
-        if (e.data.err) error.innerText += " [ERR] " + e.data.err + "\n";
+    worker.onmessage = (e) => {
+        if (e.data.log) {
+            error.innerText += " > " + e.data.log + "\n";
+        }
+        if (e.data.err) {
+            error.innerText += " [ERR] " + e.data.err + "\n";
+        }
     };
-worker.onerror = (e) => {
-        error.innerText += " [Runtime][ERROR] " + e.message + "\n";
+    worker.onerror = (e) => {
+        error.innerText += " [Worker][Error] " + e.message + "\n";
     };
 }
 let main = document?.querySelector("#input")
