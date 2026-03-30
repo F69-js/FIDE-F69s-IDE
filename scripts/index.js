@@ -303,7 +303,7 @@ function SwitchTheme(v) {
             break;
         case "l":
             theme_area.innerText = `
-        :root{--cursol-color:#FFFFFF;--line-no-color:#565b5d;--line-no-border:#b1bdbf;--main-color:#727a7b;--ineditor-text-color:#FFFFFF;--background-unit-color:FFFFFF;--out-unit-color:#000000;}
+        :root{--cursol-color:#FFFFFF;--line-no-color:#565b5d;--line-no-border:#b1bdbf;--main-color:#727a7b;--ineditor-text-color:#FFFFFF;--background-unit-color:#FFFFFF;--out-unit-color:#000000;}
           `
             break;
         default:
