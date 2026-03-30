@@ -1,3 +1,4 @@
+let codehaserror = false;
 function TIDEPreParse(code) {
     variables.innerHTML="";
     let vars = [];
