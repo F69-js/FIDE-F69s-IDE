@@ -93,6 +93,43 @@
         background-color:var(--background-unit-color);
         color:var(--out-unit-color);
       }
+  //START TIDE
+  .inline{
+    list-style-type: circle;
+    margin:0px 20px;
+  }
+  code{
+    background-color:#e9f3f5;
+    border:3px solid #d9e7e8;
+    border-radius:4px;
+  }
+  table{
+    border:1px solid black;
+    background-color:#d0fff8
+  }
+  tr{
+    border:1px solid black;
+    background-color:#d0fff8
+  }
+  td:not(.error){
+    border:1px solid black;
+  }
+  tr:nth-child(odd):not(.error){
+    background-color:#d8fbff;
+  }
+  tr:nth-child(even):not(.error){
+    background-color:#bbf8ff;
+  }
+  .error{
+    background-color:#ffa5a5;
+  }
+  s{
+    color:red;
+  }
+  caption{
+    border:1px solid black;
+    background-color:#d0fff8;
+  }
      </style>
   </head>
   <body id=body>
@@ -112,6 +149,12 @@
               <div id=line0 class="line"></div>
               <div id=cursol0 class=cursol></div>
            </div>
+       </div>
+       <div id=info>
+           <table>
+            <caption>vars</caption>
+            <tbody id=variables></tbody>
+           </table>
        </div>
     </div>
     <div id=settingscontainer>
