@@ -106,6 +106,12 @@ function TIDEPreParse(code) {
             codehaserror = true
             p.innerText = t.name.toUpperCase()
             g.classList.add("error")
+            let ln = document.querySelector("#line"+t.line)
+            if(!ln){
+                t.error+="エラー箇所の取得に失敗しました"
+                return;
+            }
+            ln.classList.add("haserror")
             switch (t.errorcode) {
                 case 1:
                     q.innerText = "ヒント:この変数は再定義されていて、実行すると構文エラーになります"
