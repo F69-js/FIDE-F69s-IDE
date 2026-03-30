@@ -259,7 +259,6 @@ window.addEventListener("keydown", e => {
             if (mi.length > 0) {
                 cur.innerText = mi.slice(0, -1)
                 raw = raw.slice(0, -1)
-                TIDEPreParse(raw)
             } else {
                 let oldelem = cur;
                 lineID -= 1;
@@ -326,7 +325,6 @@ window.addEventListener("keydown", e => {
             e.preventDefault()
             cur.innerText += "|";
             raw += "\t"
-            TIDEPreParse(raw)
             break;
         case "Enter":
             DoEnter()
@@ -334,7 +332,6 @@ window.addEventListener("keydown", e => {
         default:
             cur.innerText += e.key;
             raw += e.key
-            TIDEPreParse(raw)
             break;
     }
 })
@@ -443,5 +440,6 @@ maintheme.addEventListener("input", () => {
     localStorage?.setItem?.("fide:theme", v);
 })
 rawexec.addEventListener("click", () => {
+    TIDEPreParse(raw)
     ExecuteCode(raw)
 })
