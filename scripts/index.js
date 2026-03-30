@@ -15,6 +15,7 @@ let savefile = document.querySelector("#savefile");
 let maintheme = document.querySelector("#maintheme");
 let theme_area = document.querySelector("#theme_area");
 let rawexec = document.querySelector("#rawexec");
+let codehaserror = true;
 class EnvironmentError extends Error {
     constructor(...args) {
         super(...args)
@@ -102,6 +103,7 @@ function TIDEPreParse(code) {
         r.classList.add("inline")
         r.innerText = "値:" + t.value
         if (t.error) {
+            codehaserror = true
             p.innerText = t.name.toUpperCase()
             g.classList.add("error")
             switch (t.errorcode) {
@@ -160,6 +162,9 @@ function ExecuteCode(c) {
             console.error(e.message);
         }
     `;
+    if(codehaserror){
+        error.innerText += "内部エンジンがエラーを予測したため、実行は中止されました"
+    }
     const blob = new Blob([wrap], { type: 'application/javascript' });
     const worker = new Worker(URL.createObjectURL(blob));
     worker.onmessage = (e) => {
