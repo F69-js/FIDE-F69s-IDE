@@ -22,7 +22,7 @@ class EnvironmentError extends Error {
     }
 }
 function TIDEPreParse(code) {
-    info.innerHTML="";
+    variables.innerHTML="";
     let vars = [];
     function PreParsePart(part, idx) {
         let cosp = part.split(" ")
