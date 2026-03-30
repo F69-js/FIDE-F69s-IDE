@@ -23,7 +23,7 @@ class EnvironmentError extends Error {
         this.name = "EnvironmentError"
     }
 }
-function ExecuteCode(c) {
+function ExecuteCode(c,h) {
     const wrap = `
         self.console = {
             log: (...args) => self.postMessage({log: args.join(" ")}),
@@ -36,7 +36,7 @@ function ExecuteCode(c) {
             console.error(e.message);
         }
     `;
-    if(codehaserror){
+    if(h){
         error.innerText += "内部エンジンがエラーを予測したため、実行は中止されました"
         return;
     }
@@ -321,6 +321,6 @@ maintheme.addEventListener("input", () => {
     localStorage?.setItem?.("fide:theme", v);
 })
 rawexec.addEventListener("click", () => {
-    TIDEPreParse(raw)
-    ExecuteCode(raw)
+    let h=TIDEPreParse(raw)
+    ExecuteCode(raw,h)
 })
