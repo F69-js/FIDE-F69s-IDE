@@ -45,7 +45,7 @@ function TIDEPreParse(code) {
                             type: t,
                             error: true,
                             errorcode: 2,
-                            line: idx,
+                            line: idx+1,
                             all: part
                         })
                         break;
@@ -57,7 +57,7 @@ function TIDEPreParse(code) {
                         type: t,
                         error: false,
                         errorcode: 1,
-                        line: idx,
+                        line: idx+1,
                         all: part
                     })
                     break;
