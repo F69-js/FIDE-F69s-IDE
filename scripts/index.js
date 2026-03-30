@@ -164,6 +164,7 @@ function ExecuteCode(c) {
     `;
     if(codehaserror){
         error.innerText += "内部エンジンがエラーを予測したため、実行は中止されました"
+        return;
     }
     const blob = new Blob([wrap], { type: 'application/javascript' });
     const worker = new Worker(URL.createObjectURL(blob));
