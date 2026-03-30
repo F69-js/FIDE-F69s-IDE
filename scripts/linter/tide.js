@@ -131,5 +131,6 @@ function TIDEPreParse(code) {
         m.appendChild(r)
         variables.appendChild(m)
     })
+    return codehaserror;
 }
 export {TIDEPreParse}
