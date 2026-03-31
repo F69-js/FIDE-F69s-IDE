@@ -21,11 +21,24 @@ let searchi = document?.querySelector("#searchi")
 let searchresults=document?.querySelector("#searchresults")
 let codehaserror = false;
 let active = false;
+let regexmode = false;
 function Search(raw,searchwords){
   let q=[]
   let rs=raw.split("\n")
   rs.forEach((t,i)=>{
-    if(t.includes(searchwords)){
+    let condition;
+    if(regexmode){
+      let rgx = new RegExp(searchwords,"g")
+      try{
+        condition=rgx.test(t)
+      }catch(e){
+        searchresults.innerText+="正しくないRegex:"+e.message
+        condition=false;
+      }
+    }else{
+        condition=t.includes(searchwords)
+    }
+    if(condition){
       q.push({
         id:i,
         code:rs[i]
