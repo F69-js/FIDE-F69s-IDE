@@ -366,13 +366,13 @@ searchi.addEventListener("keydown",e=>{
         searchresults.innerText="結果は見つかりませんでした"
     }
     searchresults.innerText=String(res.length)+"件の結果が見つかりました"
+    let elems = Array.from(document.querySelectorAll(".found"))
+    elems.forEach(t=>t.classList.remove("found"))
     res.forEach(t=>{
         let m=Number(t.id)
         if(Number.isNaN(m))return;
         let elem = document.querySelector("#line"+String(m))
         if(!elem)return;
-        let elems = Array.from(document.querySelectorAll(".found"))
-        elems.forEach(t=>t.classList.remove("found"))
         elem.classList.add("found");
     })
 })
