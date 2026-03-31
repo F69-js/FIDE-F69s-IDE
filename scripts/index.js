@@ -30,6 +30,7 @@ let codehaserror = false;
 let active = false;
 let regexmode = false;
 let replaccoOpen = false;
+let isSearched = false;
 replg.hidden=true;
 replacco.addEventListener("click",()=>{
   replaccoOpen=!replaccoOpen 
@@ -424,11 +425,26 @@ searchi.addEventListener("keydown",e=>{
     searchresults.innerText=String(res.length)+"件の結果が見つかりました"
     let elems = Array.from(document.querySelectorAll(".found"))
     elems.forEach(t=>t.classList.remove("found"))
+    isSearched=false;
     res.forEach(t=>{
         let m=Number(t.id)
         if(Number.isNaN(m))return;
         let elem = document.querySelector("#line"+String(m))
         if(!elem)return;
         elem.classList.add("found");
+        isSearched=true;
     })
 })
+replt.addEventListener("click",()=>{
+  let i=replt.value
+  if(!searchi.value||!isSearched){
+    searchresults.innerText="まだ検索していないか、置換前に検索キーが無くなっているかもしれません"
+    return;
+  }
+  let elems = Array.from(document.querySelectorAll(".found"))
+  elems.forEach(t=>{
+    t.innerText=t.innerText.replaceAll(searchi.value,i);
+  })
+  searchresults.innerText=elems.length+"箇所を置換しました"
+})
+
