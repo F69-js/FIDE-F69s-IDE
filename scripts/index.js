@@ -324,3 +324,7 @@ rawexec.addEventListener("click", () => {
     let h=TIDEPreParse(raw)
     ExecuteCode(raw,h)
 })
+window.addEventListener('beforeunload', (event) => {
+  event.preventDefault();
+  event.returnValue = '';
+});
