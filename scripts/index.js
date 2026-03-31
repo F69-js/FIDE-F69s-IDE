@@ -166,6 +166,16 @@ searchi.hidden=SearchOpen
 searchresults.hidden=SearchOpen
 searchg.hidden=SearchOpen
 window.addEventListener("keydown", e => {
+    if(e.ctrlKey&&e.key==="f"){
+      e.preventDefault()
+      if(!SearchOpen){
+        active = true
+      }
+      SearchOpen=!SearchOpen
+      searchi.hidden=SearchOpen
+      searchresults.hidden=SearchOpen
+      searchg.hidden=SearchOpen
+    }
     if(!active)return;
     window.addEventListener('beforeunload',HandleUnload);
     let mi = cur.innerText
@@ -179,16 +189,6 @@ window.addEventListener("keydown", e => {
                 e.preventDefault()
                 cur.innerText = _jala(mi)
                 raw = _jala(mi)
-                break;
-             case "f":
-                e.preventDefault()
-                if(!SearchOpen){
-                    active = true
-                }
-                SearchOpen=!SearchOpen
-                searchi.hidden=SearchOpen
-                searchresults.hidden=SearchOpen
-                searchg.hidden=SearchOpen
                 break;
         }
         return;
