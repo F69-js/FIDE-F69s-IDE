@@ -53,10 +53,10 @@ let LanguageTable = {
             browsererr: "Not available in this browser",
             savedialog: "Do you want to save?",
             saved: 'Save complete',
-            resultnone: "No results found",
-            resultfound: "Results found",
+            resultnone: "No result(s) found",
+            resultfound: "　Result(s) found",
             replerr: "You may not have searched yet, or your search key may be missing before replacement",
-            replsuccess: " lines replaced"
+            replsuccess: " line(s) replaced"
         }
     }
 }
