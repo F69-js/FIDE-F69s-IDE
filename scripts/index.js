@@ -21,19 +21,22 @@ let searchi = document?.querySelector("#searchi")
 let searchresults=document?.querySelector("#searchresults")
 let searchg=document?.querySelector("#searchg")
 let rgxmode=document?.querySelector("#rgxmode")
+let flags=document?.querySelector("#flags")
 let codehaserror = false;
 let active = false;
 let regexmode = false;
 rgxmode.addEventListener("change",()=>{
   regexmode=rgxmode.checked
 })
+if(flags)flags.value="gmu"
 function Search(raw,searchwords){
   let q=[]
   let rs=raw.split("\n")
   rs.forEach((t,i)=>{
     let condition;
     if(regexmode){
-      let rgx = new RegExp(searchwords,"g")
+      let flagss = (flags?.value)?.length===0?"gmu":flags.value.split(",").join("")
+      let rgx = new RegExp(searchwords,flagss)
       try{
         condition=rgx.test(t)
       }catch(e){
