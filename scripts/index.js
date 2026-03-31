@@ -226,6 +226,8 @@ window.addEventListener("keydown", e => {
                 cur.innerText = _jala(mi)
                 raw = _jala(mi)
                 break;
+             case "s":
+                savefile.click()
         }
         return;
     }
