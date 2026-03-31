@@ -143,6 +143,7 @@ async function ReadClipBoard() {
         error.innerText += "クリップボードの権限をご確認ください"
     })
 }
+let SearchOpen = false;
 window.addEventListener("keydown", e => {
     if(!active)return;
     window.addEventListener('beforeunload',HandleUnload);
@@ -157,6 +158,11 @@ window.addEventListener("keydown", e => {
                 e.preventDefault()
                 cur.innerText = _jala(mi)
                 raw = _jala(mi)
+                break;
+             case "f":
+                SearchOpen=!SearchOpen
+                searchi.hidden=SearchOpen
+                searchresults.hidden=SearchOpen
                 break;
         }
         return;
