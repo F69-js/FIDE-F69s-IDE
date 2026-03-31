@@ -26,11 +26,16 @@ let flagg=document?.querySelector("#flagg")
 let replt=document?.querySelector("#replt")
 let replg=document?.querySelector("#replg")
 let replacco=document?.querySelector("#replacco")
+let unl=document?.querySelector("#unloaden")
 let codehaserror = false;
 let active = false;
 let regexmode = false;
 let replaccoOpen = false;
 let isSearched = false;
+let u = Number(localStorage?.getItem?.("fide:check_unload"))
+if(Number.isNaN(u)){
+  u = 1;
+}
 replg.hidden=true;
 replacco.addEventListener("click",()=>{
   replaccoOpen=!replaccoOpen 
@@ -92,7 +97,9 @@ flags.addEventListener("click",()=>{
     active=false;
 })
 function ExecuteCode(c,h) {
-    window.addEventListener('beforeunload',HandleUnload);
+    if(u===1){
+      window.addEventListener('beforeunload',HandleUnload);
+    }
     const wrap = `
         self.console = {
             log: (...args) => self.postMessage({log: args.join(" ")}),
@@ -170,7 +177,9 @@ async function DoEnter() {
     raw += "\n";
 }
 async function ReadClipBoard() {
-    window.addEventListener('beforeunload',HandleUnload);
+    if(u===1){
+      window.addEventListener('beforeunload',HandleUnload);
+    }
     navigator.clipboard.readText().then(t => {
         t
             .split("\n")
@@ -201,7 +210,9 @@ window.addEventListener("keydown", e => {
       searchg.hidden=SearchOpen
     }
     if(!active)return;
-    window.addEventListener('beforeunload',HandleUnload);
+    if(u===1){
+      window.addEventListener('beforeunload',HandleUnload);
+    }
     let mi = cur.innerText
     if (e.ctrlKey) {
         switch (e.key) {
@@ -310,7 +321,9 @@ showraw.addEventListener("click", e => {
 })
 let filename = ""
 openfile.addEventListener("click", async () => {
-    window.addEventListener('beforeunload',HandleUnload);
+    if(u===1){
+      window.addEventListener('beforeunload',HandleUnload);
+    }
     try {
         if (!("showOpenFilePicker" in window)) {
             error.innerText += "\n" + "このブラウザでは使用できません"
@@ -448,4 +461,7 @@ replt.addEventListener("keydown",e=>{
   })
   searchresults.innerText=elems.length+"箇所を置換しました"
 })
-
+unl.addEventListener("click",()=>{
+  let res = unl.ckecked?"1":"0"
+  localStorage.setItem("fide:check_unload",res)
+})
