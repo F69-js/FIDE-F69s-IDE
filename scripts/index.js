@@ -356,6 +356,9 @@ rawexec.addEventListener("click", () => {
     let h=TIDEPreParse(raw)
     ExecuteCode(raw,h)
 })
+searchi.addEventListener("click",()=>{
+    active=false;
+})
 searchi.addEventListener("keydown",e=>{
     if(e.key!=="Enter")return;
     let res=Search(raw,searchi.value)
@@ -367,6 +370,7 @@ searchi.addEventListener("keydown",e=>{
         let m=Number(t.id)
         if(Number.isNaN(m))return;
         let elem = document.querySelector("#line"+String(m-1))
+        if(!elem)return;
         elem.classList.add("haserror");
     })
 })
