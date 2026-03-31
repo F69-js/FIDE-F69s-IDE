@@ -1,5 +1,5 @@
 # [FIDE - Fjalu/Fjala Engine 搭載国産簡易IDE](https://f69-js.github.io/FIDE-F69s-IDE/)
-![サンプル画像](./images/ex.png)
+![サンプル画像](./images/ex2.png)
 ---
 ## 機能
  - テキストエディタ
