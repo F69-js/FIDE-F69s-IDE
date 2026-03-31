@@ -227,6 +227,7 @@ window.addEventListener("keydown", e => {
                 raw = _jala(mi)
                 break;
              case "s":
+            e.preventDefault();
                 savefile.click()
         }
         return;
