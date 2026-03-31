@@ -435,7 +435,8 @@ searchi.addEventListener("keydown",e=>{
         isSearched=true;
     })
 })
-replt.addEventListener("click",()=>{
+replt.addEventListener("keydown",()=>{}
+  if(e.key!=="Enter")return;
   let i=replt.value
   if(!searchi.value||!isSearched){
     searchresults.innerText="まだ検索していないか、置換前に検索キーが無くなっているかもしれません"
