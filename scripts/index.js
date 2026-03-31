@@ -19,9 +19,14 @@ let rawexec = document?.querySelector("#rawexec");
 let main = document?.querySelector("#input")
 let searchi = document?.querySelector("#searchi")
 let searchresults=document?.querySelector("#searchresults")
+let searchg=document?.querySelector("#searchg")
+let rgxmode=document?.querySelector("#rgxmode")
 let codehaserror = false;
 let active = false;
 let regexmode = false;
+rgxmode.addEventListener("change",()=>{
+  regexmode=rgxmode.checked
+})
 function Search(raw,searchwords){
   let q=[]
   let rs=raw.split("\n")
@@ -179,6 +184,7 @@ window.addEventListener("keydown", e => {
                 SearchOpen=!SearchOpen
                 searchi.hidden=SearchOpen
                 searchresults.hidden=SearchOpen
+                searchg.hidden=SearchOpen
                 break;
         }
         return;
