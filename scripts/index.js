@@ -188,6 +188,7 @@ searchi.hidden=SearchOpen
 searchresults.hidden=SearchOpen
 searchg.hidden=SearchOpen
 window.addEventListener("keydown", e => {
+    if (e.isComposing || e.key === "Process") return;
     if(e.ctrlKey&&e.key==="f"){
       e.preventDefault()
       if(!SearchOpen){
