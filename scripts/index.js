@@ -57,7 +57,7 @@ if(!paramlang){
   if(["ja","en"].includes(paramlang)){
     lang=paramlang;
   }else{
-    lang=Navigator.language==="ja"?"ja":"en";
+    lang=navigator.language==="ja"?"ja":"en";
   }
 }
 Language.language=lang;
