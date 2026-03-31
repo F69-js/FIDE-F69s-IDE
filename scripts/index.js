@@ -164,6 +164,7 @@ async function ReadClipBoard() {
 let SearchOpen = true;
 searchi.hidden=SearchOpen
 searchresults.hidden=SearchOpen
+searchg.hidden=SearchOpen
 window.addEventListener("keydown", e => {
     if(!active)return;
     window.addEventListener('beforeunload',HandleUnload);
