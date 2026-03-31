@@ -1,10 +1,10 @@
 class Language{
-  static textlist = [{LanguageTableName}];
-  static language = [{Language}];
+  static textlist = null;
+  static language = null;
   static for(key){
-    let keys = key.split(".").splice(2)
+    let keys = key.split(".")
     keys.unshift(this.language)
-    let current = texts;
+    let current = this.textlist;
     let err = false;
     keys.forEach(t=>{
       current = current[t];
@@ -24,12 +24,14 @@ let LanguageTable = {
     }
   },
   en:{
+    htmltext:{
       regexmode:"Regular Expression Mode",
       flag:"Flag.Use a comma (,) if there are multiple flags.",
       replacer:"Replace To",
       thmelabel1:"Select Theme:",
       unllabel1:"display a dialog box for saving confirmation.",
       unllabel2:"dialog box for saving confirmation."
+    }
   }
 }
 export{Language,LanguageTable}
