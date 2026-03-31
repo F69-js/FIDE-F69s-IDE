@@ -182,6 +182,9 @@ window.addEventListener("keydown", e => {
                 break;
              case "f":
                 e.preventDefault()
+                if(!SearchOpen){
+                    active = true
+                }
                 SearchOpen=!SearchOpen
                 searchi.hidden=SearchOpen
                 searchresults.hidden=SearchOpen
@@ -328,7 +331,8 @@ savefile.addEventListener("click", async () => {
         error.innerText += ('保存完了');
         window.removeEventListener('beforeunload',HandleUnload);
     } catch (e) {
-        error.innerText += "[fileReading][ERR] " + e.message;
+        if(e.name==="AbortedError")return;
+        error.innerText += "[fileReading]["+e.name+"] " + e.message;
     }
 })
 filenamei.addEventListener("input", async () => {
