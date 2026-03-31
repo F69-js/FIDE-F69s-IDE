@@ -23,9 +23,19 @@ let searchg=document?.querySelector("#searchg")
 let rgxmode=document?.querySelector("#rgxmode")
 let flags=document?.querySelector("#flags")
 let flagg=document?.querySelector("#flagg")
+let replt=document?.querySelector("#replt")
+let replg=document?.querySelector("#replg")
+let replacco=document?.querySelector("#replacco")
 let codehaserror = false;
 let active = false;
 let regexmode = false;
+let replaccoOpen = false;
+replg.hidden=true;
+replacco.addEventListener("click",()=>{
+  replaccoOpen=!replaccoOpen 
+  replacco.innerText=replaccoOpen?"▼":"▶";
+  replg.hidden=!replaccoOpen;
+})
 rgxmode.addEventListener("change",()=>{
   regexmode=rgxmode.checked
   if(regexmode){
