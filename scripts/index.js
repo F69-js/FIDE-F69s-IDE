@@ -98,7 +98,7 @@ function Search(raw,searchwords){
       try{
         condition=rgx.test(t)
       }catch(e){
-        searchresults.innerText+="正しくないRegex:"+e.message
+        searchresults.innerText+=Language.for("inscript.invalidregex")+e.message
         condition=false;
       }
     }else{
@@ -115,7 +115,7 @@ function Search(raw,searchwords){
 }
 function HandleUnload(e){
     e.preventDefault();
-    e.returnValue = 'FIDEは保存されていません。本当にサイトを終了しますか？';
+    e.returnValue = Language.for("inscript.saveconfirm");
 }
 class EnvironmentError extends Error {
     constructor(...args) {
@@ -149,7 +149,7 @@ function ExecuteCode(c,h) {
         }
     `;
     if(h){
-        error.innerText += "内部エンジンがエラーを予測したため、実行は中止されました"
+        error.innerText += Language.for("inscript.executestop")
         return;
     }
     const blob = new Blob([wrap], { type: 'application/javascript' });
@@ -226,7 +226,7 @@ async function ReadClipBoard() {
             })
     }, e => {
         error.innerText += "Error:" + t;
-        error.innerText += "クリップボードの権限をご確認ください"
+        error.innerText += Language.for("inscript.clipboarderr")
     })
 }
 let SearchOpen = true;
@@ -365,7 +365,7 @@ openfile.addEventListener("click", async () => {
     }
     try {
         if (!("showOpenFilePicker" in window)) {
-            error.innerText += "\n" + "このブラウザでは使用できません"
+            error.innerText += "\n" + Language.for("inscript.browsererr")
             return;
         }
         let [picker] = (await window?.showOpenFilePicker()) ?? "#"
@@ -393,18 +393,18 @@ savefile.addEventListener("click", async () => {
         let intexts = linesArr.map(t => t.innerText)
         raw = intexts.join("\n")
         if (!("showSaveFilePicker" in window)) {
-            error.innerText += "\n" + "このブラウザでは使用できません"
+            error.innerText += "\n" + Language.for("inscript.browsererr")
             return;
         }
         let picker = await window.showSaveFilePicker({
             suggestedName: (filename || "F69sIDE.js")
         })
 
-        if (!confirm("保存しますか？")) return;
+        if (!confirm(Language.for("inscript.savedialog"))) return;
         const writable = await picker.createWritable();
         await writable.write(raw);
         await writable.close();
-        error.innerText += ('保存完了');
+        error.innerText += Language.for("inscript.saved");
         window.removeEventListener('beforeunload',HandleUnload);
     } catch (e) {
         if(e.name==="AbortError")return;
@@ -472,9 +472,9 @@ searchi.addEventListener("keydown",e=>{
     if(e.key!=="Enter")return;
     let res=Search(raw,searchi.value)
     if(res.length===0){
-        searchresults.innerText="結果は見つかりませんでした"
+        searchresults.innerText=Language.for("inscript.resultnone")
     }
-    searchresults.innerText=String(res.length)+"件の結果が見つかりました"
+    searchresults.innerText=String(res.length)+Language.for("inscript.resultfound")
     let elems = Array.from(document.querySelectorAll(".found"))
     elems.forEach(t=>t.classList.remove("found"))
     isSearched=false;
@@ -491,14 +491,14 @@ replt.addEventListener("keydown",e=>{
   if(e.key!=="Enter")return;
   let i=replt.value
   if(!searchi.value||!isSearched){
-    searchresults.innerText="まだ検索していないか、置換前に検索キーが無くなっているかもしれません"
+    searchresults.innerText=Language.for("inscript.replerr")
     return;
   }
   let elems = Array.from(document.querySelectorAll(".found"))
   elems.forEach(t=>{
     t.innerText=t.innerText.replaceAll(searchi.value,i);
   })
-  searchresults.innerText=elems.length+"箇所を置換しました"
+  searchresults.innerText=elems.length+Language.for("inscript.replsuccess")
 })
 unl.addEventListener("click",()=>{
   let res = unl.checked?"1":"0"
