@@ -17,6 +17,10 @@ let maintheme = document.querySelector("#maintheme");
 let theme_area = document.querySelector("#theme_area");
 let rawexec = document.querySelector("#rawexec");
 let codehaserror = false;
+function HandleUnload(e){
+    e.preventDefault();
+    e.returnValue = 'FIDEは保存されていません。本当にサイトを終了しますか？';
+}
 class EnvironmentError extends Error {
     constructor(...args) {
         super(...args)
@@ -24,6 +28,7 @@ class EnvironmentError extends Error {
     }
 }
 function ExecuteCode(c,h) {
+    window.addEventListener('beforeunload',HandleUnload);
     const wrap = `
         self.console = {
             log: (...args) => self.postMessage({log: args.join(" ")}),
@@ -102,6 +107,7 @@ async function DoEnter() {
     raw += "\n";
 }
 async function ReadClipBoard() {
+    window.addEventListener('beforeunload',HandleUnload);
     navigator.clipboard.readText().then(t => {
         t
             .split("\n")
@@ -116,6 +122,7 @@ async function ReadClipBoard() {
     })
 }
 window.addEventListener("keydown", e => {
+    window.addEventListener('beforeunload',HandleUnload);
     let mi = cur.innerText
     if (e.ctrlKey) {
         switch (e.key) {
@@ -224,6 +231,7 @@ showraw.addEventListener("click", e => {
 })
 let filename = ""
 openfile.addEventListener("click", async () => {
+    window.addEventListener('beforeunload',HandleUnload);
     try {
         if (!("showOpenFilePicker" in window)) {
             error.innerText += "\n" + "このブラウザでは使用できません"
@@ -266,6 +274,7 @@ savefile.addEventListener("click", async () => {
         await writable.write(raw);
         await writable.close();
         error.innerText += ('保存完了');
+        window.removeEventListener('beforeunload',HandleUnload);
     } catch (e) {
         error.innerText += "[fileReading][ERR] " + e.message;
     }
@@ -324,7 +333,3 @@ rawexec.addEventListener("click", () => {
     let h=TIDEPreParse(raw)
     ExecuteCode(raw,h)
 })
-window.addEventListener('beforeunload', (event) => {
-  event.preventDefault();
-  event.returnValue = '';
-});
