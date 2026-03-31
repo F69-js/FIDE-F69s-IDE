@@ -52,7 +52,7 @@ let isSearched = false;
 let lang;
 let paramlang = getParams(sec).find(t => Object.keys(t).includes("lang"))?.lang
 if(!paramlang){
-  lang=Navigator.language==="ja"?"ja":"en";
+  lang=navigator.language==="ja"?"ja":"en";
 }else{
   if(["ja","en"].includes(paramlang)){
     lang=paramlang;
