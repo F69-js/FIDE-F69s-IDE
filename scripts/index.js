@@ -17,8 +17,23 @@ let maintheme = document?.querySelector("#maintheme");
 let theme_area = document?.querySelector("#theme_area");
 let rawexec = document?.querySelector("#rawexec");
 let main = document?.querySelector("#input")
+let searchi = document?.querySelector("#searchi")
+let searchresults=document?.querySelector("#searchresults")
 let codehaserror = false;
 let active = false;
+function Search(raw,searchwords){
+  let q=[]
+  let rs=raw.split("\n")
+  rs.forEach((t,i)=>{
+    if(t.includes(searchwords)){
+      q.push({
+        id:i,
+        code:rs[i]
+      })
+    }
+  })
+  return q;
+}
 function HandleUnload(e){
     e.preventDefault();
     e.returnValue = 'FIDEは保存されていません。本当にサイトを終了しますか？';
@@ -340,4 +355,18 @@ maintheme.addEventListener("input", () => {
 rawexec.addEventListener("click", () => {
     let h=TIDEPreParse(raw)
     ExecuteCode(raw,h)
+})
+searchi.addEventListener("keydown",e=>{
+    if(e.key!=="Enter")return;
+    let res=Search(raw,searchi.value)
+    if(res.length===0){
+        searchresults.innerText="結果は見つかりませんでした"
+    }
+    searchresults.innerText=String(res.length)+"件の結果が見つかりました"
+    res.forEach(t=>{
+        let m=Number(t.id)
+        if(Number.isNaN(m))return;
+        let elem = document.querySelector("#line"+String(m-1))
+        elem.classList.add("haserror");
+    })
 })
