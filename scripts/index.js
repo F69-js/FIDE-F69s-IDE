@@ -369,8 +369,10 @@ searchi.addEventListener("keydown",e=>{
     res.forEach(t=>{
         let m=Number(t.id)
         if(Number.isNaN(m))return;
-        let elem = document.querySelector("#line"+String(m-1))
+        let elem = document.querySelector("#line"+String(m))
         if(!elem)return;
-        elem.classList.add("haserror");
+        let elems = Array.from(document.querySelectorAll(".found"))
+        elems.forEach(t=>t.classList.remove("found"))
+        elem.classList.add("found");
     })
 })
