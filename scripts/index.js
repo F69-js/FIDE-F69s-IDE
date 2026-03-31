@@ -35,8 +35,8 @@ let isSearched = false;
 let u = Number(localStorage?.getItem?.("fide:check_unload"))
 if(Number.isNaN(u)){
   u = 1;
-  unl.checked=u===1;
 }
+unl.checked=u===1;
 replg.hidden=true;
 replacco.addEventListener("click",()=>{
   replaccoOpen=!replaccoOpen 
