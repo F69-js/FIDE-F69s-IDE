@@ -372,7 +372,7 @@ savefile.addEventListener("click", async () => {
         error.innerText += ('保存完了');
         window.removeEventListener('beforeunload',HandleUnload);
     } catch (e) {
-        if(e.name==="AbortedError")return;
+        if(e.name==="AbortError")return;
         error.innerText += "[fileReading]["+e.name+"] " + e.message;
     }
 })
