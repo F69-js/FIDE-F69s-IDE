@@ -435,7 +435,7 @@ searchi.addEventListener("keydown",e=>{
         isSearched=true;
     })
 })
-replt.addEventListener("keydown",()=>{
+replt.addEventListener("keydown",e=>{
   if(e.key!=="Enter")return;
   let i=replt.value
   if(!searchi.value||!isSearched){
