@@ -35,6 +35,7 @@ let isSearched = false;
 let u = Number(localStorage?.getItem?.("fide:check_unload"))
 if(Number.isNaN(u)){
   u = 1;
+  unl.checked=u===1;
 }
 replg.hidden=true;
 replacco.addEventListener("click",()=>{
@@ -462,6 +463,6 @@ replt.addEventListener("keydown",e=>{
   searchresults.innerText=elems.length+"箇所を置換しました"
 })
 unl.addEventListener("click",()=>{
-  let res = unl.ckecked?"1":"0"
+  let res = unl.checked?"1":"0"
   localStorage.setItem("fide:check_unload",res)
 })
