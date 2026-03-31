@@ -155,15 +155,15 @@
      <input id=filenamei placeholder="Enter File Name...">
      <div id=searchg>
        <input id=searchi placeholder="fox">
-       <span>正規表現モード</span>
+       <span id=Text_RegexMode>正規表現モード</span>
        <input type="checkbox" id=rgxmode>
        <div id=flagg hidden=true>
-          <span>フラグ 複数の場合は,を使用してください</span>
+          <span id=Text_Flag>フラグ 複数の場合は,を使用してください</span>
           <input id=flags placeholder="g,m,u">
        </div>
        <button id=replacco>▶</button>
        <div id=replg>
-          <span>置換先</span>
+          <span id=Text_replacer>置換先</span>
           <input id=replt placeholder="cat">
        </div>
      </div>
@@ -187,14 +187,14 @@
     <div id=settingscontainer>
       <h1>Settings</h1>
       <p>theme:</p>
-      <label for="maintheme">テーマ選択:</label>
+      <label for="maintheme" id="Text_thmelabel1">テーマ選択:</label>
       <select id=maintheme>
         <option value="l">light</option>
         <option value="d">dark</option>
       </select>
-      <label for="unloaden">保存確認時のダイアログを表示します</label>
+      <label for="unloaden" id="Text_unllabel1">保存確認時のダイアログを表示します</label>
       <input type=checkbox id="unloaden">
-      <p>保存確認ダイアログを表示</p>
+      <p id="Text_unllabel2">保存確認ダイアログを表示</p>
     </div>
     <div id=menu>
        <div id=error></div>
