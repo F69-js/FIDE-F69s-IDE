@@ -4,19 +4,21 @@ let lineID = 0;
 let cur = null;
 let raw = "";
 let g;
-let error = document.querySelector("#error");
-let showraw = document.querySelector("#showraw");
-let settings = document.querySelector("#settings");
-let settingscontainer = document.querySelector("#settingscontainer");
-let middlearea = document.querySelector("#middlearea");
-let maincontainer = document.querySelector("#maincontainer");
-let filenamei = document.querySelector("#filenamei");
-let openfile = document.querySelector("#openfile");
-let savefile = document.querySelector("#savefile");
-let maintheme = document.querySelector("#maintheme");
-let theme_area = document.querySelector("#theme_area");
-let rawexec = document.querySelector("#rawexec");
+let error = document?.querySelector("#error");
+let showraw = document?.querySelector("#showraw");
+let settings = document?.querySelector("#settings");
+let settingscontainer = document?.querySelector("#settingscontainer");
+let middlearea = document?.querySelector("#middlearea");
+let maincontainer = document?.querySelector("#maincontainer");
+let filenamei = document?.querySelector("#filenamei");
+let openfile = document?.querySelector("#openfile");
+let savefile = document?.querySelector("#savefile");
+let maintheme = document?.querySelector("#maintheme");
+let theme_area = document?.querySelector("#theme_area");
+let rawexec = document?.querySelector("#rawexec");
+let main = document?.querySelector("#input")
 let codehaserror = false;
+let active = false;
 function HandleUnload(e){
     e.preventDefault();
     e.returnValue = 'FIDEは保存されていません。本当にサイトを終了しますか？';
@@ -27,6 +29,12 @@ class EnvironmentError extends Error {
         this.name = "EnvironmentError"
     }
 }
+main.addEventListener("click",()=>{
+    active=true;
+})
+filenamei.addEventListener("click",()=>{
+    active=false;
+})
 function ExecuteCode(c,h) {
     window.addEventListener('beforeunload',HandleUnload);
     const wrap = `
@@ -59,7 +67,6 @@ function ExecuteCode(c,h) {
         error.innerText += " [Worker][Error] " + e.message + "\n";
     };
 }
-let main = document?.querySelector("#input")
 if (!main) {
     if (!document?.body) {
         throw new EnvironmentError("this script only Use in HTML File")
@@ -122,6 +129,7 @@ async function ReadClipBoard() {
     })
 }
 window.addEventListener("keydown", e => {
+    if(!active)return;
     window.addEventListener('beforeunload',HandleUnload);
     let mi = cur.innerText
     if (e.ctrlKey) {
