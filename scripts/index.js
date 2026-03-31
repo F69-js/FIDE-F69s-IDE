@@ -22,11 +22,17 @@ let searchresults=document?.querySelector("#searchresults")
 let searchg=document?.querySelector("#searchg")
 let rgxmode=document?.querySelector("#rgxmode")
 let flags=document?.querySelector("#flags")
+let flagg=document?.querySelector("#flagg")
 let codehaserror = false;
 let active = false;
 let regexmode = false;
 rgxmode.addEventListener("change",()=>{
   regexmode=rgxmode.checked
+  if(regexmode){
+    flagg.hidden=false;
+  }else{
+    flagg.hidden=true;
+  }
 })
 if(flags)flags.value="gmu"
 function Search(raw,searchwords){
@@ -69,6 +75,9 @@ main.addEventListener("click",()=>{
     active=true;
 })
 filenamei.addEventListener("click",()=>{
+    active=false;
+})
+flags.addEventListener("click",()=>{
     active=false;
 })
 function ExecuteCode(c,h) {
