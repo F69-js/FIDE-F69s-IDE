@@ -1,5 +1,16 @@
 import { _jala, _fjalu } from "./fjalu/index.js"
 import {TIDEPreParse} from "./linter/tide.js"
+import {Language,LanguageTable} from "./langs/i18n.js"
+Language.textlist=LanguageTable;
+let sec = location.search
+function getParams(p) {
+    let c = {};
+    return p.substring(1).split("&").map(t => {
+        let l = t.split("=")
+        c[l[0]] = l.slice(1, l.length).join("=")
+        return c;
+    })
+}
 let lineID = 0;
 let cur = null;
 let raw = "";
@@ -27,11 +38,35 @@ let replt=document?.querySelector("#replt")
 let replg=document?.querySelector("#replg")
 let replacco=document?.querySelector("#replacco")
 let unl=document?.querySelector("#unloaden")
+let textregexmode=document?.querySelector("#Text_RegexMode")
+let textflag=document?.querySelector("#Text_Flag")
+let textreplacer=document?.querySelector("#Text_replacer")
+let ttl1=document?.querySelector("#Text_thmelabel1")
+let tul1=document?.querySelector("#Text_unllabel1")
+let tul2=document?.querySelector("#Text_unllabel2")
 let codehaserror = false;
 let active = false;
 let regexmode = false;
 let replaccoOpen = false;
 let isSearched = false;
+let lang;
+let paramlang = getParams(sec).find(t => Object.keys(t).includes("lang"))?.lang
+if(!paramlang){
+  lang=Navigator.language==="ja"?"ja":"en";
+}else{
+  if(["ja","en"].includes(paramlang)){
+    lang=paramlang;
+  }else{
+    lang=Navigator.language==="ja"?"ja":"en";
+  }
+}
+Language.language=lang;
+textregexmode.innerText=Language.for("htmltext.regexmode")
+textflag.innerText=Language.for("htmltext.flag")
+textreplacer.innerText=Language.for("htmltext.replacer")
+ttl1.innerText=Language.for("htmltext.thmelabel1")
+tul1.innerText=Language.for("htmltext.unllabel1")
+tul2.innerText=Language.for("htmltext.unllabel2")
 let u = Number(localStorage?.getItem?.("fide:check_unload"))
 if(Number.isNaN(u)){
   u = 1;
