@@ -1,4 +1,4 @@
-# [FIDE - Fjalu/Fjala Engine build-in simple IDE made in japan](https://f69-js.github.io/FIDE-F69s-IDE/)
+# [FIDE - Fjalu/Fjala Engine built-in simple IDE made in japan](https://f69-js.github.io/FIDE-F69s-IDE/)
 ![Example Image](./images/ex2.png)
 ---
 ## Features
