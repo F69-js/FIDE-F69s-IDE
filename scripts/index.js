@@ -44,6 +44,9 @@ let textreplacer=document?.querySelector("#Text_replacer")
 let ttl1=document?.querySelector("#Text_thmelabel1")
 let tul1=document?.querySelector("#Text_unllabel1")
 let tul2=document?.querySelector("#Text_unllabel2")
+let spanc=document?.querySelector("#spanc")
+let palettecolor=document?.querySelector("#palettecolor")
+let setc=document?.querySelector("#setc")
 let codehaserror = false;
 let active = false;
 let regexmode = false;
@@ -67,6 +70,7 @@ textreplacer.innerText=Language.for("htmltext.replacer")
 ttl1.innerText=Language.for("htmltext.thmelabel1")
 tul1.innerText=Language.for("htmltext.unllabel1")
 tul2.innerText=Language.for("htmltext.unllabel2")
+spanc.innerText=Language.for("htmltext.spanc")
 let u = Number(localStorage?.getItem?.("fide:check_unload"))
 if(Number.isNaN(u)){
   u = 1;
@@ -503,4 +507,7 @@ replt.addEventListener("keydown",e=>{
 unl.addEventListener("click",()=>{
   let res = unl.checked?"1":"0"
   localStorage.setItem("fide:check_unload",res)
+})
+setc.addEventListener("click",()=>{
+    cur.innerText += palettecolor.value;
 })
