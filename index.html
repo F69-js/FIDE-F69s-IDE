@@ -149,10 +149,20 @@
     display:flex;
     flex-direction:column;
   }
+  button, input#filenamei {
+    padding: 12px; 
+    margin: 4px;
+  }
+  #openfile, #savefile, #settings {
+    min-width: 48px;
+    min-height: 48px;
+  }
+       
      </style>
   </head>
   <body id=body>
     <div id=headermenu>
+     <main>
       <a href="https://github.com/F69-js/FIDE-F69s-IDE/">github</a>
        <button id=openfile>Open File</button>
        <button id=savefile>Save File</button>
@@ -178,6 +188,7 @@
     <div id=searchresults></div>
     <div id=toolbars>
       <span id=spanc></span>
+      <label for="palettecolor">パレット色選択</label>
       <input type=color id=palettecolor>
       <button id=setc>push</button>
     </div>
@@ -214,5 +225,6 @@
        <button id=rawexec>Exec</button>
     </div>
     <script src="./scripts/index.js" type="module" defer></script>
+    </main>
   </body>
 </html>
