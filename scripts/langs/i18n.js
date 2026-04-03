@@ -20,7 +20,8 @@ let LanguageTable = {
             replacer: "置換先",
             thmelabel1: "テーマ選択:",
             unllabel1: "保存確認時のダイアログを表示します",
-            unllabel2: "保存確認ダイアログを表示"
+            unllabel2: "保存確認ダイアログを表示",
+            spanc:"色入力ツール:"
         },
         inscript: {
             invalidregex: "正しくないRegex:",
@@ -43,7 +44,8 @@ let LanguageTable = {
             replacer: "Replace To",
             thmelabel1: "Select Theme:",
             unllabel1: "display a dialog box for saving confirmation.",
-            unllabel2: "dialog box for saving confirmation."
+            unllabel2: "dialog box for saving confirmation.",
+            spanc:"Color input tools:"
         },
         inscript: {
             invalidregex: "Invalid Regex:",
