@@ -19,6 +19,9 @@
     <link rel="icon" href="images/favicon.ico" type="image/x-icon">
      <meta name="twitter:image" content="https://f69-js.github.io/FIDE-F69s-IDE/images/ex.png">
      <link rel="apple-touch-icon" href="images/favicon.ico">
+     <link rel="modulepreload" href="scripts/index.js">
+     <link rel="modulepreload" href="fjalu/index.js">
+     <link rel="modulepreload" href="linter/tide.js">
      <style id="theme_area">
         :root{
          --cursol-color:#000000;
@@ -210,6 +213,6 @@
        <button id=showraw>raw</button>
        <button id=rawexec>Exec</button>
     </div>
-    <script src="./scripts/index.js" type="module"></script>
+    <script src="./scripts/index.js" type="module" defer></script>
   </body>
 </html>
