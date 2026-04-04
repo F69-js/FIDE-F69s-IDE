@@ -400,12 +400,13 @@ openfile.addEventListener("click", async () => {
                 imgcontainer.hidden=false;
                 CurrentOpeningFile = file;
                 let url = URL.createObjectURL(file)
-                img1.src=url;
-                function img1onload(){
+                let imge = new Image()
+                imge.src = url;
+                let ctx = img1,getContext("2d")
+                img.onload=()=>{
+                    ctx.drawImage(imge,0,0,imge.width,imge.height)
                     URL.revokeObjectURL(url);
-                    img1.removeEventListener("load",img1onload)
                 }
-                img1.addEventListener("load",img1onload)
                 break;
             default:
                 filetype = "text"
@@ -443,7 +444,9 @@ savefile.addEventListener("click", async () => {
         const writable = await picker.createWritable();
         switch(filetype){
             case "image":
-                await writable.write(CurrentOpeningFile);
+                img1.toBlob((b)=>{
+                    await writable.write(b);
+                }
                 break;
             default:
                 await writable.write(raw);
