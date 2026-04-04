@@ -32,7 +32,7 @@ Enter the name in the input field.
 It will also appear in the Main Area, so please delete it.
 ### Opening Settings
 Press **Open Settings** in the upper right. You can select a theme from here, and the theme will be retained for your next access.
-## QA
+## Q and A
 Q: Why are the Tab characters vertical bars?
 > A: This is to make the indentation (depth) easier to understand in programming. Don't worry, they will remain as Tabs during downloads, etc.
 
