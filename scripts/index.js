@@ -25,7 +25,46 @@ let lineID = 0;
 let cur = null;
 let raw = "";
 let g;
-let list = ["#error","#showraw","#settings","#settingscontainer","#middlearea","#maincontainer","#filenamei","#openfile","#savefile","#maintheme","#theme_area","#rawexec","#input","#searchi","#searchresults","#searchg","#rgxmode","#flags","#flagg","#replt","#replg","#replacco","#unloaden","#Text_RegexMode","#Text_Flag","#Text_replacer","#Text_thmelabel1","#Text_unllabel1","#Text_unllabel2","#spanc","#palettecolor","#setc","#img1","#imgcontainer"]
+let list = [
+    "#error",
+    "#showraw",
+    "#settings",
+    "#settingscontainer"
+    ,"#middlearea",
+    "#maincontainer",
+    "#filenamei",
+    "#openfile",
+    "#savefile",
+    "#maintheme",
+    "#theme_area",
+    "#rawexec",
+    "#input",
+    "#searchi",
+    "#searchresults",
+    "#searchg",
+    "#rgxmode",
+    "#flags",
+    "#flagg",
+    "#replt",
+    "#replg",
+    "#replacco",
+    "#unloaden",
+    "#Text_RegexMode",
+    "#Text_Flag",
+    "#Text_replacer",
+    "#Text_thmelabel1",
+    "#Text_unllabel1",
+    "#Text_unllabel2",
+    "#spanc",
+    "#palettecolor",
+    "#setc",
+    "#img1",
+    "#imgcontainer",
+    "#mediamenu",
+    "#penmode",
+    "#tpcolor",
+    "#pencolor"
+]
 list.forEach(t=>{
    let d=document?.querySelector(t)
     if(!d)return;
@@ -42,6 +81,7 @@ function Coloredline(fx=0,fy=0,tx=10,ty=10,c="#000000"){
     ctx.stroke();
 }
 let drawing = false;
+pencolor.value="#FF0000"
 let filetype="text"
 let codehaserror = false;
 let active = false;
@@ -565,7 +605,7 @@ setc.addEventListener("click",()=>{
   img1.addEventListener("mousemove",e=>{
     if(!drawing)return;
     let x=e.offsetX,y=e.offsetY;
-    Coloredline(x,y,oldx,oldy)
+    Coloredline(x,y,oldx,oldy,pencolor.value)
     oldx=x;
     oldy=y;
   })
