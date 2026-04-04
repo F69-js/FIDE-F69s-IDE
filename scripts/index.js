@@ -1,3 +1,13 @@
+/*@credit
+ *created by F69 with Gemini(https://gemini.google.com/)
+ *@license FIDE
+ * *F69's Scriptng License
+ *copyright(c) 2026 F69_Scripting. All Rights Reserved.
+ *DISCLAIMER
+ *There is no guarantee that this code is error-free, bug-free, always works properly, will not be subject to specification changes or service outages, is legal, or can be used with various entities. 
+ *This code is provided "AS IS". By using this library, you agree to the license.
+ *if you copy this program, add this comment 'this code is COPY OF FIDE" below this code and add "copyright(c) [YEAR(do not use "'YY". please use "YYYY")] [NAME]' in copyright section(don't include placeholder(text between "[" and "]"))
+ */
 import { _jala, _fjalu } from "./fjalu/index.js"
 import {TIDEPreParse} from "./linter/tide.js"
 import {Language,LanguageTable} from "./langs/i18n.js"
@@ -49,6 +59,16 @@ let palettecolor=document?.querySelector("#palettecolor")
 let setc=document?.querySelector("#setc")
 let img1 = document?.querySelector("#img1")
 let imgcontainer = document?.querySelector("#imgcontainer")
+let ctx = img1.getContext("2d")
+let oldx = 0,oldy = 0;
+function Coloredline(fx=0,fy=0,tx=10,ty=10,c="#000000"){
+    ctx.beginPath();
+    ctx.moveTo(fx, fy);
+    ctx.lineTo(tx, ty);
+    ctx.strokeStyle = c;
+    ctx.stroke();
+}
+let drawing = false;
 let filetype="text"
 let codehaserror = false;
 let active = false;
@@ -402,7 +422,6 @@ openfile.addEventListener("click", async () => {
                 let url = URL.createObjectURL(file)
                 let imge = new Image()
                 imge.src = url;
-                let ctx = img1.getContext("2d")
                 imge.onload=()=>{
                     img1.width = imge.width;
                     img1.height = imge.height;
@@ -564,3 +583,19 @@ unl.addEventListener("click",()=>{
 setc.addEventListener("click",()=>{
     cur.innerText += palettecolor.value;
 })
+  img1.addEventListener("mousedown",e=>{
+    drawing = true;
+    let x=e.offsetX,y=e.offsetY;
+    oldx=x;
+    oldy=y;
+  })
+  img1.addEventListener("mousemove",e=>{
+    if(!drawing)return;
+    let x=e.offsetX,y=e.offsetY;
+    Coloredline(x,y,oldx,oldy)
+    oldx=x;
+    oldy=y;
+  })
+  img1.addEventListener("mouseup",()=>{
+    drawing = false;
+  })
