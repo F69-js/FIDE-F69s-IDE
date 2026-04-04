@@ -382,11 +382,15 @@ openfile.addEventListener("click", async () => {
         if(!filename)return;
         filenamei.value = filename;
         switch(filename.split(".").slice(-1)[0]){
-            case ".png":
-            case ".svg":
-            case ".jpeg":
-            case ".jpg":
-            case ".gif":
+            case "png":
+            case "svg":
+            case "jpeg":
+            case "jpg":
+            case "gif":
+            case "webp":
+            case "heic":
+            case "tiff":
+            case "bmp":
                 let url = URL.createObjectURL(file)
                 img1.src=url;
                 function img1onload(){
