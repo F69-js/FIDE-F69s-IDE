@@ -124,7 +124,7 @@ class EnvironmentError extends Error {
         this.name = "EnvironmentError"
     }
 }
-main.addEventListener("click",()=>{
+maincontainer.addEventListener("click",()=>{
     active=true;
 })
 filenamei.addEventListener("click",()=>{
@@ -167,7 +167,7 @@ function ExecuteCode(c,h) {
         error.innerText += " [Worker][Error] " + e.message + "\n";
     };
 }
-if (!main) {
+if (!maincontainer) {
     if (!document?.body) {
         throw new EnvironmentError("this script only Use in HTML File")
     }
@@ -209,7 +209,7 @@ async function DoEnter() {
     elemGroup.appendChild(elemNo)
     elemGroup.appendChild(newElem)
     elemGroup.appendChild(curElem)
-    main.appendChild(elemGroup)
+    maincontainer.appendChild(elemGroup)
     cur = newElem;
     raw += "\n";
 }
