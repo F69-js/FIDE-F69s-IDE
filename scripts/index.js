@@ -443,7 +443,7 @@ savefile.addEventListener("click", async () => {
         })
 
         if (!confirm(Language.for("inscript.savedialog"))) return;
-        const writable = await picker.createWritable();
+        let writable; 
         async function SuscessSave(){
             await writable.close();
             error.innerText += Language.for("inscript.saved");
@@ -452,18 +452,20 @@ savefile.addEventListener("click", async () => {
         switch(filetype){
             case "image":
                 img1.toBlob(async (b)=>{
+                    writable = await picker.createWritable();
                     await writable.write(b);
                     SuscessSave()
                 })
                 break;
             default:
+                writable = await picker.createWritable();
                 await writable.write(raw);
+                SuscessSave()
                 break;
         }
-        SuscessSave()
     } catch (e) {
         if(e.name==="AbortError")return;
-        error.innerText += "[fileReading]["+e.name+"] " + e.message;
+        error.innerText += "[fileSaving]["+e.name+"] " + e.message;
     }
 })
 filenamei.addEventListener("input", async () => {
