@@ -25,40 +25,13 @@ let lineID = 0;
 let cur = null;
 let raw = "";
 let g;
-let error = document?.querySelector("#error");
-let showraw = document?.querySelector("#showraw");
-let settings = document?.querySelector("#settings");
-let settingscontainer = document?.querySelector("#settingscontainer");
-let middlearea = document?.querySelector("#middlearea");
-let maincontainer = document?.querySelector("#maincontainer");
-let filenamei = document?.querySelector("#filenamei");
-let openfile = document?.querySelector("#openfile");
-let savefile = document?.querySelector("#savefile");
-let maintheme = document?.querySelector("#maintheme");
-let theme_area = document?.querySelector("#theme_area");
-let rawexec = document?.querySelector("#rawexec");
-let main = document?.querySelector("#input")
-let searchi = document?.querySelector("#searchi")
-let searchresults=document?.querySelector("#searchresults")
-let searchg=document?.querySelector("#searchg")
-let rgxmode=document?.querySelector("#rgxmode")
-let flags=document?.querySelector("#flags")
-let flagg=document?.querySelector("#flagg")
-let replt=document?.querySelector("#replt")
-let replg=document?.querySelector("#replg")
-let replacco=document?.querySelector("#replacco")
-let unl=document?.querySelector("#unloaden")
-let textregexmode=document?.querySelector("#Text_RegexMode")
-let textflag=document?.querySelector("#Text_Flag")
-let textreplacer=document?.querySelector("#Text_replacer")
-let ttl1=document?.querySelector("#Text_thmelabel1")
-let tul1=document?.querySelector("#Text_unllabel1")
-let tul2=document?.querySelector("#Text_unllabel2")
-let spanc=document?.querySelector("#spanc")
-let palettecolor=document?.querySelector("#palettecolor")
-let setc=document?.querySelector("#setc")
-let img1 = document?.querySelector("#img1")
-let imgcontainer = document?.querySelector("#imgcontainer")
+let list = ["#error","#showraw","#settings","#settingscontainer","#middlearea","#maincontainer","#filenamei","#openfile","#savefile","#maintheme","#theme_area","#rawexec","#input","#searchi","#searchresults","#searchg","#rgxmode","#flags","#flagg","#replt","#replg","#replacco","#unloaden","#Text_RegexMode","#Text_Flag","#Text_replacer","#Text_thmelabel1","#Text_unllabel1","#Text_unllabel2","#spanc","#palettecolor","#setc","#img1","#imgcontainer"]
+list.forEach(t=>{
+   let d=document?.querySelector(t)
+    if(!d)return;
+    let n=t.slice(1)
+    globalThis[n]=d;
+})
 let ctx = img1.getContext("2d")
 let oldx = 0,oldy = 0;
 function Coloredline(fx=0,fy=0,tx=10,ty=10,c="#000000"){
