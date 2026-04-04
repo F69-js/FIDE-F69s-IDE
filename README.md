@@ -1,2 +1,2 @@
 # choose language
-[JA](./readme_ja.md)|[EN](./readme_en.md)
+[JA](./README_ja.md)|[EN](./README_en.md)
