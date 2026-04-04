@@ -47,6 +47,8 @@ let tul2=document?.querySelector("#Text_unllabel2")
 let spanc=document?.querySelector("#spanc")
 let palettecolor=document?.querySelector("#palettecolor")
 let setc=document?.querySelector("#setc")
+let img1 = document?.querySelector("#img1")
+let imgcontainer = document?.querySelector("#imgcontainer")
 let codehaserror = false;
 let active = false;
 let regexmode = false;
@@ -377,15 +379,33 @@ openfile.addEventListener("click", async () => {
         const file = await picker.getFile();
         if (!file) return;
         filename = file?.name
+        if(!filename)return;
         filenamei.value = filename;
-        const content = await file.text();
-        content
-            .split("\n")
-            .forEach((r, t, a) => {
-                cur.innerText += r;
-                raw += r;
-                if (t != a.length - 1) DoEnter()
-            })
+        switch(filename.split(".").slice(-1)[0]){
+            case ".png":
+            case ".svg":
+            case ".jpeg":
+            case ".jpg":
+            case ".gif":
+                let url = URL.createObjectURL(file)
+                img1.src=url;
+                function img1onload(){
+                    URL.revokeObjectURL(url);
+                    img1.removeEventListener("load",img1onload)
+                }
+                img1.addEventListener("load",img1onload)
+                break;
+            default:
+                const content = await file.text();
+                content
+                   .split("\n")
+                   .forEach((r, t, a) => {
+                        cur.innerText += r;
+                        raw += r;
+                        if (t != a.length - 1) DoEnter()
+                    })
+            break;
+        }
     } catch (e) {
         error.innerText += "[fileReading][ERR] " + e.message;
     }
