@@ -444,7 +444,7 @@ savefile.addEventListener("click", async () => {
         const writable = await picker.createWritable();
         switch(filetype){
             case "image":
-                img1.toBlob((b)=>{
+                img1.toBlob(async (b)=>{
                     await writable.write(b);
                 })
                 break;
