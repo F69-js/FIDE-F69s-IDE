@@ -365,6 +365,8 @@ showraw.addEventListener("click", e => {
     alert(raw)
 })
 let filename = ""
+maincontainer.hidden=false;
+imgcontainer.hidden=true;
 openfile.addEventListener("click", async () => {
     if(u===1){
       window.addEventListener('beforeunload',HandleUnload);
@@ -391,6 +393,8 @@ openfile.addEventListener("click", async () => {
             case "heic":
             case "tiff":
             case "bmp":
+                maincontainer.hidden=true;
+                imgcontainer.hidden=false;
                 let url = URL.createObjectURL(file)
                 img1.src=url;
                 function img1onload(){
@@ -400,6 +404,8 @@ openfile.addEventListener("click", async () => {
                 img1.addEventListener("load",img1onload)
                 break;
             default:
+                maincontainer.hidden=true;
+                imgcontainer.hidden=false;
                 const content = await file.text();
                 content
                    .split("\n")
