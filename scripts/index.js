@@ -404,6 +404,8 @@ openfile.addEventListener("click", async () => {
                 imge.src = url;
                 let ctx = img1.getContext("2d")
                 imge.onload=()=>{
+                    img1.width = imge.width;
+                    img1.height = imge.height;
                     ctx.drawImage(imge,0,0,imge.width,imge.height)
                     URL.revokeObjectURL(url);
                 }
@@ -442,19 +444,23 @@ savefile.addEventListener("click", async () => {
 
         if (!confirm(Language.for("inscript.savedialog"))) return;
         const writable = await picker.createWritable();
+        async function SuscessSave(){
+            await writable.close();
+            error.innerText += Language.for("inscript.saved");
+            window.removeEventListener('beforeunload',HandleUnload);
+        }
         switch(filetype){
             case "image":
                 img1.toBlob(async (b)=>{
                     await writable.write(b);
+                    SuscessSave()
                 })
                 break;
             default:
                 await writable.write(raw);
                 break;
         }
-        await writable.close();
-        error.innerText += Language.for("inscript.saved");
-        window.removeEventListener('beforeunload',HandleUnload);
+        SuscessSave()
     } catch (e) {
         if(e.name==="AbortError")return;
         error.innerText += "[fileReading]["+e.name+"] " + e.message;
