@@ -145,7 +145,7 @@
     text-decoration-line: underline;
     text-decoration-color: red;
   }
-  #toolbar{
+  #toolbar,imgcontainer{
     display:flex;
     flex-direction:column;
   }
@@ -153,7 +153,7 @@
     padding: 12px; 
     margin: 4px;
   }
-  #openfile, #savefile, #settings {
+  #openfile, #savefile, #settings, #pencolor {
     min-width: 48px;
     min-height: 48px;
   }
@@ -172,15 +172,15 @@
      <input id=filenamei placeholder="Enter File Name...">
      <div id=searchg>
        <input id=searchi placeholder="fox">
-       <span id=Text_RegexMode></span>
+       <span id=textregexmode></span>
        <input type="checkbox" id=rgxmode>
        <div id=flagg hidden=true>
-          <span id=Text_Flag></span>
+          <span id=textflag></span>
           <input id=flags placeholder="g,m,u">
        </div>
        <button id=replacco>▶</button>
        <div id=replg>
-          <span id=Text_replacer></span>
+          <span id=textreplacer></span>
           <input id=replt placeholder="cat">
        </div>
      </div>
@@ -208,19 +208,25 @@
        </div>
     </div>
     <div id=imgcontainer>
+      <div id=mediamenu>
+        <button id=penmode>ペン</button>
+        <label for="pencolor">ペンの色を選択</label>
+        <div id=tpcolor>ペンの色</div>
+        <input type=color id=pencolor>
+      </div>
       <canvas id=img1></canvas>
     </div>
     <div id=settingscontainer>
       <h1>Settings</h1>
       <p>theme:</p>
-      <label for="maintheme" id="Text_thmelabel1"></label>
+      <label for="maintheme" id="ttl1"></label>
       <select id=maintheme>
         <option value="l">light</option>
         <option value="d">dark</option>
       </select>
-      <label for="unloaden" id="Text_unllabel1"></label>
+      <label for="unloaden" id="tul1"></label>
       <input type=checkbox id="unloaden">
-      <p id="Text_unllabel2"></p>
+      <p id="tul2"></p>
     </div>
     <div id=menu>
        <div id=error></div>
