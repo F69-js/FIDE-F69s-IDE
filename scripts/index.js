@@ -402,7 +402,7 @@ openfile.addEventListener("click", async () => {
                 let url = URL.createObjectURL(file)
                 let imge = new Image()
                 imge.src = url;
-                let ctx = img1,getContext("2d")
+                let ctx = img1.getContext("2d")
                 img.onload=()=>{
                     ctx.drawImage(imge,0,0,imge.width,imge.height)
                     URL.revokeObjectURL(url);
