@@ -49,11 +49,13 @@ let palettecolor=document?.querySelector("#palettecolor")
 let setc=document?.querySelector("#setc")
 let img1 = document?.querySelector("#img1")
 let imgcontainer = document?.querySelector("#imgcontainer")
+let filetype="text"
 let codehaserror = false;
 let active = false;
 let regexmode = false;
 let replaccoOpen = false;
 let isSearched = false;
+let CurrentOpeningFile = null;
 let lang;
 let paramlang = getParams(sec).find(t => Object.keys(t).includes("lang"))?.lang
 if(!paramlang){
@@ -393,8 +395,10 @@ openfile.addEventListener("click", async () => {
             case "heic":
             case "tiff":
             case "bmp":
+                filetype = "image"
                 maincontainer.hidden=true;
                 imgcontainer.hidden=false;
+                CurrentOpeningFile = file;
                 let url = URL.createObjectURL(file)
                 img1.src=url;
                 function img1onload(){
@@ -404,6 +408,7 @@ openfile.addEventListener("click", async () => {
                 img1.addEventListener("load",img1onload)
                 break;
             default:
+                filetype = "text"
                 maincontainer.hidden=true;
                 imgcontainer.hidden=false;
                 const content = await file.text();
@@ -436,7 +441,14 @@ savefile.addEventListener("click", async () => {
 
         if (!confirm(Language.for("inscript.savedialog"))) return;
         const writable = await picker.createWritable();
-        await writable.write(raw);
+        switch(filetype){
+            case "image":
+                await writable.write(CurrentOpeningFile);
+                break;
+            default:
+                await writable.write(raw);
+                break;
+        }
         await writable.close();
         error.innerText += Language.for("inscript.saved");
         window.removeEventListener('beforeunload',HandleUnload);
