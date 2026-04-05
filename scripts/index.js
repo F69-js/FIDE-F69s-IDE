@@ -131,11 +131,11 @@ if(flags)flags.value="gmu"
 function Search(raw,searchwords){
   let q=[]
   let rs=raw.split("\n")
+  let flagss = (flags?.value)?.length===0?"gmu":flags.value.split(",").join("")
+  let rgx = new RegExp(searchwords,flagss)
   rs.forEach((t,i)=>{
     let condition;
     if(regexmode){
-      let flagss = (flags?.value)?.length===0?"gmu":flags.value.split(",").join("")
-      let rgx = new RegExp(searchwords,flagss)
       try{
         condition=rgx.test(t)
       }catch(e){
