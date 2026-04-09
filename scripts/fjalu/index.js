@@ -11,8 +11,6 @@ const noop = () => { };
         return e.map(t => !JP_RE.test(t));
     }
 
-    // 文字を CharCode または [CharCode, CharCode] で定義
-    // ※ 12354 = あ, 12363 = か ...
     let t = {
         a: 12354, i: 12356, u: 12358, e: 12360, o: 12362,
         a: { a: 12354, i: 12356, u: 12358, e: 12360, o: 12362 },
@@ -51,10 +49,8 @@ const noop = () => { };
             let char = input[index]?.toLowerCase();
             let nextNode = node[char];
 
-            // 1. 次のノードがない = このルートはハズレ
             if (!nextNode) return null;
 
-            // 2. 確定ノード（数字 or 配列）を見つけた！
             if (typeof nextNode === "number" || Array.isArray(nextNode)) {
                 return {
                     res: String.fromCharCode(...(Array.isArray(nextNode) ? nextNode : [nextNode])),
@@ -62,16 +58,11 @@ const noop = () => { };
                 };
             }
 
-            // 3. さらに深く潜る (k -> y -> o のような連鎖)
-            // ※ index + 1 が範囲外なら null が返るようにしておく
             if (index + 1 < input.length) {
                 let sub = walk(nextNode, index + 1);
-                if (sub) return sub; // 奥でマッチしたならそれを採用
+                if (sub) return sub;
             }
 
-            // 4. 奥でマッチしなかった（例: ky まで行ったが次に o がない）
-            // この時、現在の node に「デフォルトの文字」があれば返すが、
-            // なければ null を返して「原文ママ」ルートへ戻す
             return null;
         }
         noop("Core Loop with Sokuon support");
@@ -79,13 +70,9 @@ const noop = () => { };
             let char = input[i].toLowerCase();
             let next = input[i + 1]?.toLowerCase();
 
-            // --- 「っ」の動的判定 ---
-            // 1. 次の文字と同じアルファベットである
-            // 2. それが a,i,u,e,o,n ではない
-            // 3. そのアルファベットがテーブル(t)の起点として存在する
             if (next && char === next && !'aiueon'.includes(char) && t[char]) {
                 result += String.fromCharCode(12387); // 「っ」
-                i++; // 1文字分だけ進めて、次の walk で本体を処理させるにょ
+                i++;
                 continue;
             }
 
@@ -118,19 +105,16 @@ const noop = () => { };
             let char = input[i];
             let next = input[i + 1];
 
-            // --- 「っ」の処理 ---
             if (char === "っ" && next) {
-                // 次の文字をローマ字変換して、その先頭子音を拝借する
                 let nextRomaji = reverseMap[next] || encodeRomaji(next);
                 result += nextRomaji[0];
                 continue;
             }
 
-            // --- 2文字の塊 (ゃゅょ等) を優先チェック ---
             let doubleChar = char + (next || "");
             if (reverseMap[doubleChar]) {
                 result += reverseMap[doubleChar];
-                i++; // 2文字分進む
+                i++;
             } else {
                 result += reverseMap[char] || char;
             }
