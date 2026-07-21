@@ -414,6 +414,11 @@
       box-sizing: border-box;
       height: 34px;
     }
+    hr {
+      background-color: var(--cursor-color) !important;
+      border: none !important;
+      height: 2px !important;
+    }
 </style>
 </head>
 
@@ -452,20 +457,21 @@
     <input type=color id=palettecolor>
     <button id=setc>push</button>
   </div>
+  <hr>
   <div id=maincontainer>
     <div id=input>
-        <div id=lineGroup0 class="group">
+        <div id=lineGroup0 class="group"></div>
         <div id=lineno0 class=lineno>1</div>
         <div id=line0 class="line"></div>
         <div id=cursol0 class=cursol></div>
-      </div>
     </div>
-    <div id=info>
-      <table>
-        <caption>vars</caption>
-        <tbody id=variables></tbody>
-      </table>
-    </div>
+  </div>
+  <hr>
+  <div id=info>
+    <table>
+      <caption>vars</caption>
+      <tbody id=variables></tbody>
+    </table>
   </div>
   <div id=imgcontainer>
     <div id=mediamenu>
