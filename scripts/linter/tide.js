@@ -1,4 +1,8 @@
 let codehaserror = false; 
+const RESERVED_WORDS = ["if", "else", "for", "while", "do", "switch", "case", "break", "continue","return", "function", "class", "let", "var", "const", "new", "this", "true","false", "null", "undefined", "window", "document", "globalThis", "_jala", "console"];
+const DEPRECATED_SINGLE_WORDS = ["substr", "substring", "escape", "unescape", "with", "caller", "showModalDialog","applicationCache", "AppCache"];
+const DEPRECATED_PAIRS = {"document": ["all", "write", "alinkColor", "bgColor", "fgColor", "linkColor", "vlinkColor", "anchors", "applets"],"navigator": ["getUserMedia"],"KeyboardEvent": ["keyCode"],"Object.prototype": ["proto"]};
+const DEPRECATED_STRING_METHODS = ["anchor", "big", "blink", "bold", "fixed", "fontcolor", "fontsize", "italics","link", "small", "strike", "sub", "sup"];
 function checkVariableDeclaration(tokens, part, lineNo) {
     for (let i = 0; i < tokens.length; i++) {
         let t = tokens[i];
