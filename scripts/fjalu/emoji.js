@@ -34,11 +34,18 @@ let emojis = {
     ":yum:": "🤤",
     ":stuck_out_tongue:": "😛",
     ":stuck_out_tongue_closed_eyes:": "😝",
-    ":stuck_out_tongue_winking_eye:": "😜"
+    ":stuck_out_tongue_winking_eye:": "😜",
+    // 💡 宇宙で目覚めたAIロボットの記念ショートコードを追加！
+    ":robot_in_space:": "🤖🚀🪐",
+    ":uwu:": "(UwU)",
+    ":fox_face:": "🦊",
+    ":dog_face:": "🐶"
+};
+
+export function ReplaceEmoji(text) {
+    if (typeof text !== "string") return text;
+    // 正規表現で :ショートコード: を一括検出して置換する爆速処理
+    return text.replace(/:[a-z0-9_]+:/g, (match) => {
+        return emojis[match] || match;
+    });
 }
-let ks = Object.keys(emojis)
-function ReplaceEmoji(e){
-  if(!ks.includes(e))return e;
-  return emojis[e]
-}
-export{ReplaceEmoji}
