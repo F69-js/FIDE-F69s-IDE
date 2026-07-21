@@ -27,8 +27,7 @@ function TIDEPreParse(code) {
         wordsInLine.forEach(w => {
             let finalWord = w;
 
-            // 💡 提案のロジック：ドットが含まれていたら、一番最初のドットの手前だけを抽出する！
-            // これにより "console.log" ➔ "console"、"list.length" ➔ "list" になります
+            // 💡 修正：ドットが含まれていたら、分割した「最初の要素（0番目）」だけを確実に切り出す！
             if (finalWord.includes(".")) {
                 finalWord = finalWord.split(".")[0];
             }
@@ -42,7 +41,6 @@ function TIDEPreParse(code) {
                 });
             }
         });
-
         // 3. 変数宣言のトークン解析（const banana = 20 のスペース対応）
         let tokens = part.trim().split(/\s+/).filter(Boolean);
         for (let i = 0; i < tokens.length; i++) {
