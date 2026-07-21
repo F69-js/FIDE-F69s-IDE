@@ -214,15 +214,43 @@
 
     /* 💡 コード行番号への波線エフェクト（エラー＝赤、警告＝オレンジ） */
     .haserror {
-      text-decoration-style: wavy;
-      text-decoration-line: underline;
-      text-decoration-color: red;
+      text-decoration-style: wavy; 
     }
-    
-    .haswarning {
-      text-decoration-style: wavy;
-      text-decoration-line: underline;
-      text-decoration-color: #ff9900;
+    #textreplacer {
+      background-color: var(--line-no-color);
+      color: var(--ineditor-text-color) !important;
+      height: 34px !important; /* 💡 高さを34pxに強制固定 */
+      
+      /* 💡 外枠の線をしっかり3pxで統一。ただし右側だけを点線（dashed）にする */
+      border: 3px solid var(--line-no-border) !important;
+      border-right: 3px dashed var(--line-no-border) !important;
+      
+      align-items: center;
+      display: flex;
+      width: 100px;
+      justify-content: center;
+      margin-left: 10px;
+      box-sizing: border-box !important;
+      border-radius: 4px 0px 0px 4px !important; /* 💡 左側の角だけを丸くする */
+    }
+
+    #replt {
+      background-color: var(--line-no-color) !important;
+      color: var(--ineditor-text-color) !important;
+      height: 34px !important; /* 💡 左のラベルと高さを完全に1ピクセル単位で一致させる */
+      font-size: 16px;
+      padding: 4px 8px;
+      
+      /* 💡 犯人を逮捕：共通設定の border や border-radius を !important で完全に上書き拒否！ */
+      border: 3px solid var(--line-no-border) !important;
+      border-left: none !important; /* 💡 左側のボーダーは絶対に無し（0px）にして、点線と完全合体！ */
+      
+      /* 💡 犯人を逮捕：左側の角丸を「0」にして直線にし、右側の角だけを優しく丸くする！ */
+      border-radius: 0px 4px 4px 0px !important; 
+      
+      box-sizing: border-box !important; /* 💡 高さが狂うのを100%安全に防御 */
+      display: flex;
+      align-items: center;
     }
 
     /* =========================================================
