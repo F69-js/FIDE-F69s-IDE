@@ -1,6 +1,19 @@
 let codehaserror = false; 
-const RESERVED_WORDS = ["if", "else", "for", "while", "do", "switch", "case", "break", "continue","return", "function", "class", "let", "var", "const", "new", "this", "true","false", "null", "undefined", "window", "document", "globalThis", "_jala", "console"];
-const DEPRECATED_SINGLE_WORDS = ["substr", "substring", "escape", "unescape", "with", "caller", "showModalDialog","applicationCache", "AppCache"];
+const RESERVED_WORDS = [
+    // 1. 基本的な構文キーワード
+    "if", "else", "for", "while", "do", "switch", "case", "break", "continue",
+    "return", "function", "class", "let", "var", "const", "new", "this", "true", 
+    "false", "null", "undefined",
+    
+    // 2. 💡 ここを追加！ブラウザの標準グローバルオブジェクト（大爆発の犯人たち）
+    "Promise", "console", "window", "document", "navigator", "globalThis", "_jala",
+    "Math", "Date", "Array", "Object", "String", "Number", "Boolean", "JSON", 
+    "Error", "setTimeout", "setInterval", "clearTimeout", "clearInterval"
+];
+const DEPRECATED_SINGLE_WORDS = [
+    "substr", "substring", "escape", "unescape", "with", "caller", 
+    "showModalDialog", "applicationCache", "AppCache", "keyCode", "__proto__"
+];;
 const DEPRECATED_PAIRS = {"document": ["all", "write", "alinkColor", "bgColor", "fgColor", "linkColor", "vlinkColor", "anchors", "applets"],"navigator": ["getUserMedia"],"KeyboardEvent": ["keyCode"],"Object.prototype": ["proto"]};
 const DEPRECATED_STRING_METHODS = ["anchor", "big", "blink", "bold", "fixed", "fontcolor", "fontsize", "italics","link", "small", "strike", "sub", "sup"];
 function checkVariableDeclaration(tokens, part, lineNo) {
@@ -34,40 +47,53 @@ function checkVariableDeclaration(tokens, part, lineNo) {
 }
 function extractUsedWords(noStringsText, part, lineNo) {
     let usedWords = [];
-    let cleanText = noStringsText.replace(/[\(\)\{\}\[\]\s;\+-\/\*%&|=<>!\?,:]/g, " ");
-    let words = cleanText.trim().split(/\s+/).filter(Boolean);
     
-    words.forEach(w => {
+    // 括弧や演算子をスペースに変えて単語を切り出す（ここではドット "." を残す！）
+    let cleanTextForWords = noStringsText.replace(/[\(\)\{\}\[\]\s;\+-\/\*%&|=<>!\?,:]/g, " ");
+    let wordsInLine = cleanTextForWords.trim().split(/\s+/).filter(Boolean);
+    
+    wordsInLine.forEach(w => {
         let finalWord = w;
+
+        // 💡 天才ロジック：未定義チェックのため、ドットの「一番左側のベース名（0番目）」だけを抽出！
+        // これにより "console.log" ➔ "console" だけを評価。"log" は未定義エラーになりません！
         if (finalWord.includes(".")) {
             finalWord = finalWord.split(".")[0];
         }
+
+        // ベース名が数字でなく予約語でもなければ、使われている変数としてスタック
         if (finalWord && isNaN(finalWord) && !RESERVED_WORDS.includes(finalWord)) {
-            usedWords.push({ name: finalWord, line: lineNo, all: part });
+            usedWords.push({
+                name: finalWord,
+                line: lineNo,
+                all: part
+            });
         }
     });
     return usedWords;
 }
+
+
+
 function scanDeprecatedSyntax(part, noStringsText, lineNo) {
     let alerts = [];
 
-    // 💡 1. 犯人を駆逐：もし行にコメント文「//」が含まれていたら、それ以降をバッサリ削る！
-    // これによりテストコードの日本語コメント文による「未定義大爆発」が完全に消滅します
+    // コメント文「//」以降をバッサリ削る
     let cleanText = noStringsText.split("//")[0];
 
-    // 2. 8進数エスケープシーケンス (\0〜\7) の検出
+    // 8進数エスケープシーケンス (\0〜\7) の検出（これだけは正規表現の構文上、個別に残します）
     if (/\\[0-7]/.test(part)) {
         alerts.push({ name: "octal_escape", line: lineNo, all: part });
     }
 
-    // 3. 単体キーワードの走査
+    // 💡 1. すべての単体レガシーキーワードをデータ駆動で一括走査（keyCodeも__proto__もここを自動通過！）
     DEPRECATED_SINGLE_WORDS.forEach(keyword => {
         if (cleanText.includes(keyword)) {
             alerts.push({ name: keyword, line: lineNo, all: part });
         }
     });
 
-    // 4. ペア判定ロジック：document.all や write の厳密チェック
+    // 💡 2. すべてのオブジェクト・プロパティのペアをデータ駆動で厳密走査
     Object.keys(DEPRECATED_PAIRS).forEach(objName => {
         DEPRECATED_PAIRS[objName].forEach(propName => {
             let pairRegex = new RegExp(objName + "\\s*\\.\\s*" + propName);
@@ -77,11 +103,7 @@ function scanDeprecatedSyntax(part, noStringsText, lineNo) {
         });
     });
 
-    if (cleanText.includes("keyCode")) alerts.push({ name: "keyCode", line: lineNo, all: part });
-    if (cleanText.includes("__proto__")) alerts.push({ name: "__proto__", line: lineNo, all: part });
-
-    // 5. 💡 バグ修正：文字列メソッド（.bold() など）は、ドットを含めた正規表現で単語の境界（\\b）まで厳密にチェック！
-    // これにより、変数名にたまたま「oldAge」が入っているだけで「.bold() の親戚」と誤解されるのを100%防ぎます
+    // 💡 3. すべての文字列ラッパーメソッドをデータ駆動で厳密走査
     DEPRECATED_STRING_METHODS.forEach(method => {
         let methodRegex = new RegExp("\\." + method + "\\b");
         if (methodRegex.test(cleanText)) {
@@ -91,6 +113,8 @@ function scanDeprecatedSyntax(part, noStringsText, lineNo) {
 
     return alerts;
 }
+
+
 
 function renderVariables(vars, variablesContainer) {
     vars.forEach(t => {
@@ -223,6 +247,7 @@ function TIDEPreParse(code) {
     cop.forEach((part, i) => {
         let lineNo = i + 1;
         let noStringsText = part.replace(/"[^"\\]*(?:\\.[^"\\]*)*"/g, " ").replace(/'[^'\\]*(?:\\.[^'\\]*)*'/g, " ");
+        noStringsText = noStringsText.split("//")[0]; 
         let tokens = part.trim().split(/\s+/).filter(Boolean);
 
         let decl = checkVariableDeclaration(tokens, part, lineNo);
