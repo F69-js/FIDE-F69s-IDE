@@ -247,7 +247,7 @@ function TIDEPreParse(code) {
     cop.forEach((part, i) => {
         let lineNo = i + 1;
         let noStringsText = part.replace(/"[^"\\]*(?:\\.[^"\\]*)*"/g, " ").replace(/'[^'\\]*(?:\\.[^'\\]*)*'/g, " ");
-        noStringsText = noStringsText.split("//")[0]; 
+        noStringsText = noStringsText.replace(/\/\/.*$/, "");
         let tokens = part.trim().split(/\s+/).filter(Boolean);
 
         let decl = checkVariableDeclaration(tokens, part, lineNo);
