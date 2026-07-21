@@ -53,14 +53,14 @@ const noop = () => { };
     // =========================================================
     // 🌐 2. Chrome標準 window.Translator による自動日本語化
     // =========================================================
-    async function processAndTranslateToJapanese(inputText) {
+     async function processAndTranslateToJapanese(inputText) {
         if (!inputText || !inputText.trim()) return inputText;
 
         try {
             if (globalThis.Translator && typeof globalThis.Translator.create === 'function') {
-                
+
                 const translator = await globalThis.Translator.create({
-                    sourceLanguage: "auto",
+                    sourceLanguage: "en", // 確実にトリガーを引くため、まずは en（英語）固定でテスト
                     targetLanguage: "ja",
                     monitor(m) {
                         m.addEventListener("downloadprogress", (e) => {
