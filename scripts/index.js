@@ -1,13 +1,4 @@
-/*@credit
- *created by F69 with Gemini(https://gemini.google.com/)
- *@license FIDE
- * *F69's Scriptng License
- *copyright(c) 2026 F69_Scripting. All Rights Reserved.
- *DISCLAIMER
- *There is no guarantee that this code is error-free, bug-free, always works properly, will not be subject to specification changes or service outages, is legal, or can be used with various entities. 
- *This code is provided "AS IS". By using this library, you agree to the license.
- *if you copy this program, add this comment 'this code is COPY OF FIDE" below this code and add "copyright(c) [YEAR(do not use "'YY". please use "YYYY")] [NAME]' in copyright section(don't include placeholder(text between "[" and "]"))
- */
+//This code provided with 'MIT License'. For more information, See ../LICENSE
 import { _jala, _fjalu } from "./fjalu/index.js"
 import {TIDEPreParse} from "./linter/tide.js"
 import {Language,LanguageTable} from "./langs/i18n.js"
@@ -346,6 +337,24 @@ window.addEventListener("keydown",async e => {
                     
                     // 画面の表示を未来のデータに書き換える
                     cur.innerText = nextRaw.split("\n")[lineID] || "";
+                }
+                break;
+            case "f":
+                e.preventDefault();
+                const replacco = document.getElementById("replacco");
+                const replg = document.getElementById("replg");
+                const searchInput = document.querySelector("#searchi");
+
+                if (replacco && replg && searchInput) {
+                    // 1. 変数と画面の状態を「開いた状態（true）」に強制アライン
+                    replaccoOpen = true; 
+                    replacco.innerText = "▼";
+                    replg.hidden = false;
+
+                    // 2. 隠れていない状態にしてから、確実にフォーカスをワープさせる！
+                    setTimeout(() => {
+                        searchInput.focus();
+                    }, 10);
                 }
                 break;
                 
