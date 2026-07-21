@@ -1,239 +1,426 @@
-
 <!doctype html>
 <html lang="ja" dir="ltr">
-  <head>
-     <title>F69's IDE v1.0.0</title>
-     <meta charset="utf-8">
-     <meta name="viewport" content="width=device-width">
-     <meta name="description" content="A simple Fjalu/Fjala Engine equipped HTML IDE">
-     <meta name="robots" content="index">
-     <meta name="theme-color" content="#FFFFFF">
-     <meta property="og:title" content="F69's IDE v1.0.0">
-     <meta property="og:description" content="A simple Fjalu/Fjala Engine equipped HTML IDE.">
-     <meta property="og:image" content="https://f69-js.github.io/FIDE-F69s-IDE/images/ex2.png">
-     <meta name="twitter:card" content="summary_large_image">
-     <meta name="twitter:url" content="https://f69-js.github.io/FIDE-F69s-IDE/">
-     <meta name="twitter:title" content="F69's IDE v1.0.0">
-     <meta name="twitter:description" content="A simple Fjalu/Fjala Engine equipped HTML IDE.">
-     <meta name="keywords" content="F69,F69-js,FIDE,Editor,IDE,Notepad,HTML,F69's IDE,メモ帳,開発環境,統合開発環境">
-    <link rel="icon" href="images/favicon.ico" type="image/x-icon">
-     <meta name="twitter:image" content="https://f69-js.github.io/FIDE-F69s-IDE/images/ex2.png">
-     <link rel="apple-touch-icon" href="images/favicon.ico">
-     <link rel="modulepreload" href="scripts/index.js">
-     <link rel="modulepreload" href="scripts/fjalu/index.js">
-     <link rel="modulepreload" href="scripts/linter/tide.js">
-     <style id="theme_area">
-        :root{
-         --cursol-color:#000000;
-         --line-no-color:#a9a4a2;
-         --line-no-border:#4e4240;
-         --main-color:#8d8584;
-         --ineditor-text-color:#000000;
-         --background-unit-color:#FFFFFF;
-         --out-unit-color:#000000;
-       }
-     </style>
-     <style>
-       @keyframes blink{
-            50% {
-                opacity: 0;
-            }
-       }
-       #input>*{
-         white-space:pre;
-       }
-       .group{
-         margin:0px 0px;
-         display:flex;
-         flex-direction:row;
-         min-height:20px;
-         max-height:40px;
-         overflow:hidden;
-       }
-      .line{
-        font-size:16px;
-        margin: auto 3px;
-        font-size:20px;
+
+<head>
+  <title>F69's IDE v1.0.0</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <meta name="description" content="A simple Fjalu/Fjala Engine equipped HTML IDE">
+  <meta name="robots" content="index">
+  <meta name="theme-color" content="#FFFFFF">
+  <meta property="og:title" content="F69's IDE v1.0.0">
+  <meta property="og:description" content="A simple Fjalu/Fjala Engine equipped HTML IDE.">
+  <meta property="og:image" content="https://f69-js.github.io/FIDE-F69s-IDE/images/ex2.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://f69-js.github.io/FIDE-F69s-IDE/">
+  <meta name="twitter:title" content="F69's IDE v1.0.0">
+  <meta name="twitter:description" content="A simple Fjalu/Fjala Engine equipped HTML IDE.">
+  <meta name="keywords" content="F69,F69-js,FIDE,Editor,IDE,Notepad,HTML,F69's IDE,メモ帳,開発環境,統合開発環境">
+  <link rel="icon" href="images/favicon.ico" type="image/x-icon">
+  <meta name="twitter:image" content="https://f69-js.github.io/FIDE-F69s-IDE/images/ex2.png">
+  <link rel="apple-touch-icon" href="images/favicon.ico">
+  <link rel="modulepreload" href="scripts/index.js">
+  <link rel="modulepreload" href="scripts/fjalu/index.js">
+  <link rel="modulepreload" href="scripts/linter/tide.js">
+  <style id="theme_area">
+    :root {
+      --cursol-color: #000000;
+      --line-no-color: #a9a4a2;
+      --line-no-border: #4e4240;
+      --main-color: #8d8584;
+      --ineditor-text-color: #000000;
+      --background-unit-color: #FFFFFF;
+      --out-unit-color: #000000;
+      --header-color:#161616;
+    }
+  </style>
+  <style>
+    #body {
+      margin: 0;
+      padding: 0;
+    }
+
+    @keyframes blink {
+      50% {
+        opacity: 0;
       }
-      .cursol{
-        margin:15px 0px;
-        border-bottom:3px solid var(--cursol-color);
-        height:10px;
-        width:10px;
-        animation:1s blink infinite;
-      }
-      .lineno{
-        background-color:var(--line-no-color);
-        color:var(--ineditor-text-color);
-        width:30px;
-        height:40px;
-        text-align:center;
-        font-size:20px;
-        border-top:2px solid var(--line-no-border);
-        border-bottom:2px solid var(--line-no-border);
-      }
-      #maincontainer{
-        background-color:var(--main-color);
-        color:var(--out-unit-color);
-      }
-      #menu{
-        display:flex;
-        flex-direction:column;
-      }
-      #headermenu{
-        display:flex;
-        flex-direction:row;
-        margin:0;
-      }
-      #showraw{
-        max-width:64px;
-        height:48px;
-      }
-      #filename{
-        margin:0px 0px;
-      }
-      #body>*{
-        background-color:var(--background-unit-color);
-        color:var(--out-unit-color);
-      }
-      .found{
-        background-color:#FFFF00;
-      }
-      #middlearea{
-        display:flex;
-        flex-direction:column;
-      }
-  //START TIDE
-  .inline{
-    list-style-type: circle;
-    margin:0px 20px;
+    }
+
+    #input>* {
+      white-space: pre;
+    }
+
+    .group {
+      margin: 0px 0px;
+      display: flex;
+      flex-direction: row;
+      min-height: 20px;
+      max-height: 40px;
+      overflow: hidden;
+    }
+
+    .line {
+      font-size: 16px;
+      margin: auto 3px;
+      font-size: 20px;
+    }
+
+    .cursol {
+      margin: 15px 0px;
+      border-bottom: 3px solid var(--cursol-color);
+      height: 10px;
+      width: 10px;
+      animation: 1s blink infinite;
+    }
+
+    .lineno {
+      background-color: var(--line-no-color);
+      color: var(--ineditor-text-color);
+      width: 30px;
+      height: 40px;
+      text-align: center;
+      font-size: 20px;
+      border-top: 2px solid var(--line-no-border);
+      border-bottom: 2px solid var(--line-no-border);
+    }
+
+    #maincontainer {
+      background-color: var(--main-color);
+      color: var(--out-unit-color);
+    }
+
+    #menu {
+      display: flex;
+      flex-direction: column;
+    }
+
+    #headermenu {
+      display: flex;
+      flex-direction: row;
+      margin: 0;
+      background-color: var(--header-color) !important
+    }
+
+    #showraw {
+      max-width: 64px;
+      height: 48px;
+    }
+
+    #filename {
+      margin: 0px 0px;
+    }
+
+    #body>* {
+      background-color: var(--background-unit-color);
+      color: var(--out-unit-color);
+    }
+
+    .found {
+      background-color: #FFFF00;
+    }
+
+    #middlearea {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .inline {
+      list-style-type: circle;
+      margin: 0px 20px;
+    }
+
+    code {
+      background-color: #e9f3f5;
+      border: 3px solid #d9e7e8;
+      border-radius: 4px;
+    }
+
+
+    tr {
+      border: 1px solid black;
+      background-color: #d0fff8
+    }
+
+    td:not(.error) {
+      border: 1px solid black;
+    }
+
+    tr:nth-child(odd):not(.error) {
+      background-color: #d8fbff;
+    }
+
+    tr:nth-child(even):not(.error) {
+      background-color: #bbf8ff;
+    }
+
+    .error {
+      background-color: #ffa5a5;
+    }
+
+    s {
+      color: red;
+    }
+
+    caption {
+      border: 1px solid black;
+      background-color: #d0fff8;
+    }
+
+    .haserror {
+      text-decoration-style: wavy;
+      text-decoration-line: underline;
+      text-decoration-color: red;
+    }
+
+    #toolbars {
+      display: flex;
+    }
+
+    #toolbar,
+    imgcontainer {
+      display: flex;
+      flex-direction: column;
+    }
+
+    button,
+    input#filenamei {
+      padding: 12px;
+      margin: 4px;
+    }
+
+    #openfile,
+    #savefile,
+    #settings,
+    #pencolor {
+      min-width: 48px;
+      min-height: 48px;
+    }
+
+    #headermenu > main > button {
+      background-color: transparent;
+      border: none;
+      color: white;
+      font-size: 20px;
+      font-weight: bold;
+      border-radius: 0px;
+      min-width: 100px;
+      max-width: none;
+    }
+    #headermenu > main > a {
+      background-color: transparent;
+      color: #cfedfe;
+      margin-left: 10px;
+      font-weight: bold;
+      text-decoration: none;
+      font-size: 20px;
+    }
+    #headermenu > main > a:visited{
+      background-color: transparent;
+      color: #85ff81;
+      margin-left: 10px;
+      font-weight: bold;
+      text-decoration: underline;
+      font-size: 20px;
+    }
+    #headermenu > main > a:hover{
+      background-color: transparent;
+      color: #81ffe7;
+      margin-left: 10px;
+      font-weight: bold;
+      text-decoration: none;
+      font-size: 20px;
+      position: relative;
+      top: 5px;
+    }
+
+    html {
+      margin: 0;
+      height: 100vh;
+      background-color: var(--background-unit-color);
+    }
+    
+    #filenamei {
+      font-size: 17px;
+      background-color: var(--line-no-color);
+      width: 200px;
+    }
+
+    button {
+      background-color: var(--line-no-border);
+      border: 1px solid var(--line-no-color);
+      min-width: 100px;
+      max-width: 101px;
+      height: 60px;
+      overflow: hidden;
+      color: white;
+      font-size: 20px;
+    }
+    #palettecolor {
+      background-color: var(--line-no-border);
+      border: 1px solid;
+      width: 48px;
+      height: 48px;
+    }
+    #setc {
+      height: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    #toolbars > span, #toolbars > label {
+      align-items: center;
+      display: flex;
+      margin-right: 5px;
+    }
+    #spanc {
+      margin-left: 20px;
+    }
+    table {
+      border: 1px solid black;
+      background-color: #d0fff8;
+      min-width: 256px;
+      color: var(--background-unit-color);
+      margin: 10px;
+    }
+    hr {
+      background-color: var(--cursol-color) !important;
+      border: none !important;
+      height: 2px !important;
+    }
+    #replacco {
+      background: transparent;
+      border: none;
+      font-size: 15px;    
+    }
+    #searchg > input, #replg > input {
+      background-color: var(--line-no-color);
+      min-height: 32px;
+      font-size: 16px;
+    }
+    input[type="checkbox"] {
+      width: 32px;
+      display: flex;
+      align-items: center;
+    }
+    #searchg{
+      display: flex;
+      flex-direction: column;
+    }
+    #searchg > div {
+      display: flex;
+    }
+    #textregexmode {
+      display: flex;
+      align-items: center;
+      margin-right: 10px;
+    }
+    #searchi {
+      max-height: 20px;
+      display: flex;
+      position: relative;
+      top: 15px;
+      margin-left: 10px;
+      margin-right: 20px;
+    }
+    #replg {
+      align-items: center;
+    }
+    #textreplacer {
+      background-color: var(--line-no-color);
+      min-height: 34px;
+      border: 3px solid var(--line-no-border);
+      align-items: center;
+      display: flex;
+      width: 100px;
+      justify-content: center;
+      margin-left: 10px;
+      border-right: 3px dashed var(--line-no-border);
+    }
+    #replt {
+      border: 3px solid var(--line-no-border);
+      border-left: none;
   }
-  code{
-    background-color:#e9f3f5;
-    border:3px solid #d9e7e8;
-    border-radius:4px;
-  }
-  table{
-    border:1px solid black;
-    background-color:#d0fff8
-  }
-  tr{
-    border:1px solid black;
-    background-color:#d0fff8
-  }
-  td:not(.error){
-    border:1px solid black;
-  }
-  tr:nth-child(odd):not(.error){
-    background-color:#d8fbff;
-  }
-  tr:nth-child(even):not(.error){
-    background-color:#bbf8ff;
-  }
-  .error{
-    background-color:#ffa5a5;
-  }
-  s{
-    color:red;
-  }
-  caption{
-    border:1px solid black;
-    background-color:#d0fff8;
-  }
-  .haserror{
-    text-decoration-style: wavy;
-    text-decoration-line: underline;
-    text-decoration-color: red;
-  }
-  #toolbar,imgcontainer{
-    display:flex;
-    flex-direction:column;
-  }
-  button, input#filenamei {
-    padding: 12px; 
-    margin: 4px;
-  }
-  #openfile, #savefile, #settings, #pencolor {
-    min-width: 48px;
-    min-height: 48px;
-  }
-       
-     </style>
-  </head>
-  <body id=body>
-    <div id=headermenu>
-     <main>
+  </style>
+</head>
+
+<body id=body>
+  <div id=headermenu>
+    <main>
       <a href="https://github.com/F69-js/FIDE-F69s-IDE/">github</a>
-       <button id=openfile>Open File</button>
-       <button id=savefile>Save File</button>
-  　　  <button id=settings>Open Settings</button>
-   </div>
-   <div id=middlearea>
-     <input id=filenamei placeholder="Enter File Name...">
-     <div id=searchg>
-       <input id=searchi placeholder="fox">
-       <span id=textregexmode></span>
-       <input type="checkbox" id=rgxmode>
-       <div id=flagg hidden=true>
-          <span id=textflag></span>
-          <input id=flags placeholder="g,m,u">
-       </div>
-       <button id=replacco>▶</button>
-       <div id=replg>
-          <span id=textreplacer></span>
-          <input id=replt placeholder="cat">
-       </div>
-     </div>
-   </div>
-    <div id=searchresults></div>
-    <div id=toolbars>
-      <span id=spanc></span>
-      <label for="palettecolor">パレット色選択</label>
-      <input type=color id=palettecolor>
-      <button id=setc>push</button>
-    </div>
-    <div id=maincontainer>
-       <div id=input>
-  　　　    <div id=lineGroup0 class="group">
-              <div id=lineno0 class=lineno>1</div>
-              <div id=line0 class="line"></div>
-              <div id=cursol0 class=cursol></div>
-           </div>
-       </div>
-       <div id=info>
-           <table>
-            <caption>vars</caption>
-            <tbody id=variables></tbody>
-           </table>
-       </div>
-    </div>
-    <div id=imgcontainer>
-      <div id=mediamenu>
-        <button id=penmode>ペン</button>
-        <label for="pencolor">ペンの色を選択</label>
-        <div id=tpcolor>ペンの色</div>
-        <input type=color id=pencolor>
+      <button id=openfile>Open File</button>
+      <button id=savefile>Save File</button>
+      <button id=settings>Open Settings</button>
+  </div>
+  <div id=middlearea>
+    <input id=filenamei placeholder="Enter File Name...">
+    <div id="searchg">
+      <div>
+        </divL> <input id="searchi" placeholder="fox">
+        <span id="textregexmode">正規表現モード</span>
+        <input type="checkbox" id="rgxmode">
+        <div id="flagg" hidden="">
+          <span id="textflag">フラグ 複数の場合は,を使用してください</span>
+          <input id="flags" placeholder="g,m,u">
+        </div>
+        <button id="replacco">▼</button>
       </div>
-      <canvas id=img1></canvas>
+      <div id="replg">
+        <span id="textreplacer">置換先</span>
+        <input id="replt" placeholder="cat">
+      </div>
     </div>
-    <div id=settingscontainer>
-      <h1>Settings</h1>
-      <p>theme:</p>
-      <label for="maintheme" id="ttl1"></label>
-      <select id=maintheme>
-        <option value="l">light</option>
-        <option value="d">dark</option>
-      </select>
-      <label for="unloaden" id="tul1"></label>
-      <input type=checkbox id="unl">
-      <p id="tul2"></p>
+  </div>
+  <div id=searchresults></div>
+  <hr>
+  <div id=toolbars>
+    <span id=spanc></span>
+    <label for="palettecolor">パレット色選択</label>
+    <input type=color id=palettecolor>
+    <button id=setc>push</button>
+  </div>
+  <div id=maincontainer>
+    <div id=input>
+        <div id=lineGroup0 class="group">
+        <div id=lineno0 class=lineno>1</div>
+        <div id=line0 class="line"></div>
+        <div id=cursol0 class=cursol></div>
+      </div>
     </div>
-    <div id=menu>
-       <div id=error></div>
-       <button id=showraw>raw</button>
-       <button id=rawexec>Exec</button>
+    <div id=info>
+      <table>
+        <caption>vars</caption>
+        <tbody id=variables></tbody>
+      </table>
     </div>
-    <script src="./scripts/index.js" type="module" defer></script>
-    </main>
-  </body>
+  </div>
+  <div id=imgcontainer>
+    <div id=mediamenu>
+      <button id=penmode>ペン</button>
+      <label for="pencolor">ペンの色を選択</label>
+      <div id=tpcolor>ペンの色</div>
+      <input type=color id=pencolor>
+    </div>
+    <canvas id=img1></canvas>
+  </div>
+  <div id=settingscontainer>
+    <h1>Settings</h1>
+    <p>theme:</p>
+    <label for="maintheme" id="ttl1"></label>
+    <select id=maintheme>
+      <option value="l">light</option>
+      <option value="d">dark</option>
+    </select>
+    <label for="unloaden" id="tul1"></label>
+    <input type=checkbox id="unl">
+    <p id="tul2"></p>
+  </div>
+  <div id=menu>
+    <div id=error></div>
+    <button id=showraw>raw</button>
+    <button id=rawexec>Exec</button>
+  </div>
+  <script src="./scripts/index.js" type="module" defer></script>
+  </main>
+</body>
+
 </html>
