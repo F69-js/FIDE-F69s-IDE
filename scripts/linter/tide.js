@@ -48,31 +48,30 @@ function checkVariableDeclaration(tokens, part, lineNo) {
 function extractUsedWords(noStringsText, part, lineNo) {
     let usedWords = [];
     
-    // 括弧や演算子をスペースに変えて単語を切り出す（ドットは保護）
-    let cleanTextForWords = noStringsText.replace(/[\(\)\{\}\[\]\s;\+-\/\*%&|=<>!\?,:]/g, " ");
-    let wordsInLine = cleanTextForWords.trim().split(/\s+/).filter(Boolean);
+    // 💡 1. 提案の天才ロジックを「正規表現」で完全に最上流に実装！
+    // 行の中から「.プロパティ名」の塊（例：.all や .resolve や .write）を、
+    // 単語に分解するよりも前の段階で、物理的にこの世から完全に消し去ります！
+    let cleanText = noStringsText.replace(/\.[a-zA-Z_$][a-zA-Z0-9_$]*/g, " ");
+
+    // 💡 2. 記号の置換をやめ、純粋な「JavaScriptの変数名・単語の塊」だけを正規表現で直接一本釣り！
+    // これにより、console.log は右側が消えて「console」だけになり、"hello" などのノイズも完璧に除外されます
+    let words = cleanText.match(/[a-zA-Z_$][a-zA-Z0-9_$]*/g);
     
-    wordsInLine.forEach(w => {
-        let finalWord = w;
-
-        // 💡 修正：ドットが含まれていたら、分割した配列の「0番目（一番左端の文字列）」だけを綺麗に取り出す！
-        // これにより、"Promise.all" は純粋な文字列の "Promise" に化けます（右側の all は完全に切り捨てられて空気になります）
-        if (finalWord.includes(".")) {
-            finalWord = finalWord.split(".")[0]; 
-        }
-
-        // 0番目のオブジェクト名だけが、数字でなく予約語でもなければ、使われている変数としてスタック
-        if (finalWord && isNaN(finalWord) && !RESERVED_WORDS.includes(finalWord)) {
-            usedWords.push({
-                name: finalWord,
-                line: lineNo,
-                all: part
-            });
-        }
-    });
+    if (words) {
+        words.forEach(w => {
+            // 数字のみ、または予約語リスト（consoleやPromiseなど）に含まれていなければ「使われている変数」として登録
+            if (w && isNaN(w) && !RESERVED_WORDS.includes(w)) {
+                usedWords.push({
+                    name: w,
+                    line: lineNo,
+                    all: part
+                });
+            }
+        });
+    }
+    
     return usedWords;
 }
-
 
 
 function scanDeprecatedSyntax(part, noStringsText, lineNo) {
