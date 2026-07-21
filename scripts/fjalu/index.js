@@ -444,9 +444,10 @@ const t = {
             return RomajiToJapanese(emojiprocessed);
         };
 
-        if (p.length < 2) {
-            return await processSingle(p);
+        if (p.length === 1) {
+            return await processSingle(p[0]); 
         } else {
+            // 引数が複数の場合
             return await Promise.all(p.map(t => processSingle(t)));
         }
     }
