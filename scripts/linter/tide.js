@@ -246,4 +246,4 @@ function TIDEPreParse(code) {
 
     return codehaserror;
 }
-
+export { TIDEPreParse } 
