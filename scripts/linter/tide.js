@@ -51,36 +51,47 @@ function extractUsedWords(noStringsText, part, lineNo) {
 function scanDeprecatedSyntax(part, noStringsText, lineNo) {
     let alerts = [];
 
+    // 💡 1. 犯人を駆逐：もし行にコメント文「//」が含まれていたら、それ以降をバッサリ削る！
+    // これによりテストコードの日本語コメント文による「未定義大爆発」が完全に消滅します
+    let cleanText = noStringsText.split("//")[0];
+
+    // 2. 8進数エスケープシーケンス (\0〜\7) の検出
     if (/\\[0-7]/.test(part)) {
         alerts.push({ name: "octal_escape", line: lineNo, all: part });
     }
 
+    // 3. 単体キーワードの走査
     DEPRECATED_SINGLE_WORDS.forEach(keyword => {
-        if (noStringsText.includes(keyword)) {
+        if (cleanText.includes(keyword)) {
             alerts.push({ name: keyword, line: lineNo, all: part });
         }
     });
 
+    // 4. ペア判定ロジック：document.all や write の厳密チェック
     Object.keys(DEPRECATED_PAIRS).forEach(objName => {
         DEPRECATED_PAIRS[objName].forEach(propName => {
             let pairRegex = new RegExp(objName + "\\s*\\.\\s*" + propName);
-            if (pairRegex.test(noStringsText) || (objName === "document" && noStringsText.includes("." + propName))) {
+            if (pairRegex.test(cleanText) || (objName === "document" && cleanText.includes("." + propName))) {
                 alerts.push({ name: propName, line: lineNo, all: part });
             }
         });
     });
 
-    if (noStringsText.includes("keyCode")) alerts.push({ name: "keyCode", line: lineNo, all: part });
-    if (noStringsText.includes("__proto__")) alerts.push({ name: "__proto__", line: lineNo, all: part });
+    if (cleanText.includes("keyCode")) alerts.push({ name: "keyCode", line: lineNo, all: part });
+    if (cleanText.includes("__proto__")) alerts.push({ name: "__proto__", line: lineNo, all: part });
 
+    // 5. 💡 バグ修正：文字列メソッド（.bold() など）は、ドットを含めた正規表現で単語の境界（\\b）まで厳密にチェック！
+    // これにより、変数名にたまたま「oldAge」が入っているだけで「.bold() の親戚」と誤解されるのを100%防ぎます
     DEPRECATED_STRING_METHODS.forEach(method => {
-        if (noStringsText.includes("." + method)) {
+        let methodRegex = new RegExp("\\." + method + "\\b");
+        if (methodRegex.test(cleanText)) {
             alerts.push({ name: method, line: lineNo, all: part });
         }
     });
 
     return alerts;
 }
+
 function renderVariables(vars, variablesContainer) {
     vars.forEach(t => {
         if (!variablesContainer) return;
