@@ -48,20 +48,20 @@ function checkVariableDeclaration(tokens, part, lineNo) {
 function extractUsedWords(noStringsText, part, lineNo) {
     let usedWords = [];
     
-    // 括弧や演算子をスペースに変えて単語を切り出す（ここではドット "." を残す！）
+    // 括弧や演算子をスペースに変えて単語を切り出す（ドットは保護）
     let cleanTextForWords = noStringsText.replace(/[\(\)\{\}\[\]\s;\+-\/\*%&|=<>!\?,:]/g, " ");
     let wordsInLine = cleanTextForWords.trim().split(/\s+/).filter(Boolean);
     
     wordsInLine.forEach(w => {
         let finalWord = w;
 
-        // 💡 天才ロジック：未定義チェックのため、ドットの「一番左側のベース名（0番目）」だけを抽出！
-        // これにより "console.log" ➔ "console" だけを評価。"log" は未定義エラーになりません！
+        // 💡 修正：ドットが含まれていたら、分割した配列の「0番目（一番左端の文字列）」だけを綺麗に取り出す！
+        // これにより、"Promise.all" は純粋な文字列の "Promise" に化けます（右側の all は完全に切り捨てられて空気になります）
         if (finalWord.includes(".")) {
-            finalWord = finalWord.split(".")[0];
+            finalWord = finalWord.split(".")[0]; 
         }
 
-        // ベース名が数字でなく予約語でもなければ、使われている変数としてスタック
+        // 0番目のオブジェクト名だけが、数字でなく予約語でもなければ、使われている変数としてスタック
         if (finalWord && isNaN(finalWord) && !RESERVED_WORDS.includes(finalWord)) {
             usedWords.push({
                 name: finalWord,
