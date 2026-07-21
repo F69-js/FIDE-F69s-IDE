@@ -104,7 +104,7 @@ function scanDeprecatedSyntax(part, noStringsText, lineNo) {
 
     // 💡 3. すべての文字列ラッパーメソッドをデータ駆動で厳密走査
     DEPRECATED_STRING_METHODS.forEach(method => {
-        let methodRegex = new RegExp("\\." + method + "\\b");
+        let methodRegex = new RegExp("\\." + method + "\\b\\s*\\(");
         if (methodRegex.test(cleanText)) {
             alerts.push({ name: method, line: lineNo, all: part });
         }
