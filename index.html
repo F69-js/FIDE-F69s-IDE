@@ -22,36 +22,50 @@
   <link rel="modulepreload" href="scripts/index.js">
   <link rel="modulepreload" href="scripts/fjalu/index.js">
   <link rel="modulepreload" href="scripts/linter/tide.js">
-  <style id="theme_area">
+<style id="theme_area">
     :root {
-      --cursol-color: #000000;
+      --cursor-color: #000000;
       --line-no-color: #a9a4a2;
       --line-no-border: #4e4240;
       --main-color: #8d8584;
       --ineditor-text-color: #000000;
       --background-unit-color: #FFFFFF;
-      --out-unit-color: #000000;
-      --header-color:#161616;
+      --out-unit-color: #1a1a1a;
+      --header-color: #161616;
+      --button-text-color: #FFFFFF; /* 💡 読みやすさのためにボタン文字を白に固定 */
     }
-  </style>
-  <style>
-    #body {
+</style>
+<style>
+<style id="theme_area">
+    :root {
+      --cursor-color: #000000;
+      --line-no-color: #a9a4a2;
+      --line-no-border: #4e4240;
+      --main-color: #8d8584;
+      --ineditor-text-color: #1a1a1a;
+      --background-unit-color: #FFFFFF;
+      --out-unit-color: #1a1a1a;
+      --header-color: #161616;
+      --button-text-color: #FFFFFF; /* 暗い背景用の白文字 */
+    }
+</style>
+<style>
+    body {
       margin: 0;
       padding: 0;
+      font-family: sans-serif;
     }
 
     @keyframes blink {
-      50% {
-        opacity: 0;
-      }
+      50% { opacity: 0; }
     }
 
-    #input>* {
+    #input > * {
       white-space: pre;
     }
 
     .group {
-      margin: 0px 0px;
+      margin: 0;
       display: flex;
       flex-direction: row;
       min-height: 20px;
@@ -60,33 +74,38 @@
     }
 
     .line {
-      font-size: 16px;
       margin: auto 3px;
       font-size: 20px;
     }
 
-    .cursol {
+    .cursor {
       margin: 15px 0px;
-      border-bottom: 3px solid var(--cursol-color);
+      border-bottom: 3px solid var(--cursor-color);
       height: 10px;
       width: 10px;
       animation: 1s blink infinite;
     }
 
-    .lineno {
+    .linenum {
       background-color: var(--line-no-color);
       color: var(--ineditor-text-color);
-      width: 30px;
+      width: 40px;
       height: 40px;
       text-align: center;
       font-size: 20px;
       border-top: 2px solid var(--line-no-border);
       border-bottom: 2px solid var(--line-no-border);
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
     }
 
     #maincontainer {
       background-color: var(--main-color);
       color: var(--out-unit-color);
+      padding: 10px;
     }
 
     #menu {
@@ -97,8 +116,10 @@
     #headermenu {
       display: flex;
       flex-direction: row;
+      align-items: center;
       margin: 0;
-      background-color: var(--header-color) !important
+      padding: 5px 10px;
+      background-color: var(--header-color) !important;
     }
 
     #showraw {
@@ -107,10 +128,10 @@
     }
 
     #filename {
-      margin: 0px 0px;
+      margin: 0;
     }
 
-    #body>* {
+    #body > * {
       background-color: var(--background-unit-color);
       color: var(--out-unit-color);
     }
@@ -126,66 +147,148 @@
 
     .inline {
       list-style-type: circle;
-      margin: 0px 20px;
+      margin: 0 20px;
     }
 
     code {
       background-color: #e9f3f5;
       border: 3px solid #d9e7e8;
       border-radius: 4px;
+      padding: 2px 6px;
     }
 
 
+        /* =========================================================
+       📚 1. TIDE解析結果テーブル（サイト内ダークモード対応・文字色黒固定）
+       ========================================================= */
+    table, 
+    table * {
+      /* 💡 サイト内設定でダークモードにしても、テーブル内すべての要素の文字色を「黒」に強制固定！ */
+      color: #000000 !important; 
+    }
+
+    table {
+      border: 1px solid black;
+      background-color: #d0fff8;
+      min-width: 256px;
+      margin: 10px;
+      border-collapse: collapse;
+    }
+
     tr {
       border: 1px solid black;
-      background-color: #d0fff8
+      background-color: #d0fff8;
     }
 
     td:not(.error) {
       border: 1px solid black;
+      padding: 6px 10px;
     }
 
-    tr:nth-child(odd):not(.error) {
-      background-color: #d8fbff;
-    }
+    tr:nth-child(odd):not(.error) { background-color: #d8fbff; }
+    tr:nth-child(even):not(.error) { background-color: #bbf8ff; }
 
-    tr:nth-child(even):not(.error) {
-      background-color: #bbf8ff;
+    /* 💡 エラー行（赤背景 ＆ 文字色黒固定） */
+    .error, tr.error td {
+      background-color: #ffa5a5 !important;
+      color: #000000 !important;
     }
-
-    .error {
-      background-color: #ffa5a5;
+    
+    /* 💡 警告行（マイルドな黄色背景 ＆ 文字色黒固定） */
+    .warning, tr.warning td {
+      background-color: #ffe6a5 !important;
+      color: #000000 !important;
     }
 
     s {
-      color: red;
+      color: red !important; /* 打ち消し線はダークモードでも絶対「赤」で見せる */
+      font-weight: bold;
     }
 
     caption {
       border: 1px solid black;
       background-color: #d0fff8;
+      padding: 6px;
+      font-weight: bold;
     }
 
+    /* 💡 コード行番号への波線エフェクト（エラー＝赤、警告＝オレンジ） */
     .haserror {
       text-decoration-style: wavy;
       text-decoration-line: underline;
       text-decoration-color: red;
     }
+    
+    .haswarning {
+      text-decoration-style: wavy;
+      text-decoration-line: underline;
+      text-decoration-color: #ff9900;
+    }
+
+    /* =========================================================
+       🛠️ 2. ヘッダーメニュー・リンクレイアウト
+       ========================================================= */
+    #headermenu > main > button {
+      background-color: transparent;
+      border: none;
+      color: var(--button-text-color);
+      font-size: 20px;
+      font-weight: bold;
+      border-radius: 0px;
+      min-width: 100px;
+      max-width: none;
+      cursor: pointer;
+    }
+    
+    #headermenu > main > a {
+      background-color: transparent;
+      color: #cfedfe;
+      margin-left: 10px;
+      font-weight: bold;
+      text-decoration: none;
+      font-size: 20px;
+    }
+    #headermenu > main > a:visited {
+      background-color: transparent;
+      color: #85ff81;
+      margin-left: 10px;
+      font-weight: bold;
+      text-decoration: underline;
+      font-size: 20px;
+    }
+    /* 💡 改善：ホバー時のプルプル振動ジャンプバグを廃止し、スマートな色変化に変更 */
+    #headermenu > main > a:hover {
+      background-color: transparent;
+      color: #81ffe7;
+      text-decoration: none;
+    }
+
+    /* =========================================================
+       フォーム・ツールバー・各種操作ボタン
+       ========================================================= */
+    html {
+      margin: 0;
+      height: 100vh;
+      background-color: var(--background-unit-color);
+    }
 
     #toolbars {
       display: flex;
+      flex-wrap: wrap;
+      padding: 5px;
     }
 
     #toolbar,
-    imgcontainer {
+    .imgcontainer {
       display: flex;
       flex-direction: column;
     }
 
     button,
     input#filenamei {
-      padding: 12px;
+      padding: 10px;
       margin: 4px;
+      border-radius: 4px;
     }
 
     #openfile,
@@ -195,66 +298,32 @@
       min-width: 48px;
       min-height: 48px;
     }
-
-    #headermenu > main > button {
-      background-color: transparent;
-      border: none;
-      color: var(--cursol-color);
-      font-size: 20px;
-      font-weight: bold;
-      border-radius: 0px;
-      min-width: 100px;
-      max-width: none;
-    }
-    #headermenu > main > a {
-      background-color: transparent;
-      color: #cfedfe;
-      margin-left: 10px;
-      font-weight: bold;
-      text-decoration: none;
-      font-size: 20px;
-    }
-    #headermenu > main > a:visited{
-      background-color: transparent;
-      color: #85ff81;
-      margin-left: 10px;
-      font-weight: bold;
-      text-decoration: underline;
-      font-size: 20px;
-    }
-    #headermenu > main > a:hover{
-      background-color: transparent;
-      color: #81ffe7;
-      margin-left: 10px;
-      font-weight: bold;
-      text-decoration: none;
-      font-size: 20px;
-      position: relative;
-      top: 5px;
-    }
-
-    html {
-      margin: 0;
-      height: 100vh;
-      background-color: var(--background-unit-color);
-    }
     
     #filenamei {
       font-size: 17px;
       background-color: var(--line-no-color);
       width: 200px;
+      border: 1px solid var(--line-no-border);
+      color: #000000 !important;
     }
 
+    /* メインの操作用ボタン（背景が暗いため、文字は確実に白にする） */
     button {
       background-color: var(--line-no-border);
       border: 1px solid var(--line-no-color);
-      min-width: 100px;
-      max-width: 101px;
-      height: 60px;
+      min-width: 110px;
+      height: 50px;
       overflow: hidden;
-      color:var(--cursol-color);
-      font-size: 20px;
+      color: var(--button-text-color) !important;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: opacity 0.2s;
     }
+    button:hover {
+      opacity: 0.9;
+    }
+    
     #palettecolor {
       background-color: var(--line-no-border);
       border: 1px solid;
@@ -275,15 +344,9 @@
     #spanc {
       margin-left: 20px;
     }
-    table {
-      border: 1px solid black;
-      background-color: #d0fff8;
-      min-width: 256px;
-      color:var(--cursol-color);
-      margin: 10px;
-    }
+    
     hr {
-      background-color: var(--cursol-color) !important;
+      background-color: var(--cursor-color) !important;
       border: none !important;
       height: 2px !important;
     }
@@ -292,17 +355,24 @@
       border: none;
       font-size: 15px;    
     }
+
+    /* 検索・置換の入力ボックス（文字が白化して消滅するのを黒固定で防御） */
     #searchg > input, #replg > input {
       background-color: var(--line-no-color);
       min-height: 32px;
       font-size: 16px;
+      border: 1px solid var(--line-no-border);
+      padding: 4px 8px;
+      border-radius: 4px;
+      color: #000000 !important;
     }
+
     input[type="checkbox"] {
       width: 32px;
       display: flex;
       align-items: center;
     }
-    #searchg{
+    #searchg {
       display: flex;
       flex-direction: column;
     }
@@ -339,8 +409,9 @@
     #replt {
       border: 3px solid var(--line-no-border);
       border-left: none;
-  }
-  </style>
+    }
+</style>
+
 </head>
 
 <body id=body>
@@ -355,7 +426,7 @@
     <input id=filenamei placeholder="Enter File Name...">
     <div id="searchg">
       <div>
-        </divL> <input id="searchi" placeholder="fox">
+        <input id="searchi" placeholder="fox">
         <span id="textregexmode">正規表現モード</span>
         <input type="checkbox" id="rgxmode">
         <div id="flagg" hidden="">
