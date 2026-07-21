@@ -1,3 +1,4 @@
+let codehaserror = false; 
 function checkVariableDeclaration(tokens, part, lineNo) {
     for (let i = 0; i < tokens.length; i++) {
         let t = tokens[i];
