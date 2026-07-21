@@ -9,38 +9,46 @@ function TIDEPreParse(code) {
     let vars = [];          // 宣言された変数のスタック
     let usedWords = [];     // コード内で使われている変数名のスタック
     
-    // 予約語のリスト
+    // 手動の log や push はすべて綺麗に削除！純粋な構文キーワードだけに絞りました
     const RESERVED_WORDS = [
         "if", "else", "for", "while", "do", "switch", "case", "break", "continue",
         "return", "function", "class", "let", "var", "const", "new", "this", "true", 
-        "false", "null", "undefined", "console", "window", "document", "globalThis", "_jala"
+        "false", "null", "undefined", "window", "document", "globalThis", "_jala"
     ];
 
     function PreParsePart(part, idx) {
-        // 💡 改善点1: console.log(...) などのメソッド呼び出しや記号のまわりを整理し、純粋な変数・単語だけを抽出する
-        // ドットや括弧をスペースに置き換えてから切り出すことで、合体バグを防ぐ
-        let cleanTextForWords = part.replace(/[\(\)\{\}\[\]\.,;:?\+\-\*\/%&|=<>!]/g, " ");
+        // 1. 文字列リテラル（"hello" や 'world'）の中身を完全に消去（クォーテーションごとスペース化）
+        let noStringsText = part.replace(/"[^"\\]*(?:\\.[^"\\]*)*"/g, " ").replace(/'[^'\\]*(?:\\.[^'\\]*)*'/g, " ");
+
+        // 2. 括弧や演算子などの記号をスペースに変えて単語を切り出す（ドット "." はここでは残す！）
+        let cleanTextForWords = noStringsText.replace(/[\(\)\{\}\[\]\s;\+-\/\*%&|=<>!\?,:]/g, " ");
         let wordsInLine = cleanTextForWords.trim().split(/\s+/).filter(Boolean);
         
         wordsInLine.forEach(w => {
-            // 純粋な変数名・英単語らしきもの（数字のみの定数や予約語は除外）
-            if (isNaN(w) && !RESERVED_WORDS.includes(w)) {
+            let finalWord = w;
+
+            // 💡 提案のロジック：ドットが含まれていたら、一番最初のドットの手前だけを抽出する！
+            // これにより "console.log" ➔ "console"、"list.length" ➔ "list" になります
+            if (finalWord.includes(".")) {
+                finalWord = finalWord.split(".")[0];
+            }
+
+            // 抽出した結果が数字のみ、または予約語でなければ「使われている変数」として登録
+            if (finalWord && isNaN(finalWord) && !RESERVED_WORDS.includes(finalWord)) {
                 usedWords.push({
-                    name: w,
+                    name: finalWord,
                     line: idx + 1,
                     all: part
                 });
             }
         });
 
-        // 💡 改善点2: 変数宣言の解析を「スペースで分割したトークンベース」に超高性能化
+        // 3. 変数宣言のトークン解析（const banana = 20 のスペース対応）
         let tokens = part.trim().split(/\s+/).filter(Boolean);
-        
         for (let i = 0; i < tokens.length; i++) {
             let t = tokens[i];
             
             if (t === "var" || t === "let" || t === "const") {
-                // 宣言キーワードの後ろにある要素をすべて合体させてスペースを排除（例: ["banana", "=", "20"] ➔ "banana=20"）
                 let restLine = tokens.slice(i + 1).join("");
                 if (!restLine) continue;
 
@@ -50,21 +58,18 @@ function TIDEPreParse(code) {
                 let errCode = 0;
 
                 if (!restLine.includes("=")) {
-                    // イコールがない場合（例: let a;）
                     varName = restLine.replace(/;/g, "");
                     if (t === "const") {
                         isError = true;
                         errCode = 2; // const値なしエラー
                     }
                 } else {
-                    // イコールがある場合（例: const banana = 20; または const banana=20;）
                     let eqs = restLine.split("=");
                     varName = eqs[0].replace(/;/g, "");
                     varValue = eqs[1] ? eqs[1].replace(/;/g, "") : "undefined";
                 }
 
-                // 予約語の変数名チェック
-                if (RESERVED_WORDS.includes(varName) && varName !== "console" && varName !== "window") {
+                if (RESERVED_WORDS.includes(varName)) {
                     isError = true;
                     errCode = 4; // 予約語エラー
                 }
@@ -78,14 +83,11 @@ function TIDEPreParse(code) {
                     line: idx + 1,
                     all: part
                 });
-                
-                // 1行で複数のvar宣言を追わない単純化のため、この行の処理はブレイク
                 break;
             }
         }
     }
 
-    // 各行をスキャン
     let cop = code.split("\n");
     for (let i = 0; i < cop.length; i++) {
         PreParsePart(cop[i], i);
@@ -185,9 +187,6 @@ function TIDEPreParse(code) {
                                   "これらを変数名として使用することは禁止されています。\n別の名前に変更してください。\n予測されるエラー:";
                     c.innerText = "SyntaxError: Unexpected token '" + t.name + "'";
                     l.innerText = "エラー発生箇所: " + t.line + "行目";
-                    break;
-                default:
-                    q.innerText = "未知のエラーが発生しました。";
                     break;
             }
 
