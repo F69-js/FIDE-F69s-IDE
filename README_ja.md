@@ -49,5 +49,9 @@ Q:「内部エンジンがエラーを予測したため、実行は中止され
 指示に従ってすべてのエラーを修復してください
 
 > A:報告してください。
+# 詳しい説明
+詳しい説明は[wiki](https://github.com/F69-js/FIDE-F69s-IDE/wiki)をご覧ください
 ---
 # [FIDE](https://f69-js.github.io/FIDE-F69s-IDE/)はF69が[Gemini](https://gemini.google.com/)を使用して作成しました
+## License Info
+This code provided with 'MIT License'. For more information, See [LICENSE](./LICENSE).
