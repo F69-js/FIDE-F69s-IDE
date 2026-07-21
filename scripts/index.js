@@ -65,6 +65,8 @@ let list = [
     "#tpcolor",
     "#pencolor"
 ]
+let undoStack = [""];
+let redoStack = [];
 list.forEach(t=>{
    let d=document?.querySelector(t)
     if(!d)return;
@@ -222,6 +224,8 @@ if (!g) {
     cur = g;
 }
 async function DoEnter() {
+    undoStack.push(raw);
+    redoStack = [];
     let old = cur;
     let elemid = old.id.slice(4)
     let cur2 = document
@@ -304,16 +308,57 @@ window.addEventListener("keydown",async e => {
                 raw = r
                 break;
              case "s":
-            e.preventDefault();
-                savefile.click()
+                e.preventDefault();
+                savefile.click();
+                break;
+            case "l":
+                e.preventDefault();
+                cur.innerText = "";
+                raw = "";
+                break;
+            case "l":
+                e.preventDefault();
+                // 💡 歴史を刻んでから全消去する
+                undoStack.push(raw);
+                redoStack = [];
+                cur.innerText = "";
+                raw = "";
+                break;
+            case "z":
+                e.preventDefault();
+                if (undoStack.length > 1) {
+                    // 現在の状態を未来（redo）の箱にキープして、1つ過去に戻す
+                    redoStack.push(raw);
+                    let previousRaw = undoStack.pop();
+                    raw = previousRaw;
+                    
+                    // 画面の表示（cur.innerText）を過去のデータに書き換える
+                    // ※エディタ全体のテキスト（raw）から現在の行（cur）へ復元する処理
+                    cur.innerText = previousRaw.split("\n")[lineID] || "";
+                }
+            case "y":
+                e.preventDefault();
+                if (redoStack.length > 0) {
+                    // 未来の箱からデータを取り出して、過去（undo）の箱に戻す
+                    undoStack.push(raw);
+                    let nextRaw = redoStack.pop();
+                    raw = nextRaw;
+                    
+                    // 画面の表示を未来のデータに書き換える
+                    cur.innerText = nextRaw.split("\n")[lineID] || "";
+                }
+                break;
+                
         }
         return;
     }
     switch (e.key) {
-        case "Shift":
-        case "Control":
-        case "Meta":
-            break;
+            case "Shift":
+            case "Control":
+            case "Meta":
+            case "Alt":
+            case "CapsLock":
+        break;
         case "Backspace":
             if (mi.length > 0) {
                 cur.innerText = mi.slice(0, -1)
@@ -389,6 +434,9 @@ window.addEventListener("keydown",async e => {
             DoEnter()
             break;
         default:
+             if (e.key.length > 1) {
+                break;
+            }
             cur.innerText += e.key;
             raw += e.key
             break;
