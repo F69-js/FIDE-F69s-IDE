@@ -274,7 +274,7 @@ let SearchOpen = true;
 searchi.hidden=SearchOpen
 searchresults.hidden=SearchOpen
 searchg.hidden=SearchOpen
-window.addEventListener("keydown", e => {
+window.addEventListener("keydown",async e => {
     if (e.isComposing || e.key === "Process") return;
     if(e.ctrlKey&&e.key==="f"){
       e.preventDefault()
@@ -299,8 +299,9 @@ window.addEventListener("keydown", e => {
                 break;
             case "j":
                 e.preventDefault()
-                cur.innerText = _jala(mi)
-                raw = _jala(mi)
+                var r= await _jala(mi)
+                cur.innerText = r
+                raw = r
                 break;
              case "s":
             e.preventDefault();
