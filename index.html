@@ -39,7 +39,7 @@
     body {
       margin: 0;
       padding: 0;
-      font-family: sans-serif;
+      font-family: inherit;
     }
 
     @keyframes blink {
@@ -52,42 +52,47 @@
       white-space: pre;
     }
 
+    /* 各行の横並びコンテナ */
     .group {
       margin: 0px 0px;
       display: flex;
       flex-direction: row;
-      min-height: 20px;
+      min-height: 40px;
       max-height: 40px;
       overflow: hidden;
     }
 
+    /* エディタ内のテキスト（美しい等幅フォントと完璧な行間） */
     .line {
-      font-size: 16px;
+      font-size: 20px;
       margin: auto 3px;
-      font-size: 20px;
-    }
-
-    .cursor {
-      margin: 15px 0px;
-      border-bottom: 3px solid var(--cursor-color);
-      height: 10px;
-      width: 10px;
-      animation: 1s blink infinite;
-    }
-
-    .linenum {
-      background-color: var(--line-no-color);
-      color: var(--ineditor-text-color);
-      width: 40px;
+      font-family: 'Courier New', Courier, monospace, "Consolas", "Noto Sans JP" !important;
+      line-height: 40px !important; 
       height: 40px;
-      text-align: center;
+      display: inline-block;
+    }
+
+    /* 💡 1番目の赤丸（マークダウンのブラケット等への下線・波線誤爆）を最上流で完全防御 */
+    #input * {
+      text-decoration: none !important;
+    }
+
+    /* 🎯 2番目・3番目の赤丸：あなたのオリジナルの行番号スタイル（セレクタのスペルミスを完全修正！） */
+    .lineno {
+      background-color: var(--line-no-color); /* あえてねずみ色にして見やすさを極限まで高める */
+      color: var(--ineditor-text-color);
+      width: 30px; /* カチッと30pxの幅に固定して、右のテキストを押し出さない */
+      height: 40px;
+      text-align: center; /* 数字を美しく中央揃えにする */
       font-size: 20px;
+      
+      /* 上下に2pxの美しい境界線を配置して、行ごとの視認性を100%確保する */
       border-top: 2px solid var(--line-no-border);
       border-bottom: 2px solid var(--line-no-border);
-      box-sizing: border-box;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      
+      box-sizing: border-box; 
+      display: inline-block;
+      line-height: 36px; /* 境界線の4px分を引いた高さで数字を上下中央にアライン */
       cursor: pointer;
     }
 
@@ -149,7 +154,7 @@
        ========================================================= */
     table, 
     table * {
-      /* 💡 サイト内設定をダークモードに切り替えても、テーブル内の文字色を絶対に「黒」で固定！ */
+      /* サイト内設定をダークモードに切り替えても、テーブル内の文字色を絶対に「黒」で固定！ */
       color: #000000 !important; 
     }
 
@@ -250,7 +255,7 @@
       font-size: 20px;
     }
 
-    /* 💡 ホバー時の振動ガタつきバグをスマートに消去 */
+    /* ホバー時の振動ガタつきバグをスマートに消去 */
     #headermenu > main > a:hover {
       background-color: transparent;
       color: #81ffe7;
@@ -258,7 +263,7 @@
     }
 
     /* =========================================================
-       各種フォーム・操作用ボタン（右側の引き締まったサイズを完全再現）
+       各種フォーム・操作用ボタン
        ========================================================= */
     html {
       margin: 0;
@@ -270,7 +275,7 @@
       font-size: 17px;
       background-color: var(--line-no-color);
       width: 200px;
-      color: #000000 !important; /* 入力文字の白化消滅を完全ガード */
+      color: #000000 !important;
     }
 
     button {
@@ -280,7 +285,7 @@
       max-width: 101px;
       height: 60px;
       overflow: hidden;
-      color: var(--button-text-color) !important; /* 暗いボタンの上で確実に読めるように白文字に強制固定 */
+      color: var(--button-text-color) !important;
       font-size: 20px;
       cursor: pointer;
     }
@@ -352,7 +357,7 @@
       background-color: var(--line-no-color);
       min-height: 32px;
       font-size: 16px;
-      color: #000000 !important; /* 入力文字の白化消滅を完全ガード */
+      color: #000000 !important;
     }
 
     input[type="checkbox"] {
@@ -389,7 +394,6 @@
       align-items: center;
     }
 
-    /* 💡 左側の角丸を活かし、右側を直線にして一体化する完璧なアライン */
     #textreplacer {
       background-color: var(--line-no-color);
       min-height: 34px;
@@ -404,7 +408,6 @@
       box-sizing: border-box;
     }
 
-    /* 💡 左側のボーダー(実線)を完全抹殺し、左角の角丸を0にして「置換先」と隙間なく完全結合！ */
     #replt {
       border: 3px solid var(--line-no-border) !important;
       border-left: none !important;
@@ -413,7 +416,6 @@
       height: 34px;
     }
 </style>
-
 </head>
 
 <body id=body>
