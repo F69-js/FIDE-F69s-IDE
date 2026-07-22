@@ -234,6 +234,20 @@ async function DoEnter() {
         .createElement("div")
     newElem.id = "line" + lineID
     newElem.classList.add("line")
+    newElem.addEventListener("click", () => {
+        // 1. 移動前の古いカーソルを確実に隠す
+        let oldIdx = cur.id.slice(4);
+        let oldCursol = document.querySelector("#cursol" + oldIdx);
+        if (oldCursol) oldCursol.hidden = true;
+
+        // 2. 入力ターゲットを、クリックされたこの要素（newElem）に完全同期！
+        let clickID = Number(newElem.id.slice(4));
+        lineID = clickID;
+        cur = newElem;
+
+        // 3. この行のカーソル（curElem）をパッと表示させる
+        curElem.hidden = false;
+    });
     curElem.id = "cursol" + lineID
     curElem.classList.add("cursol")
     elemNo.id = "lineno" + lineID
@@ -670,3 +684,17 @@ setc.addEventListener("click",()=>{
   img1.addEventListener("mouseup",()=>{
     drawing = false;
   })
+    newElem.addEventListener("click", () => {
+        // 1. 移動前の古いカーソルを確実に隠す
+        let oldIdx = cur.id.slice(4);
+        let oldCursol = document.querySelector("#cursol" + oldIdx);
+        if (oldCursol) oldCursol.hidden = true;
+
+        // 2. 入力ターゲットを、クリックされたこの要素（newElem）に完全同期！
+        let clickID = Number(newElem.id.slice(4));
+        lineID = clickID;
+        cur = newElem;
+
+        // 3. この行のカーソル（curElem）をパッと表示させる
+        curElem.hidden = false;
+    });
