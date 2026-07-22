@@ -234,14 +234,14 @@ async function DoEnter() {
         .createElement("div")
     newElem.id = "line" + lineID
     newElem.classList.add("line")
-    newElem.addEventListener("click", () => {
+    newElem.addEventListener("click", (e) => {
         // 1. 移動前の古いカーソルを確実に隠す
         let oldIdx = cur.id.slice(4);
         let oldCursol = document.querySelector("#cursol" + oldIdx);
         if (oldCursol) oldCursol.hidden = true;
 
         // 2. 入力ターゲットを、クリックされたこの要素（newElem）に完全同期！
-        let clickID = Number(newElem.id.slice(4));
+        let clickID = Number(e.target.id.slice(4));
         lineID = clickID;
         cur = newElem;
 
