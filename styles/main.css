@@ -361,7 +361,6 @@
     #replg {
       align-items: center;
       display: flex;
-      border: 3px solid var(--line-no-border) !important;
       border-left: none !important;
       border-radius: 0px 4px 4px 0px !important;
       box-sizing: border-box;
