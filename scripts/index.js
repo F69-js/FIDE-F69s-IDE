@@ -684,17 +684,21 @@ setc.addEventListener("click",()=>{
   img1.addEventListener("mouseup",()=>{
     drawing = false;
   })
-    newElem.addEventListener("click", () => {
-        // 1. 移動前の古いカーソルを確実に隠す
+// 💡 画面ロード時の初期化エリアに追加（1行目のワープ登録）
+const firstGroup = document.getElementById("lineGroup0");
+if (firstGroup) {
+    firstGroup.addEventListener("click", () => {
+        // 今いる行のカーソルを消す
         let oldIdx = cur.id.slice(4);
         let oldCursol = document.querySelector("#cursol" + oldIdx);
         if (oldCursol) oldCursol.hidden = true;
 
-        // 2. 入力ターゲットを、クリックされたこの要素（newElem）に完全同期！
-        let clickID = Number(newElem.id.slice(4));
-        lineID = clickID;
-        cur = newElem;
+        // 1行目（ID: 0）へターゲットを強制同期
+        lineID = 0;
+        cur = document.getElementById("line0");
 
-        // 3. この行のカーソル（curElem）をパッと表示させる
-        curElem.hidden = false;
+        // 1行目のカーソルを表示
+        const firstCursol = document.getElementById("cursol0");
+        if (firstCursol) firstCursol.hidden = false;
     });
+}
