@@ -18,18 +18,19 @@ const ASSETS_TO_CACHE = [
 // 1. インストール時に、GitHub Pagesのリダイレクトを自動追跡して安全にキャッシュ
 self.addEventListener('install', (event) => {
     event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => {
-            // 【改善2】他社AIの神アドバイス：redirect: 'follow' を設定して301/302を完全突破！
-            const requests = ASSETS_TO_CACHE.map(url => new Request(url, { redirect: 'follow' }));
-            
-            console.log('[PWA] Core assets successfully cached for offline use.');
-            return cache.addAll(requests);
-        }).then(() => {
-            return self.skipWaiting(); // 爆速交代
+        caches.open(CACHE_NAME).then(async (cache) => {
+            for (const url of ASSETS_TO_CACHE) {
+                try {
+                    const response = await fetch(url, { redirect: 'follow' });
+                    if (response.ok) await cache.put(url, response);
+                } catch (err) {
+                    // 個別キャッシュ失敗を無視して続行
+                    console.warn(`[PWA] Skipping failed asset: ${url}`);
+                }
+            }
         })
     );
 });
-
 // 2. アクティベート時（変更なし：クリーンアップ＆claim）
 self.addEventListener('activate', (event) => {
     event.waitUntil(
