@@ -1,0 +1,16 @@
+{
+  "short_name": "F69's IDE",
+  "name": "F69's IDE - Custom",
+  "icons": [
+    {
+      "src": "images/favicon.ico",
+      "type": "image/x-icon",
+      "sizes": "32x32 48x48 64x64 128x128 256x256"
+    }
+  ],
+  "start_url": "./index.html",
+  "background_color": "#1e1e1e",
+  "theme_color": "#1e1e1e",
+  "display": "standalone",
+  "orientation": "portrait"
+}
