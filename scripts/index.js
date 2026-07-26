@@ -274,40 +274,34 @@ async function DoEnter() {
     curElem.hidden = false;
     raw += "\n";
 }
-
-async function ReadClipBoard() {
-    if (u === 1) {
-        window.addEventListener('beforeunload', HandleUnload);
-    }
-    
-    try {
-        const t = await navigator.clipboard.readText();
-        const lines = t.split("\n");
-
-        // forEachはasync/awaitを待てないため、for...of構文に丸替えして非同期の順番を保証
-        for (let i = 0; i < lines.length; i++) {
-            const r = lines[i];
-            
-            cur.innerText += r;
-            raw += r;
-            
-            // 最終行以外は、次の行が確実に作成されてターゲット(cur)が切り替わるのを待つ
-            if (i !== lines.length - 1) {
-                await DoEnter();
-            }
-        }
-    } catch (e) {
-        error.innerText += "Error: " + e;
-        if (globalThis.Language && typeof globalThis.Language.for === 'function') {
-            error.innerText += Language.for("inscript.clipboarderr");
-        }
-    }
-}
-
 let SearchOpen = true;
 searchi.hidden=SearchOpen
 searchresults.hidden=SearchOpen
 searchg.hidden=SearchOpen
+window.addEventListener('paste', async (e) => {
+    // デフォルトの「1行にベタッと貼り付く挙動」を絶対に許さない（強制キャンセル）
+    e.preventDefault();
+
+    // クリップボードからプレーンテキストを綺麗に取得
+    const text = (e.clipboardData || window.clipboardData).getData('text');
+    if (!text) return;
+
+    // Windows(CRLF)とMac/Linux(LF)の両方の改行コードに対応して分割
+    const lines = text.split(/\r?\n/);
+
+    for (let i = 0; i < lines.length; i++) {
+        const r = lines[i];
+
+        // 現在の行に文字を流し込む
+        cur.innerText += r;
+        raw += r;
+
+        // 最終行じゃなければ、あなたの作った完璧なDoEnter()で次の行へ進むのを待つ
+        if (i !== lines.length - 1) {
+            await DoEnter();
+        }
+    }
+});
 window.addEventListener("keydown",async e => {
     if (e.isComposing || e.key === "Process") return;
     if(e.ctrlKey&&e.key==="f"){
@@ -327,10 +321,6 @@ window.addEventListener("keydown",async e => {
     let mi = cur.innerText
     if (e.ctrlKey) {
         switch (e.key) {
-            case "v":
-                e.preventDefault();
-                ReadClipBoard();
-                break;
             case "j":
                 e.preventDefault()
                 var r= await _jala(mi)
