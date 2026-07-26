@@ -321,6 +321,34 @@ window.addEventListener("keydown",async e => {
     let mi = cur.innerText
     if (e.ctrlKey) {
         switch (e.key) {
+            case "c":
+                if (e.altKey) { // Ctrl は既に外側の if で保証されているので Alt だけチェック
+                    e.preventDefault();
+                    if (!raw) break;
+
+                    undoStack.push(raw);
+                    redoStack = [];
+                    raw = raw.replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, '$1');
+
+                    const lines = raw.split(/\r?\n/);
+                    
+                    // あなたのテンプレートリテラルによる高速リセット
+                    maincontainer.innerHTML = `
+                        <div id="lineGroup0" class="group">
+                           <div id="lineno0" class="lineno">1</div>
+                           <div id="line0" class="line">${lines[0] || ""}</div>
+                           <div id="cursol0" class="cursol"></div>
+                        </div>
+                    `;
+                    lineID = 0;
+                    cur = document.querySelector("#line0");
+
+                    for (let i = 1; i < lines.length; i++) {
+                        await DoEnter();
+                        cur.innerText = lines[i];
+                    }
+                }
+                break;
             case "j":
                 e.preventDefault()
                 var r= await _jala(mi)
