@@ -50,7 +50,7 @@ Q:「内部エンジンがエラーを予測したため、実行は中止され
 
 > A:報告してください。
 # 詳しい説明
-詳しい説明は[wiki](https://github.com/F69-js/FIDE-F69s-IDE/wiki)をご覧ください
+詳しい説明や(より詳細な!)内部のコード解説は[wiki](https://github.com/F69-js/FIDE-F69s-IDE/wiki)をご覧ください
 ---
 # [FIDE](https://f69-js.github.io/FIDE-F69s-IDE/)はF69が[Gemini](https://gemini.google.com/)を使用して作成しました
 ## License Info
