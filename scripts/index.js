@@ -751,7 +751,7 @@ if (firstGroup) {
 if ('serviceWorker' in navigator) {
     // ページ読み込み完了時にサービスワーカーを登録
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
+        navigator.serviceWorker.register('./scripts/sw.js')
             .then(() => console.log('[PWA]PWA registration successfully'))
             .catch((err) => console.error('[PWA]PWA registration failed:', err));
     });
