@@ -48,4 +48,10 @@ Q:I found bug. What should I do?
 
 > A: Please report it.
 ---
+#information
+## for more information and internal program info(more deeper!),please visit [wiki of whis repo](https://github.com/F69-js/FIDE-F69s-IDE/wiki)
+---
 # [FIDE](https://f69-js.github.io/FIDE-F69s-IDE/) was created by F69 using [Gemini](https://gemini.google.com/)
+---
+## License Info
+This code provided with 'MIT License'. For more information, See [LICENSE](./LICENSE).
