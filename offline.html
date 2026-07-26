@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ja" dir="ltr">
+<head>
+  <title>Offline - F69's IDE</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <link rel="stylesheet" href="styles/main.css">
+  <style>
+    :root {
+      --cursor-color: #000000;
+      --line-no-color: #a9a4a2;
+      --line-no-border: #4e4240;
+      --main-color: #8d8584;
+      --ineditor-text-color: #1a1a1a;
+      --background-unit-color: #FFFFFF;
+      --out-unit-color: #1a1a1a;
+      --header-color: #161616;
+      --button-text-color: #FFFFFF;
+    }
+    html, body {
+      margin: 0;
+      height: 100vh;
+      background-color: var(--background-unit-color);
+      color: var(--out-unit-color);
+      font-family: inherit;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .error-container {
+      text-align: center;
+      background-color: var(--main-color);
+      padding: 30px;
+      border: 3px solid var(--line-no-border);
+      border-radius: 8px;
+      color: var(--button-text-color); 
+      box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
+    }
+    h1 {
+      margin: 0 0 10px 0;
+      font-size: 24px;
+      background-color: #ffa5a5 !important;
+      color: #000000 !important;
+      padding: 10px;
+      border-radius: 4px;
+    }
+    p {
+      font-size: 16px;
+      margin: 15px 0;
+    }
+    .code-span {
+      background-color: var(--line-no-color);
+      color: var(--ineditor-text-color) !important;
+      padding: 4px 8px;
+      border: 1px solid var(--line-no-border);
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body id="body">
+  <div class="error-container">
+    <h1>[ERROR] Unable to Load Application</h1>
+    <p>This application could not start because you are currently offline.</p>
+    <p style="color: #ff9900; font-weight: bold;">Make sure you're connected to the internet.</p
+  </div>
+</body>
+</html>
