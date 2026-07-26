@@ -49,7 +49,7 @@ Q:I found bug. What should I do?
 > A: Please report it.
 ---
 #information
-## for more information and internal program info(more deeper!),please visit [wiki of whis repo](https://github.com/F69-js/FIDE-F69s-IDE/wiki)
+for detailed explanations and (even more detailed!) internal code Explanation,Please check the wiki(https://github.com/F69-js/FIDE-F69s-IDE/wiki)
 ---
 # [FIDE](https://f69-js.github.io/FIDE-F69s-IDE/) was created by F69 using [Gemini](https://gemini.google.com/)
 ---
