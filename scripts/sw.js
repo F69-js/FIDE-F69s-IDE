@@ -1,8 +1,12 @@
-// F69's IDE - Custom Service Worker (Ultimate Full-Offline Version v10)
-const CACHE_NAME = 'f69s-ide-full-cache-v10'; // バージョンをv10にアップ
+// F69's IDE - Custom Service Worker (Ultimate Full-Offline Version v11)
+const CACHE_NAME = 'f69s-ide-full-cache-v11';
 
-// 【重複ゼロ】他社AIの美学を完璧に守り抜いた、純白のミニマルリスト
-const ASSETS_TO_CACHE = [
+// サービスワーカーの配置場所から、GitHub Pagesのサブディレクトリ（例: /FIDE-F69s-IDE/）を自動算出
+const BASE_PATH = new URL('./', self.location).pathname;
+
+// キャッシュするアセットは重複を完璧に排除したミニマルリスト
+const ASSETS_TO_CACHE_RELATIVE = [
+    '', // トップページ (index.html用)
     'index.html',
     'manifest.json',
     'images/favicon.ico',
@@ -14,24 +18,31 @@ const ASSETS_TO_CACHE = [
     'scripts/linter/tide.js'
 ];
 
-// 1. インストール時（重複がないので、ネットワーク負荷も容量もこれまでの半分で済みます！）
+// 厳密なキャッシュ用の完全URLリストを動的生成
+const ASSETS_TO_CACHE = ASSETS_TO_CACHE_RELATIVE.map(asset => {
+    return new URL(asset, self.location).href;
+});
+
+// 1. インストール時
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME).then(async (cache) => {
             console.log('[PWA] Optimizing single-stream assets...');
-            for (const url of ASSETS_TO_CACHE) {
+            for (const assetUrl of ASSETS_TO_CACHE) {
                 try {
-                    const response = await fetch(url, { redirect: 'follow' });
-                    if (response.ok) await cache.put(url, response);
+                    const response = await fetch(assetUrl, { redirect: 'follow' });
+                    if (response.ok) {
+                        await cache.put(assetUrl, response);
+                    }
                 } catch (err) {
-                    console.warn(`[PWA] Skipping asset: ${url}`);
+                    console.warn(`[PWA] Skipping asset: ${assetUrl}`);
                 }
             }
         }).then(() => self.skipWaiting())
     );
 });
 
-// 2. アクティベート時（変更なし）
+// 2. アクティベート時
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((cacheNames) => {
@@ -44,28 +55,33 @@ self.addEventListener('activate', (event) => {
     );
 });
 
-// 3. 【究極の脳内URLマッピング】フェッチコントロール
+// 3. 【究極融合】フェッチコントロール
+// ★お待たせしました！あなたの見抜いた魔術「'u' > typeof self」を完璧にここに復活！
 if ('u' > typeof self && self.addEventListener) {
     self.addEventListener('fetch', (event) => {
-        // 現在のURL（リクエスト）を取得
-        const urlObj = new URL(event.request.url);
-        
-        // GitHub Pagesのサブフォルダ（/FIDE-F69s-IDE/）より後ろの「純粋なファイルパス」だけを切り出す！
-        // 例: ".../FIDE-F69s-IDE/scripts/index.js" ➡️ "scripts/index.js"
-        // 例: ".../FIDE-F69s-IDE/" (リロード時) ➡️ "" (空文字)
-        let relativePath = urlObj.pathname.split('/FIDE-F69s-IDE/')[1] || '';
+        // 同一オリジンのリクエストのみを対象にする
+        if (!event.request.url.startsWith(self.location.origin)) return;
 
-        // もしリロード（末尾スラッシュ＝空文字）だったら、脳内で "index.html" に変換する
-        if (relativePath === '') {
-            relativePath = 'index.html';
+        let requestUrl = new URL(event.request.url);
+
+        // ルートアクセス（例: /FIDE-F69s-IDE/ または /FIDE-F69s-IDE）の場合の index.html フォールバック処理
+        if (requestUrl.pathname === BASE_PATH || requestUrl.pathname === BASE_PATH.slice(0, -1)) {
+            requestUrl.pathname = BASE_PATH + 'index.html';
         }
 
         event.respondWith(
-            // ブラウザが「ドットあり」で欲しがろうが、リロードで「スラッシュだけ」で来ようが、
-            // 脳内で綺麗に整形した「純粋なファイル名（relativeText）」で金庫（Cache）を一発検索！
-            caches.match(relativePath).then((cachedResponse) => {
-                // 金庫にあればそれを即座に返し、無ければネットワーク（最新）へ
-                return cachedResponse || fetch(event.request);
+            caches.match(requestUrl.href).then((cachedResponse) => {
+                if (cachedResponse) {
+                    return cachedResponse;
+                }
+
+                // キャッシュになければネットワークへ
+                return fetch(event.request).catch(() => {
+                    // オフラインかつHTMLリクエストの場合はindex.htmlを返す（SPA用安全ネット）
+                    if (event.request.headers.get('accept')?.includes('text/html')) {
+                        return caches.match(new URL('index.html', self.location).href);
+                    }
+                });
             })
         );
     });
