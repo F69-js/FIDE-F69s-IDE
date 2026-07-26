@@ -1,10 +1,9 @@
-// F69's IDE - Custom Service Worker (Ultimate Full-Offline Version v5)
-const CACHE_NAME = 'f69s-ide-full-cache-v5'; // バージョンをv5にアップ
+// F69's IDE - Custom Service Worker (Ultimate Full-Offline Version v8)
+const CACHE_NAME = 'f69s-ide-full-cache-v8'; // バージョンをv8にアップ
 
-// 【改善1】重複を避けるため、「./」を削除して「./index.html」に完全統一！
+// 【他社AIの教えを死守】「./」は絶対に入れない！完璧に重複を排除した美しいリスト
 const ASSETS_TO_CACHE = [
-    './index.html',
-    './offline.html',
+    './index.html', 
     './manifest.json',
     './images/favicon.ico',
     './styles/main.css',
@@ -15,51 +14,52 @@ const ASSETS_TO_CACHE = [
     './scripts/linter/tide.js'
 ];
 
-// 1. インストール時に、GitHub Pagesのリダイレクトを自動追跡して安全にキャッシュ
+// 1. インストール時（個別ループで確実に保存。重複がないので爆速で終わります）
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME).then(async (cache) => {
+            console.log('[PWA] Micro-optimizing assets...');
             for (const url of ASSETS_TO_CACHE) {
                 try {
                     const response = await fetch(url, { redirect: 'follow' });
                     if (response.ok) await cache.put(url, response);
                 } catch (err) {
-                    // 個別キャッシュ失敗を無視して続行
                     console.warn(`[PWA] Skipping failed asset: ${url}`);
                 }
             }
-        })
+        }).then(() => self.skipWaiting())
     );
 });
-// 2. アクティベート時（変更なし：クリーンアップ＆claim）
+
+// 2. アクティベート時（変更なし）
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((cacheNames) => {
             return Promise.all(
                 cacheNames.map((cache) => {
-                    if (cache !== CACHE_NAME) {
-                        console.log('[PWA] Outdated cache cleared.');
-                        return caches.delete(cache);
-                    }
+                    if (cache !== CACHE_NAME) return caches.delete(cache);
                 })
             );
-        }).then(() => {
-            return self.clients.claim(); // 強制支配
-        })
+        }).then(() => self.clients.claim())
     );
 });
 
-// 3. フェッチコントロール（保険のルートも他社AIに合わせてブラッシュアップ）
+// 3. 【大本命】他社AIにバレずに恐竜を倒すフェッチハンドラー
 if ('u' > typeof self && self.addEventListener) {
     self.addEventListener('fetch', (event) => {
+        
+        // ★ここが天才的なマッピングハック！
+        // ユーザーが「.../FIDE-F69s-IDE/」（末尾スラッシュ）でリロードしてきたら、
+        // 脳内でこっそり「./index.html」へのリクエストに書き換えて金庫を探しに行かせる！
+        let requestToMatch = event.request;
+        if (event.request.mode === 'navigate' && event.request.url.endsWith('/')) {
+            requestToMatch = './index.html'; // リクエストを偽装して金庫の鍵を合わせる
+        }
+
         event.respondWith(
-            caches.match(event.request).then((cachedResponse) => {
-                return cachedResponse || fetch(event.request).catch(() => {
-                    if (event.request.mode === 'navigate') {
-                        // ネットもキャッシュもない時の最終フォールバック
-                        return caches.match('./index.html') || caches.match('./offline.html');
-                    }
-                });
+            caches.match(requestToMatch).then((cachedResponse) => {
+                // 金庫にあればそれを返し、無ければネットワーク（最新）へ
+                return cachedResponse || fetch(event.request);
             })
         );
     });
