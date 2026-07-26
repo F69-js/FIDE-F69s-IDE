@@ -276,22 +276,34 @@ async function DoEnter() {
 }
 
 async function ReadClipBoard() {
-    if(u===1){
-      window.addEventListener('beforeunload',HandleUnload);
+    if (u === 1) {
+        window.addEventListener('beforeunload', HandleUnload);
     }
-    navigator.clipboard.readText().then(t => {
-        t
-            .split("\n")
-            .forEach((r, t, a) => {
-                cur.innerText += r;
-                raw += r;
-                if (t != a.length - 1) DoEnter()
-            })
-    }, e => {
-        error.innerText += "Error:" + t;
-        error.innerText += Language.for("inscript.clipboarderr")
-    })
+    
+    try {
+        const t = await navigator.clipboard.readText();
+        const lines = t.split("\n");
+
+        // forEachはasync/awaitを待てないため、for...of構文に丸替えして非同期の順番を保証
+        for (let i = 0; i < lines.length; i++) {
+            const r = lines[i];
+            
+            cur.innerText += r;
+            raw += r;
+            
+            // 最終行以外は、次の行が確実に作成されてターゲット(cur)が切り替わるのを待つ
+            if (i !== lines.length - 1) {
+                await DoEnter();
+            }
+        }
+    } catch (e) {
+        error.innerText += "Error: " + e;
+        if (globalThis.Language && typeof globalThis.Language.for === 'function') {
+            error.innerText += Language.for("inscript.clipboarderr");
+        }
+    }
 }
+
 let SearchOpen = true;
 searchi.hidden=SearchOpen
 searchresults.hidden=SearchOpen
