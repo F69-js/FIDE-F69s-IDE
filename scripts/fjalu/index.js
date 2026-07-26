@@ -53,38 +53,54 @@ const noop = () => { };
     // =========================================================
     // 🌐 2. Chrome標準 window.Translator による自動日本語化
     // =========================================================
-     async function processAndTranslateToJapanese(inputText) {
-        if (!inputText || !inputText.trim()) return inputText;
+async function processAndTranslateToJapanese(inputText, config = {}) {
+    if (!inputText || !inputText.trim()) return inputText;
 
-        try {
-            if (globalThis.Translator && typeof globalThis.Translator.create === 'function') {
+    try {
+        // 1. Language Detector が利用可能か確認
+        if (globalThis.LanguageDetector && typeof globalThis.LanguageDetector.create === 'function') {
+            const detector = await globalThis.LanguageDetector.create();
+            const results = await detector.detect(inputText);
+            
+            // 最も確率の高い言語を取得
+            const detectedLanguage = results[0]?.detectedLanguage;
 
-                const translator = await globalThis.Translator.create({
-                    sourceLanguage: "en", // 確実にトリガーを引くため、まずは en（英語）固定でテスト
-                    targetLanguage: "ja",
-                    monitor(m) {
-                        m.addEventListener("downloadprogress", (e) => {
-                            const loaded = e.loaded;
-                            const total = e.total;
-                            const percent = total > 0 ? Math.round((loaded / total) * 100) : 0;
-                            
-                            if (typeof config.onDownloadProgress === 'function') {
-                                config.onDownloadProgress(loaded, total, percent);
-                            }
-                        });
-                    }
-                });
-
-                if (translator && typeof translator.translate === 'function') {
-                    let translatedText = await translator.translate(inputText);
-                    return RomajiToJapanese(translatedText);
-                }
+            // 入力が英語（en）ではない場合、翻訳をスキップして直接ローマ字変換へ
+            if (detectedLanguage !== 'en') {
+                return RomajiToJapanese(inputText);
             }
-        } catch (error) {
-            console.warn("Translator準備中、または利用不可。ローカル置換で並行処理します。");
         }
-        return inputText; 
+
+        // 2. 英語と判定された場合のみ、Translator を作成して翻訳
+        if (globalThis.Translator && typeof globalThis.Translator.create === 'function') {
+            const translator = await globalThis.Translator.create({
+                sourceLanguage: "en", // 英語から
+                targetLanguage: "ja", // 日本語へ
+                monitor(m) {
+                    m.addEventListener("downloadprogress", (e) => {
+                        const loaded = e.loaded;
+                        const total = e.total;
+                        const percent = total > 0 ? Math.round((loaded / total) * 100) : 0;
+                        
+                        if (typeof config.onDownloadProgress === 'function') {
+                            config.onDownloadProgress(loaded, total, percent);
+                        }
+                    });
+                }
+            });
+
+            if (translator && typeof translator.translate === 'function') {
+                // 英語を日本語に翻訳した結果をそのまま返す（RomajiToJapaneseは不要）
+                return await translator.translate(inputText);
+            }
+        }
+    } catch (error) {
+        console.warn("LanguageDetector/Translator準備中、または利用不可。ローカル置換で並行処理します。");
     }
+    
+    // どちらも使えない、または判定に失敗した場合は安全にローマ字変換
+    return RomajiToJapanese(inputText); 
+}
 
     // =========================================================
     // ⚡ 3. ローマ字・かな変換コアロジック (重複バグ修正版)
