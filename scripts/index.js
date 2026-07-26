@@ -279,24 +279,24 @@ searchi.hidden=SearchOpen
 searchresults.hidden=SearchOpen
 searchg.hidden=SearchOpen
 window.addEventListener('paste', async (e) => {
-    // デフォルトの「1行にベタッと貼り付く挙動」を絶対に許さない（強制キャンセル）
+    // ブラウザ標準の1行ベタ貼り挙動を強制キャンセル
     e.preventDefault();
 
-    // クリップボードからプレーンテキストを綺麗に取得
+    // クリップボードからプレーンテキストを取得
     const text = (e.clipboardData || window.clipboardData).getData('text');
     if (!text) return;
 
-    // Windows(CRLF)とMac/Linux(LF)の両方の改行コードに対応して分割
+    // Windows/Mac両対応で改行分割
     const lines = text.split(/\r?\n/);
 
     for (let i = 0; i < lines.length; i++) {
         const r = lines[i];
 
-        // 現在の行に文字を流し込む
-        cur.innerText += r;
+        // 【力業インデント対応】画面表示時のみタブ(\t)を縦棒(|)に変換してスタンプ！
+        cur.innerText += r.replace(/\t/g, "|");
         raw += r;
 
-        // 最終行じゃなければ、あなたの作った完璧なDoEnter()で次の行へ進むのを待つ
+        // 最終行じゃなければ、あなたの作った完璧なDoEnterで次の行へ安全に進む
         if (i !== lines.length - 1) {
             await DoEnter();
         }
