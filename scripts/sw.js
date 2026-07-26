@@ -1,8 +1,8 @@
-// F69's IDE - Custom Service Worker (Ultimate Full-Offline Version v3)
-const CACHE_NAME = 'f69s-ide-full-cache-v3'; // バージョンをv3にアップ
+// F69's IDE - Custom Service Worker (Ultimate Full-Offline Version v5)
+const CACHE_NAME = 'f69s-ide-full-cache-v5'; // バージョンをv5にアップ
 
+// 【改善1】重複を避けるため、「./」を削除して「./index.html」に完全統一！
 const ASSETS_TO_CACHE = [
-    './',
     './index.html',
     './offline.html',
     './manifest.json',
@@ -15,20 +15,22 @@ const ASSETS_TO_CACHE = [
     './scripts/linter/tide.js'
 ];
 
-// 1. インストール時
+// 1. インストール時に、GitHub Pagesのリダイレクトを自動追跡して安全にキャッシュ
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
+            // 【改善2】他社AIの神アドバイス：redirect: 'follow' を設定して301/302を完全突破！
+            const requests = ASSETS_TO_CACHE.map(url => new Request(url, { redirect: 'follow' }));
+            
             console.log('[PWA] Core assets successfully cached for offline use.');
-            return cache.addAll(ASSETS_TO_CACHE);
+            return cache.addAll(requests);
         }).then(() => {
-            // ★超重要：順番待ちをさせず、古いワーカーを即座にキックして交代する！
-            return self.skipWaiting();
+            return self.skipWaiting(); // 爆速交代
         })
     );
 });
 
-// 2. アクティベート時
+// 2. アクティベート時（変更なし：クリーンアップ＆claim）
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((cacheNames) => {
@@ -41,20 +43,20 @@ self.addEventListener('activate', (event) => {
                 })
             );
         }).then(() => {
-            // ★超重要：現在開いているこのページを、今すぐこのワーカーの支配下に置く（claim）！
-            return self.clients.claim();
+            return self.clients.claim(); // 強制支配
         })
     );
 });
 
-// 3. フェッチコントロール（変更なし）
+// 3. フェッチコントロール（保険のルートも他社AIに合わせてブラッシュアップ）
 if ('u' > typeof self && self.addEventListener) {
     self.addEventListener('fetch', (event) => {
         event.respondWith(
             caches.match(event.request).then((cachedResponse) => {
                 return cachedResponse || fetch(event.request).catch(() => {
                     if (event.request.mode === 'navigate') {
-                        return caches.match('./') || caches.match('./index.html') || caches.match('./offline.html');
+                        // ネットもキャッシュもない時の最終フォールバック
+                        return caches.match('./index.html') || caches.match('./offline.html');
                     }
                 });
             })
