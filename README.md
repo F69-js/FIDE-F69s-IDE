@@ -8,7 +8,8 @@
 ---
 # badges:
 [![hundreds Commit](https://shields.io/badge/Commits-hundreds-8d8584?style=for-the-badge
-)](https://github.com/F69-js/FIDE-F69s-IDE/commits/main/)
+)](https://github.com/F69-js/FIDE-F69s-IDE/commits/main/)  
+![Vaild CSS!](https://jigsaw.w3.org/css-validator/images/vcss-blue)
 ---
 ### 📢 Translations Welcome! / 翻訳PR募集中！
 We are looking for translation Pull Requests to help localize F69's IDE into more languages. 
