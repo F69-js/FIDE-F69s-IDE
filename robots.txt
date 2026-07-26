@@ -1,0 +1,14 @@
+# =================================================================
+# F69's IDE - Custom Robots Configuration
+# =================================================================
+
+User-agent: *
+Allow: /
+
+# Exclude private components and scripts from direct crawling
+Disallow: /scripts/fjalu/
+Disallow: /scripts/linter/
+
+# Ensure the core application remains highly crawlable
+Match-agent: Googlebot
+Allow: /index.html
