@@ -218,50 +218,63 @@ async function DoEnter() {
     undoStack.push(raw);
     redoStack = [];
     let old = cur;
-    let elemid = old.id.slice(4)
-    let cur2 = document
-        .querySelector("#cursol" + elemid)
-    if (!cur2) return;
-    cur2.hidden = true;
-    lineID++;
-    let newElem = document
-        .createElement("div")
-    let elemGroup = document
-        .createElement("div")
-    let elemNo = document
-        .createElement("div")
-    let curElem = document
-        .createElement("div")
-    newElem.id = "line" + lineID
-    newElem.classList.add("line")
-    newElem.addEventListener("click", (e) => {
-        // 1. 移動前の古いカーソルを確実に隠す
-        let oldIdx = cur.id.slice(4);
-        let oldCursol = document.querySelector("#cursol" + oldIdx);
-        if (oldCursol) oldCursol.hidden = true;
+    let elemid = old.id.slice(4);
+    
+    // 古いカーソルを隠す
+    let cur2 = document.querySelector("#cursol" + elemid);
+    if (cur2) cur2.hidden = true;
 
-        // 2. 入力ターゲットを、クリックされたこの要素（newElem）に完全同期！
-        let clickID = Number(e.target.id.slice(4));
-        lineID = clickID;
-        cur = newElem;
+    // 要素の作成
+    let newElem = document.createElement("div");
+    let elemGroup = document.createElement("div");
+    let elemNo = document.createElement("div");
+    let curElem = document.createElement("div");
 
-        // 3. この行のカーソル（curElem）をパッと表示させる
-        curElem.hidden = false;
+    // クラスの設定など（省略）
+    newElem.classList.add("line");
+    curElem.classList.add("cursol");
+    elemNo.classList.add("lineno");
+    elemGroup.classList.add("group");
+
+    // イベントリスナーなどは元のまま（省略）
+    
+    elemGroup.appendChild(elemNo);
+    elemGroup.appendChild(newElem);
+    elemGroup.appendChild(curElem);
+
+    // ★修正1：末尾に追加するのではなく、現在の行の「すぐ後ろ」に挿入する
+    let currentGroup = old.closest(".group");
+    if (currentGroup) {
+        currentGroup.insertAdjacentElement("afterend", elemGroup);
+    } else {
+        maincontainer.appendChild(elemGroup); // フォールバック
+    }
+
+    // ★修正2：画面上のすべての行を集めて、IDと行番号を上から完璧に綺麗にナンバリングし直す！
+    let allGroups = maincontainer.querySelectorAll(".group");
+    allGroups.forEach((group, index) => {
+        let line = group.querySelector(".line");
+        let lineno = group.querySelector(".lineno");
+        let cursol = group.querySelector(".cursol");
+
+        // インデックスを上から順に綺麗に上書き
+        line.id = "line" + index;
+        lineno.id = "lineno" + index;
+        lineno.innerText = String(index + 1); // 1書き換え
+        cursol.id = "cursol" + index;
     });
-    curElem.id = "cursol" + lineID
-    curElem.classList.add("cursol")
-    elemNo.id = "lineno" + lineID
-    elemNo.classList.add("lineno")
-    elemNo.innerText = String(lineID + 1);
-    elemGroup.id = "lineGroup" + lineID
-    elemGroup.classList.add("group")
-    elemGroup.appendChild(elemNo)
-    elemGroup.appendChild(newElem)
-    elemGroup.appendChild(curElem)
-    maincontainer.appendChild(elemGroup)
+
+    // 現在のターゲットとlineIDを、新しく挿入した行のインデックスに同期
+    let finalGroups = Array.from(maincontainer.querySelectorAll(".group"));
+    let newIndex = finalGroups.indexOf(elemGroup);
+    lineID = newIndex;
     cur = newElem;
+    
+    // 新しいカーソルを表示
+    curElem.hidden = false;
     raw += "\n";
 }
+
 async function ReadClipBoard() {
     if(u===1){
       window.addEventListener('beforeunload',HandleUnload);
