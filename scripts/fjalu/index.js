@@ -77,7 +77,7 @@ const noop = () => { };
 
                 if (translator && typeof translator.translate === 'function') {
                     let translatedText = await translator.translate(inputText);
-                    return JapaneseToRomaji(translatedText);
+                    return RomajiToJapanese(translatedText);
                 }
             }
         } catch (error) {
