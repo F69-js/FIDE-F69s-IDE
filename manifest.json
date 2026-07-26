@@ -5,12 +5,13 @@
     {
       "src": "images/favicon.ico",
       "type": "image/x-icon",
-      "sizes": "32x32 48x48 64x64 128x128 256x256"
+      "sizes": "32x40",
+      "purpose": "any"
     }
   ],
   "start_url": "./index.html",
-  "background_color": "#1e1e1e",
-  "theme_color": "#1e1e1e",
+  "background_color": "#ffffff",
+  "theme_color": "#161616",
   "display": "standalone",
   "orientation": "portrait"
 }
