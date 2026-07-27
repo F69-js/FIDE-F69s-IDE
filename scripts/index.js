@@ -361,11 +361,6 @@ window.addEventListener("keydown",async e => {
                 break;
             case "l":
                 e.preventDefault();
-                cur.innerText = "";
-                raw = "";
-                break;
-            case "l":
-                e.preventDefault();
                 // 💡 歴史を刻んでから全消去する
                 undoStack.push(raw);
                 redoStack = [];
@@ -745,9 +740,6 @@ if (firstGroup) {
         if (firstCursol) firstCursol.hidden = false;
     });
 }
-// =================================================================
-// 3. PWAサービスワーカーの登録（外部ファイル化）
-// =================================================================
 if ('serviceWorker' in navigator) {
     // ページ読み込み完了時にサービスワーカーを登録
     window.addEventListener('load', () => {
