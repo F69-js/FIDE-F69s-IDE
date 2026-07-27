@@ -554,8 +554,8 @@ openfile.addEventListener("click", async () => {
                 break;
             default:
                 filetype = "text"
-                maincontainer.hidden=true;
-                imgcontainer.hidden=false;
+                maincontainer.hidden=false;
+                imgcontainer.hidden=true;
                 const content = await file.text();
                 content
                    .split("\n")
