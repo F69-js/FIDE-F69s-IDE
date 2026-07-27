@@ -1,6 +1,10 @@
-// F69's IDE - Custom Service Worker (Ultimate Full-Offline Version v11)
-const CACHE_NAME = 'f69s-ide-full-cache-v11';
+// F69's IDE - Custom Service Worker (Ultimate Full-Offline Version v12)
+const CACHE_NAME = 'f69s-ide-full-cache-v12';
 
+if (!('u' > typeof self && self.addEventListener)){
+    console.log("ERR_SELF_NOT_SUPPERTED");
+    return;
+}
 // サービスワーカーの配置場所から、GitHub Pagesのサブディレクトリ（例: /FIDE-F69s-IDE/）を自動算出
 const BASE_PATH = new URL('./', self.location).pathname;
 
@@ -55,8 +59,7 @@ self.addEventListener('activate', (event) => {
     );
 });
 
-// 3. 【究極融合】フェッチコントロール
-// ★お待たせしました！あなたの見抜いた魔術「'u' > typeof self」を完璧にここに復活！
+
 if ('u' > typeof self && self.addEventListener) {
     self.addEventListener('fetch', (event) => {
         // 同一オリジンのリクエストのみを対象にする
