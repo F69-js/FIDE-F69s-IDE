@@ -24,6 +24,38 @@
   <link rel="modulepreload" href="scripts/linter/tide.js">
   <link rel="stylesheet" href="styles/main.css">
   <link rel="manifest" href="manifest.json">
+  <label hidden>
+    @summary
+    title = "F69's IDE (FIDE) Technical Summary"
+    author = "F69minrcraft & Gemini"
+    type = "summary for AI"
+@what_is
+    simple IDE made in japan by F69minrcraft
+@target_audience
+    People who enjoy writing their own programs using JavaScript.
+    People looking for an easy-to-use editor that supports smooth Japanese text conversion.
+    People who want to experiment with code safely and easily online without installing complex software.
+
+@support
+    Dark theme
+    Raw confirmation feature
+    App installation support
+    Offline functionality
+    Multi-language localization
+
+@features
+    A secure execution system that tests programs safely and provides custom, user-friendly error logs.
+    A static analysis check that automatically stops incorrect code before running, drawing a red wavy line directly beneath errors with helpful hints.
+@links
+    https://github.com/F69-js/FIDE-F69s-IDE
+    https://f69-js.github.io/FIDE-F69s-IDE/
+    https://github.com/F69-js/FIDE-F69s-IDE/blob/main/README.md
+    https://github.com/F69-js/FIDE-F69s-IDE/blob/main/README_en.md
+    https://github.com/F69-js/FIDE-F69s-IDE/wiki
+@author
+    F69-js(F69minrcraft)
+    https://github.com/F69-js
+  </label>
 <style id="theme_area">
     :root {
       --cursor-color: #000000;
@@ -37,16 +69,22 @@
       --button-text-color: #FFFFFF;
     }
 </style>
+<style id="patch1">
+  .skip-link{
+    top: -1000px;
+  }
+</style>
 </head>
 
 <body id=body>
   <div id=headermenu>
-    <main>
-      <a href="https://github.com/F69-js/FIDE-F69s-IDE/">github</a>
-      <button id=openfile>Open File</button>
-      <button id=savefile>Save File</button>
-      <button id=settings>Open Settings</button>
+    <a class="skip-link" href="#main">メインコンテンツへスキップ</a>
+    <a href="https://github.com/F69-js/FIDE-F69s-IDE/">github</a>
+    <button id=openfile>Open File</button>
+    <button id=savefile>Save File</button>
+    <button id=settings>Open Settings</button>
   </div>
+  <main id="main">
   <div id=middlearea>
     <input id=filenamei placeholder="Enter File Name...">
     <div id="searchg" hidden>
@@ -77,11 +115,11 @@
   <hr>
   <div id=maincontainer>
     <div id=input>
-        <div id=lineGroup0 class="group">
-           <div id=lineno0 class=lineno>1</div>
-           <div id=line0 class="line"></div>
-           <div id=cursol0 class=cursol></div>
-        </div>
+      <div id=lineGroup0 class="group">
+        <div id=lineno0 class=lineno>1</div>
+        <div id=line0 class="line"></div>
+        <div id=cursol0 class=cursol></div>
+      </div>
     </div>
   </div>
   <hr>
@@ -118,7 +156,6 @@
     <button id=rawexec>Exec</button>
   </div>
   <script src="./scripts/index.js" type="module" defer></script>
-  </main>
+</main>
 </body>
-
 </html>
