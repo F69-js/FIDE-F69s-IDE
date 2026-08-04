@@ -54,7 +54,17 @@ let list = [
     "#mediamenu",
     "#penmode",
     "#tpcolor",
-    "#pencolor"
+    "#pencolor",
+    /* ▼ AI関連の追加DOM登録 ▼ */
+    "#aimenu",
+    "#aiinput",
+    "#aiexec",
+    "#aioutput",
+    "#aigroup",
+    "#available",
+    "#ainotavailable",
+    "#aienable",
+    "#menu"
 ]
 let undoStack = [""];
 let redoStack = [];
@@ -220,83 +230,170 @@ async function DoEnter() {
     let old = cur;
     let elemid = old.id.slice(4);
     
-    // 古いカーソルを隠す
     let cur2 = document.querySelector("#cursol" + elemid);
     if (cur2) cur2.hidden = true;
 
-    // 要素の作成
     let newElem = document.createElement("div");
     let elemGroup = document.createElement("div");
     let elemNo = document.createElement("div");
     let curElem = document.createElement("div");
 
-    // クラスの設定など（省略）
     newElem.classList.add("line");
     curElem.classList.add("cursol");
     elemNo.classList.add("lineno");
     elemGroup.classList.add("group");
 
-    // イベントリスナーなどは元のまま（省略）
-    
     elemGroup.appendChild(elemNo);
     elemGroup.appendChild(newElem);
     elemGroup.appendChild(curElem);
 
-    // ★修正1：末尾に追加するのではなく、現在の行の「すぐ後ろ」に挿入する
     let currentGroup = old.closest(".group");
     if (currentGroup) {
         currentGroup.insertAdjacentElement("afterend", elemGroup);
     } else {
-        maincontainer.appendChild(elemGroup); // フォールバック
+        maincontainer.appendChild(elemGroup);
     }
 
-    // ★修正2：画面上のすべての行を集めて、IDと行番号を上から完璧に綺麗にナンバリングし直す！
     let allGroups = maincontainer.querySelectorAll(".group");
     allGroups.forEach((group, index) => {
         let line = group.querySelector(".line");
         let lineno = group.querySelector(".lineno");
         let cursol = group.querySelector(".cursol");
 
-        // インデックスを上から順に綺麗に上書き
         line.id = "line" + index;
         lineno.id = "lineno" + index;
-        lineno.innerText = String(index + 1); // 1書き換え
+        lineno.innerText = String(index + 1);
         cursol.id = "cursol" + index;
     });
 
-    // 現在のターゲットとlineIDを、新しく挿入した行のインデックスに同期
     let finalGroups = Array.from(maincontainer.querySelectorAll(".group"));
     let newIndex = finalGroups.indexOf(elemGroup);
     lineID = newIndex;
     cur = newElem;
     
-    // 新しいカーソルを表示
     curElem.hidden = false;
     raw += "\n";
 }
+
+// ==========================================
+// ▼ Built-in AI (Prompt API) 連携ロジック ▼
+// ==========================================
+async function initBuiltInAI() {
+    if (!window.ai || !window.ai.languageModel) {
+        if (available) available.hidden = true;
+        if (ainotavailable) ainotavailable.hidden = false;
+        return;
+    }
+    try {
+        const capabilities = await window.ai.languageModel.capabilities();
+        if (capabilities.available === "no") {
+            if (available) available.hidden = true;
+            if (ainotavailable) ainotavailable.hidden = false;
+        }
+    } catch (e) {
+        if (available) available.hidden = true;
+        if (ainotavailable) ainotavailable.hidden = false;
+    }
+}
+initBuiltInAI();
+
+// エディタへ一括でコードを反映させる関数
+async function applyCodeToEditor(codeText) {
+    undoStack.push(raw);
+    redoStack = [];
+    raw = "";
+    
+    const lines = codeText.split(/\r?\n/);
+    maincontainer.innerHTML = `
+        <div id="lineGroup0" class="group">
+           <div id="lineno0" class="lineno">1</div>
+           <div id="line0" class="line">${lines[0] || ""}</div>
+           <div id="cursol0" class="cursol"></div>
+        </div>
+    `;
+    lineID = 0;
+    cur = document.querySelector("#line0");
+    raw = lines[0] || "";
+
+    for (let i = 1; i < lines.length; i++) {
+        await DoEnter();
+        cur.innerText = lines[i];
+        raw += lines[i];
+    }
+}
+
+if (aiexec) {
+    aiexec.addEventListener("click", async () => {
+        if (aienable && !aienable.checked) {
+            if (aioutput) aioutput.innerText = "AI機能は設定で無効化されています。";
+            return;
+        }
+        if (!window.ai || !window.ai.languageModel) {
+            alert("お使いのブラウザはBuilt-in AIに対応していません。");
+            return;
+        }
+
+        const promptText = aiinput ? aiinput.value.trim() : "";
+        if (!promptText) return;
+
+        if (aioutput) aioutput.innerText = "AIが思考中...";
+
+        try {
+            const session = await window.ai.languageModel.create({
+                systemPrompt: "あなたは優秀なプログラミングアシスタントです。ユーザーの指示と現在のコード(raw)を元に修正案を考え、解説文と、修正後のコードを [!code_editor ファイル名] のコードブロック形式で出力してください。"
+            });
+
+            const currentFileName = filenamei ? (filenamei.value || "F69sIDE.js") : "F69sIDE.js";
+            
+            // プロンプトにユーザーの指示とrawを必ずセットで同梱
+            const fullPrompt = `
+【ユーザーからの指示】
+${promptText}
+
+【現在のコード (raw)】
+[!code_editor ${currentFileName}]
+${raw}
+            `.trim();
+
+            const response = await session.prompt(fullPrompt);
+            session.destroy();
+
+            // [!code_editor filename] のコードブロックを分離する正規表現
+            const codeBlockRegex = /\[!code_editor\s+([^\]]+)\]([\s\S]*?)(?:```|$)/;
+            const match = response.match(codeBlockRegex);
+
+            let explanation = response;
+            if (match) {
+                const extractedCode = match[2].trim();
+                await applyCodeToEditor(extractedCode);
+                explanation = response.replace(codeBlockRegex, "").trim();
+            }
+
+            if (aioutput) {
+                aioutput.innerText = explanation;
+            }
+
+        } catch (err) {
+            console.error(err);
+            if (aioutput) aioutput.innerText = "AI実行エラー: " + err.message;
+        }
+    });
+}
+// ==========================================
+
 let SearchOpen = true;
 searchi.hidden=SearchOpen
 searchresults.hidden=SearchOpen
 searchg.hidden=SearchOpen
 window.addEventListener('paste', async (e) => {
-    // ブラウザ標準の1行ベタ貼り挙動を強制キャンセル
     e.preventDefault();
-
-    // クリップボードからプレーンテキストを取得
     const text = (e.clipboardData || window.clipboardData).getData('text');
     if (!text) return;
-
-    // Windows/Mac両対応で改行分割
     const lines = text.split(/\r?\n/);
-
     for (let i = 0; i < lines.length; i++) {
         const r = lines[i];
-
-        // 【力業インデント対応】画面表示時のみタブ(\t)を縦棒(|)に変換してスタンプ！
         cur.innerText += r.replace(/\t/g, "|");
         raw += r;
-
-        // 最終行じゃなければ、あなたの作った完璧なDoEnterで次の行へ安全に進む
         if (i !== lines.length - 1) {
             await DoEnter();
         }
@@ -322,7 +419,7 @@ window.addEventListener("keydown",async e => {
     if (e.ctrlKey) {
         switch (e.key) {
             case "c":
-                if (e.altKey) { // Ctrl は既に外側の if で保証されているので Alt だけチェック
+                if (e.altKey) {
                     e.preventDefault();
                     if (!raw) break;
 
@@ -332,12 +429,11 @@ window.addEventListener("keydown",async e => {
 
                     const lines = raw.split(/\r?\n/);
                     
-                    // あなたのテンプレートリテラルによる高速リセット
                     maincontainer.innerHTML = `
                         <div id="lineGroup0" class="group">
-                           <div id="lineno0" class="lineno">1</div>
-                           <div id="line0" class="line">${lines[0] || ""}</div>
-                           <div id="cursol0" class="cursol"></div>
+                             <div id="lineno0" class="lineno">1</div>
+                             <div id="line0" class="line">${lines[0] || ""}</div>
+                             <div id="cursol0" class="cursol"></div>
                         </div>
                     `;
                     lineID = 0;
@@ -361,7 +457,6 @@ window.addEventListener("keydown",async e => {
                 break;
             case "l":
                 e.preventDefault();
-                // 💡 歴史を刻んでから全消去する
                 undoStack.push(raw);
                 redoStack = [];
                 cur.innerText = "";
@@ -370,24 +465,17 @@ window.addEventListener("keydown",async e => {
             case "z":
                 e.preventDefault();
                 if (undoStack.length > 1) {
-                    // 現在の状態を未来（redo）の箱にキープして、1つ過去に戻す
                     redoStack.push(raw);
                     let previousRaw = undoStack.pop();
                     raw = previousRaw;
-                    
-                    // 画面の表示（cur.innerText）を過去のデータに書き換える
-                    // ※エディタ全体のテキスト（raw）から現在の行（cur）へ復元する処理
                     cur.innerText = previousRaw.split("\n")[lineID] || "";
                 }
             case "y":
                 e.preventDefault();
                 if (redoStack.length > 0) {
-                    // 未来の箱からデータを取り出して、過去（undo）の箱に戻す
                     undoStack.push(raw);
                     let nextRaw = redoStack.pop();
                     raw = nextRaw;
-                    
-                    // 画面の表示を未来のデータに書き換える
                     cur.innerText = nextRaw.split("\n")[lineID] || "";
                 }
                 break;
@@ -398,12 +486,9 @@ window.addEventListener("keydown",async e => {
                 const searchInput = document.querySelector("#searchi");
 
                 if (replacco && replg && searchInput) {
-                    // 1. 変数と画面の状態を「開いた状態（true）」に強制アライン
                     replaccoOpen = true; 
                     replacco.innerText = "▼";
                     replg.hidden = false;
-
-                    // 2. 隠れていない状態にしてから、確実にフォーカスをワープさせる！
                     setTimeout(() => {
                         searchInput.focus();
                     }, 10);
@@ -560,10 +645,10 @@ openfile.addEventListener("click", async () => {
                 content
                    .split("\n")
                    .forEach((r, t, a) => {
-                        cur.innerText += r;
-                        raw += r;
-                        if (t != a.length - 1) DoEnter()
-                    })
+                       cur.innerText += r;
+                       raw += r;
+                       if (t != a.length - 1) DoEnter()
+                   })
             break;
         }
     } catch (e) {
@@ -722,26 +807,21 @@ setc.addEventListener("click",()=>{
   img1.addEventListener("mouseup",()=>{
     drawing = false;
   })
-// 💡 画面ロード時の初期化エリアに追加（1行目のワープ登録）
 const firstGroup = document.getElementById("lineGroup0");
 if (firstGroup) {
     firstGroup.addEventListener("click", () => {
-        // 今いる行のカーソルを消す
         let oldIdx = cur.id.slice(4);
         let oldCursol = document.querySelector("#cursol" + oldIdx);
         if (oldCursol) oldCursol.hidden = true;
 
-        // 1行目（ID: 0）へターゲットを強制同期
         lineID = 0;
         cur = document.getElementById("line0");
 
-        // 1行目のカーソルを表示
         const firstCursol = document.getElementById("cursol0");
         if (firstCursol) firstCursol.hidden = false;
     });
 }
 if ('serviceWorker' in navigator) {
-    // ページ読み込み完了時にサービスワーカーを登録
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
             .then(() => console.log('[PWA]PWA registration successfully'))
