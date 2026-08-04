@@ -297,6 +297,11 @@ async function initBuiltInAI() {
 }
 initBuiltInAI();
 
+// 初回説明文の自動挿入
+if (aioutput) {
+    aioutput.innerText = "こんにちは！Built-in AIです。プログラミングの質問やコードの修正指示を入力してください。";
+}
+
 // エディタへ一括でコードを反映させる関数
 async function applyCodeToEditor(codeText) {
     undoStack.push(raw);
@@ -340,6 +345,7 @@ if (aiexec) {
 
         try {
             const session = await window.ai.languageModel.create({
+                expectedOutputLanguage: 'ja',
                 systemPrompt: "あなたは優秀なプログラミングアシスタントです。ユーザーの指示と現在のコード(raw)を元に修正案を考え、解説文と、修正後のコードを [!code_editor ファイル名] のコードブロック形式で出力してください。"
             });
 
