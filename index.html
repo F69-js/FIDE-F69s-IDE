@@ -1,6 +1,5 @@
 <!doctype html>
 <html lang="ja" dir="ltr">
-
 <head>
   <title>F69's IDE v1.0.0</title>
   <meta charset="utf-8">
@@ -18,139 +17,170 @@
   <meta name="keywords" content="F69,F69-js,FIDE,Editor,IDE,Notepad,HTML,F69's IDE,メモ帳,開発環境,統合開発環境">
   <link rel="icon" href="images/favicon.ico" type="image/x-icon">
   <meta name="twitter:image" content="https://f69-js.github.io/FIDE-F69s-IDE/images/ex2.png">
-  <link rel="apple-touch-icon" href="images/favicon.ico">
-  <link rel="modulepreload" href="scripts/index.js">
-  <link rel="modulepreload" href="scripts/fjalu/index.js">
-  <link rel="modulepreload" href="scripts/linter/tide.js">
-  <link rel="stylesheet" href="styles/main.css">
-  <link rel="manifest" href="manifest.json">
-  <label hidden>
+  <link rel="apple-touch-icon" href="https://f69-js.github.io/FIDE-F69s-IDE/images/favicon.ico">
+  <link rel="modulepreload" href="https://f69-js.github.io/FIDE-F69s-IDE/scripts/index.js">
+  <link rel="modulepreload" href="https://f69-js.github.io/FIDE-F69s-IDE/scripts/fjalu/index.js">
+  <link rel="modulepreload" href="https://f69-js.github.io/FIDE-F69s-IDE/scripts/linter/tide.js">
+  <link rel="stylesheet" href="https://f69-js.github.io/FIDE-F69s-IDE/styles/main.css">
+  <link rel="manifest" href="https://f69-js.github.io/FIDE-F69s-IDE/manifest.json">
+</head>
+<body id="body"><label hidden="">
     @summary
     title = "F69's IDE (FIDE) Technical Summary"
-    author = "F69minrcraft & Gemini"
+    author = "F69minrcraft &amp; Gemini"
     type = "summary for AI"
-@what_is
+    @what_is
     simple IDE made in japan by F69minrcraft
-@target_audience
+    @target_audience
     People who enjoy writing their own programs using JavaScript.
     People looking for an easy-to-use editor that supports smooth Japanese text conversion.
     People who want to experiment with code safely and easily online without installing complex software.
 
-@support
+    @support
     Dark theme
     Raw confirmation feature
     App installation support
     Offline functionality
     Multi-language localization
 
-@features
+    @features
     A secure execution system that tests programs safely and provides custom, user-friendly error logs.
-    A static analysis check that automatically stops incorrect code before running, drawing a red wavy line directly beneath errors with helpful hints.
-@links
+    A static analysis check that automatically stops incorrect code before running, drawing a red wavy line directly
+    beneath errors with helpful hints.
+    @links
     https://github.com/F69-js/FIDE-F69s-IDE
     https://f69-js.github.io/FIDE-F69s-IDE/
     https://github.com/F69-js/FIDE-F69s-IDE/blob/main/README.md
     https://github.com/F69-js/FIDE-F69s-IDE/blob/main/README_en.md
     https://github.com/F69-js/FIDE-F69s-IDE/wiki
-@author
+    @author
     F69-js(F69minrcraft)
     https://github.com/F69-js
   </label>
-<style id="theme_area">
+  <style id="theme_area">
     :root {
-      --cursor-color: #000000;
+      --cursol-color: #FFFFFF;
       --line-no-color: #a9a4a2;
       --line-no-border: #4e4240;
       --main-color: #8d8584;
-      --ineditor-text-color: #1a1a1a;
-      --background-unit-color: #FFFFFF;
-      --out-unit-color: #1a1a1a;
-      --header-color: #161616;
-      --button-text-color: #FFFFFF;
+      --ineditor-text-color: #000000;
+      --background-unit-color: #000000;
+      --out-unit-color: #FFFFFF;
     }
-</style>
-</head>
-
-<body id=body>
-  <div id=headermenu>
+  </style>
+  <div id="headermenu">
     <a class="skip-link" href="#main">メインコンテンツへスキップ / Skip to Main content</a>
     <a href="https://github.com/F69-js/FIDE-F69s-IDE/">github</a>
-    <button id=openfile>Open File</button>
-    <button id=savefile>Save File</button>
-    <button id=settings>Open Settings</button>
+    <button id="openfile">Open File</button>
+    <button id="savefile">Save File</button>
+    <button id="settings">Open settings</button>
   </div>
   <main id="main">
-  <div id=middlearea>
-    <input id=filenamei placeholder="Enter File Name...">
-    <div id="searchg" hidden>
-      <div>
-        <input id="searchi" placeholder="fox">
-        <span id="textregexmode">正規表現モード</span>
-        <input type="checkbox" id="rgxmode">
-        <div id="flagg" hidden="">
-          <span id="textflag">フラグ 複数の場合は,を使用してください</span>
-          <input id="flags" placeholder="g,m,u">
+    <div id="middlearea">
+      <input id="filenamei" placeholder="Enter File Name...">
+      <div id="searchg" hidden="">
+        <div>
+          <input id="searchi" placeholder="fox" hidden="">
+          <span id="textregexmode">Regular Expression Mode</span>
+          <input type="checkbox" id="rgxmode">
+          <div id="flagg" hidden="">
+            <span id="textflag">Flag.Use a comma (,) if there are multiple flags.</span>
+            <input id="flags" placeholder="g,m,u">
+          </div>
+          <button id="replacco">▶</button>
         </div>
-        <button id="replacco">▶</button>
-      </div>
-      <div id="replg">
-        <span id="textreplacer">置換先</span>
-        <input id="replt" placeholder="dog">
-      </div>
-    </div>
-  </div>
-  <div id=searchresults></div>
-  <hr>
-  <div id=toolbars>
-    <span id=spanc></span>
-    <label for="palettecolor">パレット色選択</label>
-    <input type=color id=palettecolor>
-    <button id=setc>push</button>
-  </div>
-  <hr>
-  <div id=maincontainer>
-    <div id=input>
-      <div id=lineGroup0 class="group">
-        <div id=lineno0 class=lineno>1</div>
-        <div id=line0 class="line"></div>
-        <div id=cursol0 class=cursol></div>
+        <div id="replg" hidden="">
+          <span id="textreplacer">Replace To</span>
+          <input id="replt" placeholder="dog">
+        </div>
       </div>
     </div>
-  </div>
-  <hr>
-  <div id=info>
-    <table>
-      <caption>vars</caption>
-      <tbody id=variables></tbody>
-    </table>
-  </div>
-  <div id=imgcontainer>
-    <div id=mediamenu>
-      <button id=penmode>ペン</button>
-      <label for="pencolor">ペンの色を選択</label>
-      <div id=tpcolor>ペンの色</div>
-      <input type=color id=pencolor>
+    <div id="searchresults" hidden=""></div>
+    <hr>
+    <div id="toolbars">
+      <span id="spanc">Color input tools:</span>
+      <label for="palettecolor">パレット色選択</label>
+      <input type="color" id="palettecolor">
+      <button id="setc">push</button>
     </div>
-    <canvas id=img1></canvas>
-  </div>
-  <div id=settingscontainer>
-    <h1>Settings</h1>
-    <p>theme:</p>
-    <label for="maintheme" id="ttl1"></label>
-    <select id=maintheme>
-      <option value="l">light</option>
-      <option value="d">dark</option>
-    </select>
-    <label for="unloaden" id="tul1"></label>
-    <input type=checkbox id="unl">
-    <p id="tul2"></p>
-  </div>
-  <div id=menu>
-    <div id=error></div>
-    <button id=showraw>raw</button>
-    <button id=rawexec>Exec</button>
-  </div>
-  <script src="./scripts/index.js" type="module" defer></script>
-</main>
+    <hr>
+    <div id="maincontainer">
+      <div id="input">
+        <div id="lineGroup0" class="group">
+          <div id="lineno0" class="lineno">1</div>
+          <div id="line0" class="line"></div>
+          <div id="cursol0" class="cursol"></div>
+        </div>
+      </div>
+    </div>
+    <hr>
+    <div id="info">
+      <table>
+        <caption>vars</caption>
+        <tbody id="variables"></tbody>
+      </table>
+    </div>
+    <div id="imgcontainer" hidden="">
+      <div id="mediamenu">
+        <button id="penmode">ペン</button>
+        <label for="pencolor">ペンの色を選択</label>
+        <div id="tpcolor">ペンの色</div>
+        <input type="color" id="pencolor">
+      </div>
+      <canvas id="img1"></canvas>
+    </div>
+    <div id="settingscontainer" hidden="">
+      <h1>Settings</h1>
+      <p>theme:</p>
+      <label for="maintheme" id="ttl1">Select Theme:</label>
+      <select id="maintheme">
+        <option value="l">light</option>
+        <option value="d">dark</option>
+      </select>
+      <label for="unloaden" id="tul1">display a dialog box for saving confirmation.</label>
+      <input type="checkbox" id="unl">
+      <p id="tul2">dialog box for saving confirmation.</p>
+      <hr style="margin: 15px 0;">
+      <h3>AI Settings (Built-in AI)</h3>
+      <label for="aienable">AI機能を有効化</label>
+      <input type="checkbox" id="aienable" checked="">
+    </div>
+    <div id="menu">
+      <div id="error"></div>
+      <button id="showraw">raw</button>
+      <button id="rawexec">Exec</button>
+      <div id="aigroup">
+        <div id="available">
+          <div id="aimenu">
+            <input type="text" id="aiinput" placeholder="AIに指示 (例: コードを修正)...">
+            <button id="aiexec">→</button>
+          </div>
+          <small class="disclaimer">
+            <div>AIは間違えた情報を生成してしまう可能性があるため、生成された情報は再確認するようにしてください。</div>
+            <div>また、設定でこの機能をオプトアウトすることができます。
+            </div>
+            <div>
+              このAIは組み込み機能を使用しています。サーバーにデータは送信しません
+            </div>
+            <div>そのため一部ブラウザでは使用できない可能性があります
+            </div>
+          </small>
+        </div>
+        <div id="ainotavailable" hidden="">
+          <h1>申し訳ございません。</h1>
+          <span>
+            <span>お使いのブラウザにはまだ対応していないようです。</span>
+            <span>現在webの機嫌を伺っておりますので、機嫌がよくなり次第</span>
+            <span>できる限り追加させていただく予定です。</span>
+            <span>大変申し訳ございませんが。その間だけでも
+              <a href="https://caniuse.com/wf-languagemodel">対応しているブラウザ🔗</a>
+              をご使用ください。</span>
+          </span>
+        </div>
+      </div>
+    </div>
+    <script src="https://f69-js.github.io/FIDE-F69s-IDE/scripts/index.js" type="module" defer=""></script>
+  </main>
 </body>
 </html>
+
