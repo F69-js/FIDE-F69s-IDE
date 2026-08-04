@@ -388,7 +388,7 @@ hr {
   display: inline-block;
 }
 
-.linegroup{
+.group{
   background-color: var(--background-unit-color);
 }
 
@@ -396,12 +396,10 @@ hr {
   position: absolute;
   top: -1000px;
   left: -1000px;
-  width: 1px;
-  height: 1px;
   overflow: hidden;
 }
 
-.skip-link:hover {
+.skip-link:focus,.skip-link:hover{
   top: 20px;
   left: 1px;
   width: 320px;
