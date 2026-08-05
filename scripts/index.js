@@ -279,14 +279,14 @@ async function DoEnter() {
 // ▼ Built-in AI (Prompt API) 連携ロジック ▼
 // ==========================================
 async function initBuiltInAI() {
-    if (!window.ai || !window.ai.languageModel) {
+    if (!window.LanguageModel) {
         if (available) available.hidden = true;
         if (ainotavailable) ainotavailable.hidden = false;
         return;
     }
     try {
-        const capabilities = await window.ai.languageModel.capabilities();
-        if (capabilities.available === "no") {
+        const capabilities = await window.LanguageModel.availability();
+        if (capabilities === "no") {
             if (available) available.hidden = true;
             if (ainotavailable) ainotavailable.hidden = false;
         }
@@ -333,7 +333,8 @@ if (aiexec) {
             if (aioutput) aioutput.innerText = "AI機能は設定で無効化されています。";
             return;
         }
-        if (!window.ai || !window.ai.languageModel) {
+        // 【修正】古い window.ai の判定を window.LanguageModel に修正
+        if (!window.LanguageModel) {
             alert("お使いのブラウザはBuilt-in AIに対応していません。");
             return;
         }
@@ -344,19 +345,25 @@ if (aiexec) {
         if (aioutput) aioutput.innerText = "AIが思考中...";
 
         try {
-            const session = await window.ai.languageModel.create({
+            // 【修正】最新の仕様（LanguageModel.create + initialPrompts）に適合
+            const session = await window.LanguageModel.create({
                 expectedOutputLanguage: 'ja',
-                systemPrompt: "あなたは優秀なプログラミングアシスタントです。ユーザーの指示と現在のコード(raw)を元に修正案を考え、解説文と、修正後のコードを [!code_editor ファイル名] のコードブロック形式で出力してください。"
+                initialPrompts: [
+                    { 
+                        role: "system", 
+                        content: "あなたは優秀なプログラミングアシスタントです。ユーザーの指示と現在のコード(raw)を元に修正案を考え、解説文と、修正後のコードを [!code_editor ファイル名] のコードブロック形式で出力してください。" 
+                    }
+                ]
             });
 
             const currentFileName = filenamei ? (filenamei.value || "F69sIDE.js") : "F69sIDE.js";
             
             // プロンプトにユーザーの指示とrawを必ずセットで同梱
             const fullPrompt = `
-【ユーザーからの指示】
+[!PROMPT]
 ${promptText}
 
-【現在のコード (raw)】
+[!RAWCODE]
 [!code_editor ${currentFileName}]
 ${raw}
             `.trim();
@@ -385,6 +392,7 @@ ${raw}
         }
     });
 }
+
 // ==========================================
 
 let SearchOpen = true;
