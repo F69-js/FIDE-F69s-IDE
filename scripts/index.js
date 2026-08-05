@@ -13,23 +13,33 @@ function getParams(p) {
     })
 }
 let sysprompt=`
-ユーザーの指示と現在のコード(raw)を元に、不具合の修正またはコードの提示を行ってください。
+ユーザーの指示と現在のコード(raw)を元に、不具合の修正と詳細な解説を行ってください。
 
 【出力の絶対ルール】
-1. Markdown記号（\`\`\` や ** など）は画面が崩れるため、絶対に1文字も使用しないでください。
-2. 挨拶、解説、太字などの装飾は一切省き、必要な要点とコードのみを出力してください。
+1. Markdown記号（```、**、*、#、` など）は画面が崩れるため、絶対に、1文字も使用しないでください。
+2. 太字や見出しを表現したい場合は、記号を使わず「■ 修正理由」「■ 詳しい解説」のように単語の前に四角などの記号（■、・）を付けて表現してください。
 3. すべての出力の最初（1行目）には、必ず「空行（改行）」を1行入れてから文字を開始してください。
 4. コードを出力する際は、必ず指定の形式「[!code_editor 対象のファイル名]」を使用してください。
 
 【出力フォーマット】
 
 修正が必要な場合：
-[ここに修正理由を1行だけで記述]
+■ 修正理由
+[ここに、どこがどう間違えているのかを初心者向けに優しく詳細に記述]
+
+■ 詳しい解説
+[・を使って、なぜそのエラーが起きるのか、どういう仕組みなのかを構造的に詳しく解説]
+
 [!code_editor 現在扱っているファイル名]
 // 修正後のコード
 
 修正が不要な場合：
-現在のコードは適切です。修正は不要です。
+■ コードの評価
+[現在のコードがどれだけ適切かを褒めつつ、詳細に記述]
+
+■ 仕組みの解説
+[・を使って、このコードがどのように動作しているのかを構造的に詳しく解説]
+
 [!code_editor 現在扱っているファイル名]
 // 現在のコード
 
@@ -323,34 +333,8 @@ initBuiltInAI();
 if (aioutput) {
     aioutput.innerText = "こんにちは！Built-in AIです。プログラミングの質問やコードの修正指示を入力してください。";
 }
-
-// エディタへ一括でコードを反映させる関数
-async function applyCodeToEditor(codeText) {
-    undoStack.push(raw);
-    redoStack = [];
-    raw = "";
-    
-    const lines = codeText.split(/\r?\n/);
-    maincontainer.innerHTML = `
-        <div id="lineGroup0" class="group">
-           <div id="lineno0" class="lineno">1</div>
-           <div id="line0" class="line">${lines[0] || ""}</div>
-           <div id="cursol0" class="cursol"></div>
-        </div>
-    `;
-    lineID = 0;
-    cur = document.querySelector("#line0");
-    raw = lines[0] || "";
-
-    for (let i = 1; i < lines.length; i++) {
-        await DoEnter();
-        cur.innerText = lines[i];
-        raw += lines[i];
-    }
-}
-
-if (aiexec) {
-    aiexec.addEventListener("click", async () => {
+async function sendBtnCheck(){
+    {
         if (aienable && !aienable.checked) {
             if (aioutput) aioutput.innerText = "AI機能は設定で無効化されています。";
             return;
@@ -412,6 +396,39 @@ ${raw}
             console.error(err);
             if (aioutput) aioutput.innerText = "AI実行エラー: " + err.message;
         }
+    }
+}
+// エディタへ一括でコードを反映させる関数
+async function applyCodeToEditor(codeText) {
+    undoStack.push(raw);
+    redoStack = [];
+    raw = "";
+    
+    const lines = codeText.split(/\r?\n/);
+    maincontainer.innerHTML = `
+        <div id="lineGroup0" class="group">
+           <div id="lineno0" class="lineno">1</div>
+           <div id="line0" class="line">${lines[0] || ""}</div>
+           <div id="cursol0" class="cursol"></div>
+        </div>
+    `;
+    lineID = 0;
+    cur = document.querySelector("#line0");
+    raw = lines[0] || "";
+
+    for (let i = 1; i < lines.length; i++) {
+        await DoEnter();
+        cur.innerText = lines[i];
+        raw += lines[i];
+    }
+}
+
+if (aiexec) {
+    aiexec.addEventListener("click",sendBtnCheck);
+    aiexec.addEventListener("click",(e)=>{
+        if(e.key === "Enter"){
+            sendBtnCheck();
+        }     
     });
 }
 
