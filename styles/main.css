@@ -28,27 +28,18 @@ body {
   flex-direction: row;
   min-height: 40px;
   max-height: 40px;
-  overflow: hidden;
+  overflow-x: auto; /* 💡【超重要】長い行は右側で個別に横スクロールさせる（または hidden でコンテナ側でスクロール） */
   background-color: var(--background-unit-color);
+  width: 100%; /* コンテナの幅を固定 */
+  box-sizing: border-box;
 }
 
-.line {
-  font-size: 20px;
-  margin: auto 3px;
-  line-height: 40px !important;
-  height: 40px;
-  display: inline-block;
-}
-
-#input * {
-  text-decoration: none !important;
-}
-
-/* 💡【全選択ガード】マウス選択、及び Ctrl+A の全選択から数字を完全にすり抜けさせる */
 .lineno {
   background-color: var(--line-no-color);
   color: var(--ineditor-text-color);
   width: 30px;
+  min-width: 30px; /* 💡【超重要】フレックスの縮小・拡大の道連れを完全に拒否して30pxを絶対固定！ */
+  max-width: 30px; /* 💡絶対固定の防壁 */
   height: 40px;
   text-align: center;
   font-size: 20px;
@@ -58,12 +49,29 @@ body {
   display: inline-block;
   line-height: 36px;
   cursor: pointer;
+  flex-shrink: 0; /* 💡【超重要】親がどれだけ歪んでも絶対に縮まないようにする設定 */
   
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
 }
+
+.line {
+  font-size: 20px;
+  margin: auto 3px;
+  line-height: 40px !important;
+  height: 40px;
+  display: inline-block;
+  flex-grow: 1; /* 残りの横幅をすべてコード領域に割り当てる */
+  white-space: pre; /* 自動折り返しせず、横に流す（VS Codeの標準スタイル） */
+}
+
+
+#input * {
+  text-decoration: none !important;
+}
+
 .lineno::selection, .lineno *::selection {
   background: transparent !important;
   color: inherit !important;
