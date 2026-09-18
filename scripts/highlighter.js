@@ -1,4 +1,4 @@
-// FIDE Custom IDE - Syntax Highlighter Module (Generator & Pink-Control Enhanced Version)
+// FIDE Custom IDE - Syntax Highlighter Module (Universal Object-DOM Version 5.0)
 const K_HL = {
   // 1. 基本の制御構文（淡いブルー）
   'k': [
@@ -6,7 +6,7 @@ const K_HL = {
     "extends","super","finally","with","arguments","interface","implements","package","private","protected","public","static"
   ],
   
-  // 2. 💡【強化】ピンクにする重要キーワード（アロー関数クラス a を流用！）
+  // 2. ピンクにする重要キーワード（アロー関数クラス a を流用）
   'a': [
     "async","while","continue","debugger","null"
   ],
@@ -18,7 +18,7 @@ const K_HL = {
   
   // 標準オブジェクト・グローバルクラス（ライトグリーン）
   'b': [
-    "JSON","console","Math","Date","Promise","String","Map","Set","Object","Number","Error","undefined","true","false",
+    "JSON","console","Math","Date","Promise","String","Map","Set","Object","Number","Error","undefined","null","true","false",
     "Boolean","RegExp","Function","Symbol","Proxy","Reflect","BigInt","URL","URLSearchParams","WeakMap","WeakSet","ArrayBuffer","DataView",
     "Uint8Array","Float64Array","Int32Array","Int8Array","Uint16Array","Int16Array","Uint32Array","Float32Array","BigInt64Array","BigUint64Array",
     "TypeError","ReferenceError","SyntaxError","RangeError","URIError","AggregateError","EvalError",
@@ -67,7 +67,8 @@ function runHl(t) {
     if (!w) return;
     let m = '';
     const found = Object.entries(K_HL).find(([cl, arr]) => arr.includes(w));
-    if (found) m = found;
+    // 💡【修正】見つかったペア（found）の「0番目の要素（キー文字列）」だけを確実に抽出して代入！
+    if (found) m = found[0];
 
     const span = document.createElement("span");
     if (m) {
@@ -100,24 +101,26 @@ function runHl(t) {
     if (c === '/' && t[idx + 1] === '*') { flush(); res += '<span class="c">/*'; c2 = 1; idx += 2; continue }
     if (c === "'" || c === '"' || c === '`') { flush(); sC = c; res += `<span class="str">${c}`; s = 1; idx++; continue }
     
-    // 💡【ジェネレーター対応】単語判定の正規表現から「*」を排除！これにより、function と * が別々に切り出されます
     if (/[a-zA-Z0-9_]/.test(c)) { 
       w += c; 
     } else {
-      if (w && c === '(') {
-        let m = '';
-        const found = Object.entries(K_HL).find(([cl, arr]) => arr.includes(w));
-        if (found) m = found;
-        
-        const span = document.createElement("span");
-        span.className = m ? m : "fn";
-        span.textContent = w;
-        res += span.outerHTML;
-        w = '';
-      } else if (w && c === ':') {
-        flush(true);
-      } else {
-        flush(lastChar === '.');
+      if (w) {
+        if (c === '(') {
+          let m = '';
+          const found = Object.entries(K_HL).find(([cl, arr]) => arr.includes(w));
+          // 💡ここも同様に0番目のキー（クラス名文字列）だけを抽出
+          if (found) m = found[0];
+          
+          const span = document.createElement("span");
+          span.className = m ? m : "fn";
+          span.textContent = w;
+          res += span.outerHTML;
+          w = '';
+        } else if (c === ':') {
+          flush(true);
+        } else {
+          flush(lastChar === '.');
+        }
       }
       
       if (c.trim() !== '') lastChar = c;
@@ -149,15 +152,12 @@ function runHl(t) {
         span.textContent = "...";
         res += span.outerHTML;
         idx += 2;
-      } 
-      // 💡【ジェネレーター対応】単体で出現した「*」をピンポイントで検知して、赤（専用クラス g-star）で出力！
-      else if (c === '*') {
+      } else if (c === '*') {
         const span = document.createElement("span");
         span.className = "g-star";
         span.textContent = "*";
         res += span.outerHTML;
-      }
-      else if (['+', '-', '/', '=', '!', '<', '>', '?', '%', ':', '.'].includes(c)) {
+      } else if (['+', '-', '/', '=', '!', '<', '>', '?', '%', ':', '.'].includes(c)) {
         const span = document.createElement("span");
         span.className = "o";
         span.textContent = c;
