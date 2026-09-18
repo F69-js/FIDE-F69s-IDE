@@ -421,6 +421,7 @@ async function applyCodeToEditor(codeText) {
         cur.innerText = lines[i];
         raw += lines[i];
     }
+    applyFIDEHighlight();
 }
 
 if (aiexec) {
@@ -640,6 +641,7 @@ window.addEventListener("keydown",async e => {
             raw += e.key
             break;
     }
+    applyFIDEHighlight();
 })
 window.addEventListener("error", e => {
     error.innerText += e.message + "\n"
@@ -702,6 +704,7 @@ openfile.addEventListener("click", async () => {
                        raw += r;
                        if (t != a.length - 1) DoEnter()
                    })
+                applyFIDEHighlight();
             break;
         }
     } catch (e) {
@@ -881,3 +884,50 @@ if ('serviceWorker' in navigator) {
             .catch((err) => console.error('[PWA]PWA registration failed:', err));
     });
 }
+// =========================================================
+// 🌌 FIDE特化型・配列判定式ハイライターエンジン
+// =========================================================
+const K_HL = {
+  'k': ["if","else","switch","case","break","return","continue","typeof","instanceof","throw","for","let","const","var","class","export","constructor","new","import","from","try","catch","in","async","await","default","do","while","yield","function"],
+  's': ["this","window","globalThis"],
+  'b': ["JSON","console","Math","Date","Temporal","Promise","String","Map","Set","Object","Number","Error","Array","ObservableString","BlockTypes","Player","undefined","null","true","false","parse","stringify","log","warn","error","floor","ceil","abs","max","min","pow","parseFloat","parseInt","isNaN","toString","keys","random","now"],
+  'm': ["push","pop","unshift","shift","slice","splice","filter","some","findIndex","includes","join","split","match","replace","replaceAll","trim","startsWith","indexOf","lastIndexOf","substring","map","forEach","reduce","padStart","toFixed","has","get","set","delete","entries","add","hasOwnProperty","subscribe","then","repeat","next"]
+};
+
+function runHl(t){
+  let idx=0,res='',c1=0,c2=0,s=0,sC='',w='';
+  const flush=()=>{
+    if(!w)return;let m='';
+    for(const[cl,arr]of Object.entries(K_HL)){if(arr.includes(w)){m=cl;break;}};
+    res+=m?`<span class="m">{w}</span>`:(/^\d+$/.test(w)?`<span style="color:#b5cea8">\${w}</span>`:w);w='';
+  };
+  while(idx<t.length){
+    const c=t[idx];
+    if(c1){res+=c;if(c==='\n'){res+='</span>';c1=0}idx++;continue}
+    if(c2){res+=c;if(c==='*'&&t[idx+1]==='/'){res+='/</span>';c2=0;idx+=2}else idx++;continue}
+    if(s){if(c==='\\'){res+=c+(t[idx+1]||'');idx+=2;continue}res+=c.replace(/</g,'&lt;').replace(/>/g,'&gt;');if(c===sC){res+='</span>';s=0}idx++;continue}
+    if(c==='/'&&t[idx+1]==='/'){flush();res+='<span class="hl-comment">//';c1=1;idx+=2;continue}
+    if(c==='/'&&t[idx+1]==='*'){flush();res+='<span class="hl-comment">/*';c2=1;idx+=2;continue}
+    if(c==="'"||c==='"'||c==='`'){flush();sC=c;res+=`<span class="hl-string">${c}`;s=1;idx++;continue}
+    if(/[a-zA-Z0-9_*]/.test(c)){w+=c}else{
+      flush();
+      if(c==='='&&t[idx+1]==='>'){res+='<span class="hl-arrow">=&gt;</span>';idx++}
+      else if(c==='.'&&t[idx+1]==='.'&&t[idx+2]==='.'){res+='<span class="hl-operator">...</span>';idx+=2}
+      else if((c==='+'&&t[idx+1]==='+')||(c==='-'&&t[idx+1]==='-')){res+=`<span class="hl-operator">${c}${t[idx+1]}</span>`;idx++}
+      else if((c==='&'&&t[idx+1]==='&')||(c==='|'&&t[idx+1]==='|')){res+=`<span class="hl-operator">${c}${t[idx+1]}</span>`;idx++}
+      else if(c==='='&&t[idx+1]==='='&&t[idx+2]==='='){res+='<span class="hl-operator">===</span>';idx+=2}
+      else if(['+','-','*','/','=','!','<','>','?','%',':'].includes(c)){res+=`<span class="hl-operator">${c}</span>`}
+      else{res+=c.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+    }idx++;
+  }flush();return res;
+}
+
+function applyFIDEHighlight() {
+  const lines = document.querySelectorAll(".line");
+  lines.forEach(line => {
+    const plainText = line.innerText.replace(/\|/g, "\t");
+    line.innerHTML = runHl(plainText).replace(/\t/g, "|");
+  });
+}
+
+
