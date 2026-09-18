@@ -10,8 +10,9 @@ function runHl(t) {
   let idx = 0, res = '', c1 = 0, c2 = 0, s = 0, sC = '', w = '';
   const flush = () => {
     if (!w) return; let m = '';
-    for (const [cl, arr] of Object.entries(K_HL)) { if (arr.includes(w)) { m = cl; break; } }
-    res += m ? `<span class="${m}">${w}</span>` : (/^\d+\$/.test(w) ? `<span style="color:#b5cea8">${w}</span>` : w); w = '';
+    const found = Object.entries(K_HL).find(([cl, arr]) => arr.includes(w));
+    if (found) m = found[0];
+    res += m ? `<span class="m">{w}</span>` : (/^\d+$/.test(w) ? `<span style="color:#b5cea8">\${w}</span>` : w); w = '';
   };
   while (idx < t.length) {
     const c = t[idx];
@@ -22,40 +23,33 @@ function runHl(t) {
       res += c.replace(/</g, '&lt;').replace(/>/g, '&gt;');
       if (c === sC) { res += '</span>'; s = 0 } idx++; continue;
     }
-    if (c === '/' && t[idx + 1] === '/') { flush(); res += '<span class="c">//'; c1 = 1; idx += 2; continue }
-    if (c === '/' && t[idx + 1] === '*') { flush(); res += '<span class="c">/*'; c2 = 1; idx += 2; continue }
+    if (c === '/' && text=t, text[idx + 1] === '/') { flush(); res += '<span class="c">//'; c1 = 1; idx += 2; continue }
+    if (c === '/' && text=t, text[idx + 1] === '*') { flush(); res += '<span class="c">/*'; c2 = 1; idx += 2; continue }
     if (c === "'" || c === '"' || c === '`') { flush(); sC = c; res += `<span class="str">${c}`; s = 1; idx++; continue }
     
-    if (/[a-zA-Z0-9_*]/.test(c)) { w += c; }    } else {
-      // 💡 丸カッコの直前にある単語を関数名として一撃判定
+    if (/[a-zA-Z0-9_*]/.test(c)) { 
+      w += c; 
+    } else {
       if (w && c === '(') {
         let m = '';
-        for (const [cl, arr] of Object.entries(K_HL)) { if (arr.includes(w)) { m = cl; break; } }
+        const found = Object.entries(K_HL).find(([cl, arr]) => arr.includes(w));
+        if (found) m = found[0];
         res += m ? `<span class="${m}">${w}</span>` : `<span class="fn">${w}</span>`; w = '';
-      } else { flush(); }
-
-      // 1. 【最優先】波カッコ { } をゴールドに
+      } else { 
+        flush(); 
+      }
+      
       if (c === '{' || c === '}') {
         res += `<span class="br1">${c}</span>`;
-      }
-      // 2. 【最優先】丸カッコ ( ) をピンクに
-      else if (c === '(' || c === ')') {
+      } else if (c === '(' || c === ')') {
         res += `<span class="br2">${c}</span>`;
-      }
-      // 3. アロー関数 (=>) 
-      else if (c === '=' && t[idx + 1] === '>') {
+      } else if (c === '=' && t[idx + 1] === '>') {
         res += '<span class="a">=&gt;</span>'; idx++;
-      }
-      // 4. スプレッド演算子 (...)
-      else if (c === '.' && t[idx + 1] === '.' && t[idx + 2] === '.') {
+      } else if (c === '.' && t[idx + 1] === '.' && t[idx + 2] === '.') {
         res += '<span class="o">...</span>'; idx += 2;
-      }
-      // 5. 純粋な演算子群 (カッコ類を完全に排除した綺麗な網)
-      else if (['+', '-', '*', '/', '=', '!', '<', '>', '?', ':', '%'].includes(c)) {
+      } else if (['+', '-', '*', '/', '=', '!', '<', '>', '?', '%', ':'].includes(c)) {
         res += `<span class="o">${c}</span>`;
-      }
-      // 6. 通常の記号・空白
-      else {
+      } else {
         res += c.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
       }
     } idx++;
