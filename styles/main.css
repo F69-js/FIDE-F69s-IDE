@@ -1,177 +1,478 @@
-// FIDE Custom IDE - Syntax Highlighter Module (Universal Object-DOM Version 4.0)
-const K_HL = {
-  // 1. 基本の制御構文（淡いブルー）
-  'k': [
-    "if","else","switch","case","break","return","typeof","instanceof","throw","for","let","const","var","class","export","constructor","new","import","from","try","catch","in","await","default","do","yield","function",
-    "extends","super","finally","with","arguments","interface","implements","package","private","protected","public","static"
-  ],
-  
-  // 2. ピンクにする重要キーワード（アロー関数クラス a を流用）
-  'a': [
-    "async","while","continue","debugger","null"
-  ],
-  
-  // 特殊参照（ゴールド）
-  's': [
-    "this","window","globalThis","super","self","global","screenLeft","screenTop"
-  ],
-  
-  // 標準オブジェクト・グローバルクラス（ライトグリーン）
-  'b': [
-    "JSON","console","Math","Date","Promise","String","Map","Set","Object","Number","Error","undefined","true","false",
-    "Boolean","RegExp","Function","Symbol","Proxy","Reflect","BigInt","URL","URLSearchParams","WeakMap","WeakSet","ArrayBuffer","DataView",
-    "Uint8Array","Float64Array","Int32Array","Int8Array","Uint16Array","Int16Array","Uint32Array","Float32Array","BigInt64Array","BigUint64Array",
-    "TypeError","ReferenceError","SyntaxError","RangeError","URIError","AggregateError","EvalError",
-    "Atomics","FinalizationRegistry","WeakRef","Intl","Collator","DateTimeFormat","NumberFormat","PluralRules","RelativeTimeFormat","ListFormat","Locale","DisplayNames","Segmenter",
-    "process","document","navigator","screen","location","history",
-    "Temporal","LanguageModel","ai",
-    "InternalError","ParallelArray","StopIteration",
-    "eval","escape","unescape",
-    "$","_","jQuery","React","ReactDOM","Vue","Angular","Rx"
-  ],
-  
-  // メソッド・プロパティ名（イエロー）
-  'm': [
-    "push","pop","unshift","shift","slice","splice","filter","some","findIndex","includes","join","split","match","replace","replaceAll","trim","startsWith","indexOf","lastIndexOf","substring","map","forEach","reduce","padStart","toFixed","has","get","set","delete","entries","add","hasOwnProperty","subscribe","then","repeat","next",
-    "parse","stringify","log","warn","error","floor","ceil","abs","max","min","pow","parseFloat","parseInt","isNaN","toString","keys","random","now",
-    "find","findLast","findLastIndex","reduceRight","every","sort","reverse","flat","flatMap","fill","values","endsWith","toLowerCase","toUpperCase","matchAll","search","concat","padEnd","charAt","charCodeAt","catch","finally","valueOf","apply","call","bind","setTimeout","setInterval","clearTimeout","clearInterval","addEventListener","removeEventListener","dispatchEvent","preventDefault","stopPropagation","fetch",
-    "assign","create","defineProperty","freeze","seal","is","all","race","any","allSettled","resolve","reject","fromEntries","ownKeys","getOwnPropertyDescriptor","getOwnPropertyDescriptors","getPrototypeOf","setPrototypeOf","isExtensible","preventExtensions",
-    "E","LN10","LN2","LOG10E","LOG2E","PI","SQRT1_2","SQRT2",
-    "toReversed","toSorted","toSpliced","with",
-    "anchor","big","blink","bold","fixed","fontcolor","fontsize","italics","link","small","strike","sub","sup",
-    "clz32","imul","sign","log10","log2","log1p","expm1","cosh","sinh","tanh","acosh","asinh","atanh","hypot","trunc","fround","cbrt",
-    "getUint8","setUint8","getInt8","setInt8","getUint16","setUint16","getInt16","setInt16","getUint32","setUint32","getInt32","setInt32","getFloat32","setFloat32","getFloat64","setFloat64","getBigInt64","setBigInt64","getBigUint64","setBigUint64",
-    "deref","register","unregister","supportedLocalesOf","compare","format","formatToParts","resolvedOptions","select","pluralRule","v3",
-    "load","polyfill","isLockFree","wait","notify","waitAsync",
-    "codePointAt","normalize","trimStart","trimEnd","trimLeft","trimRight","isPrototypeOf","propertyIsEnumerable","toLocaleString","toSource","toPrecision","toExponential",
-    "Instant","Duration","PlainDate","PlainTime","PlainDateTime","ZonedDateTime","Calendar","TimeZone",
-    "until","since","round","equals","withPlainDate","withPlainTime",
-    "year","month","day","hour","minute","second","millisecond","microsecond","nanosecond",
-    "languageModel","capabilities","availability","prompt","promptStreaming","destroy","tokensLeft","maxTokens","tokensSoFar",
-    "getYear","setYear","toGMTString","__proto__","__defineGetter__","__defineSetter__","__lookupGetter__","__lookupSetter__","compile","observe","unobserve","caller","callee",
-    "useState","useEffect","useContext","useReducer","useCallback","useMemo","useRef","useLayoutEffect",
-    "createRoot","render","hydrateRoot",
-    "createApp","ref","reactive","computed","watch","watchEffect","onMounted","onUnmounted","onUpdated",
-    "component","directive","mixin","provide","inject",
-    "ajax","animate","css","html","text","val","on","off","trigger","attr","removeAttr","addClass","removeClass","toggleClass","find","closest","parent","children","siblings",
-    "debounce","throttle","cloneDeep","merge","extend","pick","omit","uniq","flatten","delay","memoize",
-    "of","fromEvent","combineLatest","forkJoin","switchMap","mergeMap","concatMap","catchError","pipe","observable"
-  ]
-};
+/* =========================================================
+   F69's IDE (FIDE) - Master Stylesheet 🌌
+   ========================================================= */
 
-function runHl(t) {
-  let idx = 0, res = '', c1 = 0, c2 = 0, s = 0, sC = '', w = '';
-  let lastChar = '';
-  
-  const flush = (isProperty = false) => {
-    if (!w) return;
-    let m = '';
-    const found = Object.entries(K_HL).find(([cl, arr]) => arr.includes(w));
-    // 💡【修正】配列の0番目（一文字クラス名）をピンポイントで引き抜いて固定します！
-    if (found) m = found[0];
-
-    const span = document.createElement("span");
-    if (m) {
-      span.className = m;
-    } else if (isProperty) {
-      span.className = "prop";
-    } else if (/^\d+$/.test(w)) {
-      span.style.color = "#b5cea8";
-    }
-    
-    if (span.className || span.style.color) {
-      span.textContent = w;
-      res += span.outerHTML;
-    } else {
-      res += w;
-    }
-    w = '';
-  };
-
-  while (idx < t.length) {
-    const c = t[idx];
-    if (c1) { res += c; if (c === '\n') { res += '</span>'; c1 = 0 } idx++; continue }
-    if (c2) { res += c; if (c === '*' && t[idx + 1] === '/') { res += '/</span>'; c2 = 0; idx += 2 } else idx++; continue }
-    if (s) {
-      if (c === '\\') { res += c + (t[idx + 1] || ''); idx += 2; continue }
-      res += c.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-      if (c === sC) { res += '</span>'; s = 0 } idx++; continue;
-    }
-    if (c === '/' && t[idx + 1] === '/') { flush(); res += '<span class="c">//'; c1 = 1; idx += 2; continue }
-    if (c === '/' && t[idx + 1] === '*') { flush(); res += '<span class="c">/*'; c2 = 1; idx += 2; continue }
-    if (c === "'" || c === '"' || c === '`') { flush(); sC = c; res += `<span class="str">${c}`; s = 1; idx++; continue }
-    
-    if (/[a-zA-Z0-9_]/.test(c)) { 
-      w += c; 
-    } else {
-      if (w && c === '(') {
-        let m = '';
-        const found = Object.entries(K_HL).find(([cl, arr]) => arr.includes(w));
-        if (found) m = found[0]; // 💡ここも同様に[0]を抽出して固定
-        
-        const span = document.createElement("span");
-        span.className = m ? m : "fn";
-        span.textContent = w;
-        res += span.outerHTML;
-        w = '';
-      } else if (w && c === ':') {
-        flush(true);
-      } else {
-        flush(lastChar === '.');
-      }
-      
-      if (c.trim() !== '') lastChar = c;
-
-      if (c === '{' || c === '}') {
-        const span = document.createElement("span");
-        span.className = "br1";
-        span.textContent = c;
-        res += span.outerHTML;
-      } else if (c === '[' || c === ']') {
-        const span = document.createElement("span");
-        span.className = "br3";
-        span.textContent = c;
-        res += span.outerHTML;
-      } else if (c === '(' || c === ')') {
-        const span = document.createElement("span");
-        span.className = "br2";
-        span.textContent = c;
-        res += span.outerHTML;
-      } else if (c === '=' && t[idx + 1] === '>') {
-        const span = document.createElement("span");
-        span.className = "a";
-        span.textContent = "=>";
-        res += span.outerHTML;
-        idx++;
-      } else if (c === '.' && t[idx + 1] === '.' && t[idx + 2] === '.') {
-        const span = document.createElement("span");
-        span.className = "o";
-        span.textContent = "...";
-        res += span.outerHTML;
-        idx += 2;
-      } else if (c === '*') {
-        const span = document.createElement("span");
-        span.className = "g-star";
-        span.textContent = "*";
-        res += span.outerHTML;
-      } else if (['+', '-', '/', '=', '!', '<', '>', '?', '%', ':', '.'].includes(c)) {
-        const span = document.createElement("span");
-        span.className = "o";
-        span.textContent = c;
-        res += span.outerHTML;
-      } else {
-        res += c.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-      }
-    } idx++;
-  } 
-  flush(lastChar === '.'); 
-  return res;
+*[hidden] {
+  display: none !important;
 }
 
-export function applyFIDEHighlight() {
-  const lines = document.querySelectorAll(".line");
-  lines.forEach(line => {
-    const plainText = line.innerText.replace(/\|/g, "\t");
-    line.innerHTML = runHl(plainText).replace(/\t/g, "|");
-  });
+body {
+  margin: 0;
+  padding: 0;
+  font-family: inherit;
 }
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+#input>* {
+  white-space: pre;
+}
+
+.group {
+  margin: 0px 0px;
+  display: flex;
+  flex-direction: row;
+  min-height: 40px;
+  max-height: 40px;
+  overflow: hidden;
+  background-color: var(--background-unit-color);
+}
+
+.line {
+  font-size: 20px;
+  margin: auto 3px;
+  line-height: 40px !important;
+  height: 40px;
+  display: inline-block;
+}
+
+#input * {
+  text-decoration: none !important;
+}
+
+/* 💡【全選択ガード】マウス選択、及び Ctrl+A の全選択から数字を完全にすり抜けさせる */
+.lineno {
+  background-color: var(--line-no-color);
+  color: var(--ineditor-text-color);
+  width: 30px;
+  height: 40px;
+  text-align: center;
+  font-size: 20px;
+  border-top: 2px solid var(--line-no-border);
+  border-bottom: 2px solid var(--line-no-border);
+  box-sizing: border-box;
+  display: inline-block;
+  line-height: 36px;
+  cursor: pointer;
+  
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+.lineno::selection, .lineno *::selection {
+  background: transparent !important;
+  color: inherit !important;
+}
+
+#maincontainer {
+  background-color: var(--main-color);
+  color: var(--out-unit-color);
+}
+
+#menu {
+  display: flex;
+  flex-direction: column;
+}
+
+#headermenu {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 0;
+  background-color: var(--header-color) !important;
+}
+
+#showraw {
+  max-width: 64px;
+  height: 48px;
+}
+
+#filename {
+  margin: 0px 0px;
+}
+
+#body>* {
+  background-color: var(--background-unit-color);
+  color: var(--out-unit-color);
+}
+
+.found {
+  background-color: #ffff00;
+}
+
+#middlearea {
+  display: flex;
+  flex-direction: column;
+}
+
+.inline {
+  list-style-type: circle;
+  margin: 0px 20px;
+}
+
+code {
+  background-color: #e9f3f5;
+  border: 3px solid #d9e7e8;
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+table,
+table * {
+  color: #000000 !important;
+}
+
+table {
+  border: 1px solid black;
+  background-color: #d0fff8;
+  min-width: 256px;
+  color: var(--cursor-color);
+  margin: 10px;
+  border-collapse: collapse;
+}
+
+tr {
+  border: 1px solid black;
+  background-color: #d0fff8;
+}
+
+td:not(.error) {
+  border: 1px solid black;
+  padding: 6px 10px;
+}
+
+tr:nth-child(odd):not(.error) {
+  background-color: #d8fbff;
+}
+
+tr:nth-child(even):not(.error) {
+  background-color: #bbf8ff;
+}
+
+.error,
+tr.error td {
+  background-color: #ffa5a5 !important;
+  color: #000000 !important;
+}
+
+.warning,
+tr.warning td {
+  background-color: #ffe6a5 !important;
+  color: #000000 !important;
+}
+
+s {
+  color: red !important;
+  font-weight: bold;
+}
+
+caption {
+  border: 1px solid black;
+  background-color: #d0fff8;
+  padding: 6px;
+  font-weight: bold;
+}
+
+.haserror {
+  text-decoration-style: wavy;
+  text-decoration-line: underline;
+  text-decoration-color: red;
+}
+
+.haswarning {
+  text-decoration-style: wavy;
+  text-decoration-line: underline;
+  text-decoration-color: #ff9900;
+}
+
+#headermenu>button {
+  background-color: transparent;
+  border: none;
+  color: var(--button-text-color) !important;
+  font-size: 20px;
+  font-weight: bold;
+  border-radius: 0px;
+  min-width: 100px;
+  max-width: none;
+  cursor: pointer;
+}
+
+#headermenu>a {
+  background-color: transparent;
+  color: #cfedfe;
+  margin-left: 10px;
+  font-weight: bold;
+  text-decoration: none;
+  font-size: 20px;
+}
+
+#headermenu>a:visited {
+  background-color: transparent;
+  color: #85ff81;
+  margin-left: 10px;
+  font-weight: bold;
+  text-decoration: underline;
+  font-size: 20px;
+}
+
+#headermenu>a:hover {
+  background-color: transparent;
+  color: #81ffe7;
+  text-decoration: none;
+}
+
+html {
+  margin: 0;
+  height: 100vh;
+  background-color: var(--background-unit-color);
+}
+
+#filenamei {
+  font-size: 17px;
+  background-color: var(--line-no-color);
+  width: 200px;
+  color: #000000 !important;
+}
+
+button {
+  background-color: var(--line-no-border);
+  border: 1px solid var(--line-no-color);
+  min-width: 100px;
+  max-width: 101px;
+  height: 60px;
+  overflow: hidden;
+  color: var(--button-text-color) !important;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+#toolbars {
+  display: flex;
+}
+
+#toolbar,
+.imgcontainer {
+  display: flex;
+  flex-direction: column;
+}
+
+button,
+input#filenamei {
+  padding: 12px;
+  margin: 4px;
+}
+
+#openfile,
+#savefile,
+#settings,
+#pencolor {
+  min-width: 48px;
+  min-height: 48px;
+}
+
+#palettecolor {
+  background-color: var(--line-no-border);
+  border: 1px solid;
+  width: 48px;
+  height: 48px;
+}
+
+#setc {
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#toolbars>span,
+#toolbars>label {
+  align-items: center;
+  display: flex;
+  margin-right: 5px;
+}
+
+#spanc {
+  margin-left: 20px;
+}
+
+#replacco {
+  background: transparent;
+  border: none;
+  font-size: 15px;
+}
+
+#searchg>input,
+#replg>input {
+  background-color: var(--line-no-color);
+  min-height: 32px;
+  font-size: 16px;
+  color: #000000 !important;
+}
+
+input[type="checkbox"] {
+  width: 32px;
+  display: flex;
+  align-items: center;
+}
+
+#searchg {
+  display: flex;
+  flex-direction: column;
+}
+
+#searchg[hidden] {
+  display: none !important;
+}
+
+#searchg>div {
+  display: flex;
+}
+
+#textregexmode {
+  display: flex;
+  align-items: center;
+  margin-right: 10px;
+}
+
+#searchi {
+  max-height: 20px;
+  display: flex;
+  position: relative;
+  top: 15px;
+  margin-left: 10px;
+  margin-right: 20px;
+}
+
+#replg {
+  align-items: center;
+  display: flex;
+  border-left: none !important;
+  border-radius: 0px 4px 4px 0px !important;
+  box-sizing: border-box;
+  height: 34px;
+}
+
+#replg[hidden] {
+  display: none !important;
+}
+
+#textreplacer {
+  background-color: var(--line-no-color);
+  min-height: 34px;
+  border: 3px solid var(--line-no-border);
+  align-items: center;
+  display: flex;
+  width: 100px;
+  justify-content: center;
+  margin-left: 10px;
+  border-right: 3px dashed var(--line-no-border) !important;
+  border-radius: 4px 0px 0px 4px !important;
+  box-sizing: border-box;
+}
+
+#replt {
+  border: 3px solid var(--line-no-border) !important;
+  border-left: none !important;
+  border-radius: 0px 4px 4px 0px !important;
+  box-sizing: border-box;
+  height: 34px;
+}
+
+hr {
+  background-color: var(--main-color) !important;
+  border: none !important;
+  height: 2px !important;
+}
+
+.cursol {
+  margin: 15px 0px;
+  border-bottom: 3px solid var(--cursol-color);
+  height: 10px !important;
+  width: 10px !important;
+  display: inline-block;
+}
+
+.skip-link {
+  position: absolute;
+  top: -1000px;
+  left: -1000px;
+  overflow: hidden;
+}
+
+.skip-link:focus,
+.skip-link:hover {
+  top: 20px;
+  left: 1px;
+  width: 320px;
+  height: 50px;
+  background-color: var(--line-no-border) !important;
+  border-radius: 40px;
+  border: 3px solid var(--line-no-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px !important;  
+}
+
+#aimenu {
+  margin: 5px 0;
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+#aiinput {
+  background-color: var(--line-no-color);
+  border-radius: 40px;
+  height: 40px;
+  margin-left: 40px;
+  flex-grow: 1;
+  padding: 4px;
+}
+
+#aiexec {
+  border-radius: 40px;
+  min-width: 60px;
+  margin-right: 60px;
+}
+
+.disclaimer {
+  position: relative;
+  left: 50px;
+  color: var(--line-no-border);
+}
+
+#ainotavailable>h1 {
+  display: flex;
+  justify-content: center;
+  margin-top: 60px;
+}
+
+#ainotavailable>span {
+  display: flex;
+  flex-direction: column;
+  margin-left: 200px;
+}
+
+/* =========================================================
+   🌌 FIDE カスタムハイライター・完全カラーテーマパレット
+   ========================================================= */
+.k { color: #569cd6; font-weight: bold; }       /* 予約語・制御文：ブルー */
+.s { color: #f2c94c; font-weight: bold; }       /* this, window：ゴールド */
+.b { color: #4ec9b0; }                          /* 標準オブジェクト：グリーン */
+.m { color: #dcdcaa; }                          /* 標準メソッド・関数：淡いイエロー */
+.a { color: #ff007f; font-weight: bold; }       /* アロー関数, async, while：ネオンピンク */
+.o { color: #c586c0; font-weight: bold; }       /* 演算子・記号：パープル */
+.str { color: #ce9178; }                        /* 文字列リテラル：茶/オレンジ */
+.c { color: #6a9955; font-style: italic; }      /* コメント文：深緑（イタリック） */
+.fn { color: #dcdcaa; font-weight: bold; }      /* ユーザー定義関数名：イエロー */
+.prop { color: #9cdcfe; }                       /* オブジェクトプロパティ：ライトブルー */
+.br1 { color: #00ffaa; font-weight: bold; }     /* 波カッコ {} ：ネオングリーン */
+.br2 { color: #00ffff; font-weight: bold; }     /* 丸カッコ () ：ネオンシアン */
+.br3 { color: #ff00ff; font-weight: bold; }     /* 角カッコ [] ：ビビッドマゼンタ */
+.g-star { color: #ff453a; font-weight: bold; }  /* ジェネレーターの * ：鮮烈なレッド */
