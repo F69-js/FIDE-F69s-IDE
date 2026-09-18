@@ -22,20 +22,20 @@ body {
   white-space: pre;
 }
 
-/* 💡【超重要】各行の親コンテナ。横幅を100%に固定し、長い行はコード側でスクロールさせる */
+/* 💡 行コンテナ：個別スクロールを禁止し、レイアウト崩れを防ぐ */
 .group {
   margin: 0px 0px;
   display: flex;
   flex-direction: row;
   min-height: 40px;
   max-height: 40px;
-  overflow: hidden; /* コンテナ自体のはみ出しを防止 */
+  overflow: visible; /* 個別のスクロールバーの発生を禁止 */
   background-color: var(--background-unit-color);
   width: 100%;
   box-sizing: border-box;
 }
 
-/* 💡【超重要】行番号レール。親要素の伸縮に一切道連れにされない絶対防御の30px固定 */
+/* 💡 行番号レール：親の縮小に一切道連れにされない絶対防御の30px固定 */
 .lineno {
   background-color: var(--line-no-color);
   color: var(--ineditor-text-color);
@@ -64,15 +64,15 @@ body {
   color: inherit !important;
 }
 
-/* 💡【超重要】テキスト入力領域。長い文字列が来たらここだけを右側にスクロールさせる */
+/* 💡 テキスト表示領域：邪魔な個別スクロールバーを完全非表示にする */
 .line {
   font-size: 20px;
   margin: auto 3px;
   line-height: 40px !important;
   height: 40px;
   display: inline-block;
-  flex-grow: 1;      /* 残りの横幅をすべて使う */
-  overflow-x: auto;  /* 長い文字列が来たら横スクロールバーを出す */
+  flex-grow: 1;
+  overflow: visible; /* 個別のバーを消してすっきりさせる */
   white-space: pre;  /* 自動折り返しせず横に流す */
 }
 
@@ -80,12 +80,13 @@ body {
   text-decoration: none !important;
 }
 
-/* 💡 エディタ全体のコンテナが画面外へ突き出るのを防ぐ防壁 */
+/* 💡【解決の主軸】エディタ全体のコンテナ：ここに綺麗なスクロールバーを1本だけ集約！ */
 #maincontainer {
   background-color: var(--main-color);
   color: var(--out-unit-color);
   width: 100%;
-  overflow-x: hidden;
+  overflow-x: auto; /* エディタ全体を一括でスクロールさせる */
+  box-sizing: border-box;
 }
 
 #menu {
