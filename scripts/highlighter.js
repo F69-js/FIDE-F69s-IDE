@@ -26,18 +26,38 @@ function runHl(t) {
     if (c === '/' && t[idx + 1] === '*') { flush(); res += '<span class="c">/*'; c2 = 1; idx += 2; continue }
     if (c === "'" || c === '"' || c === '`') { flush(); sC = c; res += `<span class="str">${c}`; s = 1; idx++; continue }
     
-    if (/[a-zA-Z0-9_*]/.test(c)) { w += c; } else {
+    if (/[a-zA-Z0-9_*]/.test(c)) { w += c; }    } else {
+      // 💡 丸カッコの直前にある単語を関数名として一撃判定
       if (w && c === '(') {
         let m = '';
         for (const [cl, arr] of Object.entries(K_HL)) { if (arr.includes(w)) { m = cl; break; } }
         res += m ? `<span class="${m}">${w}</span>` : `<span class="fn">${w}</span>`; w = '';
       } else { flush(); }
-      if (c === '=' && t[idx + 1] === '>') { res += '<span class="a">=&gt;</span>'; idx++; }
-      else if (c === '{' || c === '}') { res += `<span class="br1">${c}</span>`; }
-      else if (c === '(' || c === ')') { res += `<span class="br2">${c}</span>`; }
-      else if (c === '.' && t[idx + 1] === '.' && t[idx + 2] === '.') { res += '<span class="o">...</span>'; idx += 2; }
-      else if (['+', '-', '*', '/', '=', '!', '<', '>', '?', '%', ':'].includes(c)) { res += `<span class="o">${c}</span>`; }
-      else { res += c.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+      // 1. 【最優先】波カッコ { } をゴールドに
+      if (c === '{' || c === '}') {
+        res += `<span class="br1">${c}</span>`;
+      }
+      // 2. 【最優先】丸カッコ ( ) をピンクに
+      else if (c === '(' || c === ')') {
+        res += `<span class="br2">${c}</span>`;
+      }
+      // 3. アロー関数 (=>) 
+      else if (c === '=' && t[idx + 1] === '>') {
+        res += '<span class="a">=&gt;</span>'; idx++;
+      }
+      // 4. スプレッド演算子 (...)
+      else if (c === '.' && t[idx + 1] === '.' && t[idx + 2] === '.') {
+        res += '<span class="o">...</span>'; idx += 2;
+      }
+      // 5. 純粋な演算子群 (カッコ類を完全に排除した綺麗な網)
+      else if (['+', '-', '*', '/', '=', '!', '<', '>', '?', ':', '%'].includes(c)) {
+        res += `<span class="o">${c}</span>`;
+      }
+      // 6. 通常の記号・空白
+      else {
+        res += c.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      }
     } idx++;
   } flush(); return res;
 }
