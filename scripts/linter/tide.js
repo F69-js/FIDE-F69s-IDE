@@ -1,289 +1,97 @@
-let codehaserror = false; 
-const RESERVED_WORDS = [
-    // 1. 基本的な構文キーワード
-    "if", "else", "for", "while", "do", "switch", "case", "break", "continue",
-    "return", "function", "class", "let", "var", "const", "new", "this", "true", 
-    "false", "null", "undefined",
+// =========================================================
+// 🌌 FIDE Static Analysis Engine 'TIDE v8-Turbo'
+// =========================================================
+
+// V8エンジン級の膨大な組み込み安全単語データベース
+const TIDE_BUILTINS = new Set([
+  "if","else","switch","case","break","return","continue","typeof","instanceof","throw","for","let","const","var","class","export","constructor","new","import","from","try","catch","in","async","await","default","do","while","yield","function",
+  "extends","super","finally","with","debugger","arguments","interface","implements","package","private","protected","public","static",
+  "this","window","globalThis","self","global","screenLeft","screenTop",
+  "JSON","console","Math","Date","Promise","String","Map","Set","Object","Number","Error","undefined","null","true","false",
+  "Boolean","RegExp","Function","Symbol","Proxy","Reflect","BigInt","URL","URLSearchParams","WeakMap","WeakSet","ArrayBuffer","DataView",
+  "Uint8Array","Float64Array","Int32Array","Int8Array","Uint16Array","Int16Array","Uint32Array","Float32Array","BigInt64Array","BigUint64Array",
+  "TypeError","ReferenceError","SyntaxError","RangeError","URIError","AggregateError","EvalError",
+  "Atomics","FinalizationRegistry","WeakRef","Intl","Collator","DateTimeFormat","NumberFormat","PluralRules","RelativeTimeFormat","ListFormat","Locale","DisplayNames","Segmenter",
+  "process","document","navigator","screen","location","history","Temporal","LanguageModel","ai","InternalError","ParallelArray","StopIteration",
+  "eval","escape","unescape","$","_","jQuery","React","ReactDOM","Vue","Angular","Rx",
+  // 頻出する標準コアプロパティ
+  "length","size","prototype","name","status","version","author","modules","features"
+]);
+
+export function TIDEPreParse(codeText) {
+  const errors = [];
+  const warnings = [];
+  const lines = codeText.split("\n");
+  
+  // ユーザーが自作した変数・関数・クラス名を完全に記憶する仮想グローバルスコープ
+  const virtualScope = new Set();
+
+  // ─── STAGE 1: V8型 プリコンパイル・スコープホイスティング（名前の先読み登録） ───
+  lines.forEach(line => {
+    let t = line.split("//")[0].split("/*")[0].trim(); // コメントを物理的に除去
+    if (!t) return;
+
+    // 1. function 名のキャッチ（async function* も完全カバー）
+    const funcMatch = t.match(/(?:async\s+)?function\*?\s+([a-zA-Z0-9_]+)/);
+    if (funcMatch) virtualScope.add(funcMatch[1]);
+
+    // 2. 変数・クラス宣言のキャッチ (const, let, var, class)
+    const declMatch = t.match(/(?:const|let|var|class)\s+([a-zA-Z0-9_]+)/);
+    if (declMatch) virtualScope.add(declMatch[1]);
+
+    // 3. アロー関数の宣言キャッチ (const test = () =>)
+    const arrowMatch = t.matchCustom || t.match(/([a-zA-Z0-9_]+)\s*=\s*(?:\([^)]*\)|[a-zA-Z0-9_]+)\s*=>/);
+    if (arrowMatch) virtualScope.add(arrowMatch[1]);
+  });
+
+  // ─── STAGE 2: コンテキスト・アウェア・静的バリデーション ───
+  lines.forEach((line, index) => {
+    const lineNum = index + 1;
     
-    // 2. 💡 ここを追加！ブラウザの標準グローバルオブジェクト（大爆発の犯人たち）
-    "Promise", "console", "window", "document", "navigator", "globalThis", "_jala",
-    "Math", "Date", "Array", "Object", "String", "Number", "Boolean", "JSON", 
-    "Error", "setTimeout", "setInterval", "clearTimeout", "clearInterval"
-];
-const DEPRECATED_SINGLE_WORDS = [
-    "substr", "substring", "escape", "unescape", "with", "caller", 
-    "showModalDialog", "applicationCache", "AppCache", "keyCode", "__proto__"
-];;
-const DEPRECATED_PAIRS = {"document": ["all", "write", "alinkColor", "bgColor", "fgColor", "linkColor", "vlinkColor", "anchors", "applets"],"navigator": ["getUserMedia"],"KeyboardEvent": ["keyCode"],"Object.prototype": ["proto"]};
-const DEPRECATED_STRING_METHODS = ["anchor", "big", "blink", "bold", "fixed", "fontcolor", "fontsize", "italics","link", "small", "strike", "sub", "sup"];
-function checkVariableDeclaration(tokens, part, lineNo) {
-    for (let i = 0; i < tokens.length; i++) {
-        let t = tokens[i];
-        if (t === "var" || t === "let" || t === "const") {
-            let restLine = tokens.slice(i + 1).join("");
-            if (!restLine) continue;
+    // 文字列リテラルやコメントの中身を完全に消去して構文だけを抽出（誤検知の完全破壊）
+    let analysisText = line.replace(/\/\/.*$/, "").replace(/\/\*.*?\*\//g, "");
+    analysisText = analysisText.replace(/(["'`])(.*?)\1/g, "");
 
-            let varName = "";
-            let varValue = "undefined";
-            let isError = false;
-            let errCode = 0;
+    if (!analysisText.trim()) return;
 
-            if (!restLine.includes("=")) {
-                varName = restLine.replace(/;/g, "");
-                if (t === "const") { isError = true; errCode = 2; }
-            } else {
-                let eqs = restLine.split("=");
-                varName = eqs[0].replace(/;/g, "");
-                varValue = eqs[1] ? eqs[1].replace(/;/g, "") : "undefined";
-            }
-
-            if (t === "var") { isError = true; errCode = 5; }
-            if (RESERVED_WORDS.includes(varName) && varName !== "console") { isError = true; errCode = 4; }
-
-            return { name: varName, value: varValue, type: t, error: isError, errorcode: errCode, line: lineNo, all: part };
-        }
+    // 1. 【リアルリスク警告】真に危険な非推奨APIのみを検知
+    if (analysisText.includes("document.write")) {
+      warnings.push({
+        type: "DOCUMENT_WRITE",
+        hint: "警告【非推奨 / 危険】: document.writeは現代のWeb開発ではレンダリングを阻害するため非推奨です。Element.append()等を使用してください。",
+        line: lineNum
+      });
     }
-    return null;
-}
-function extractUsedWords(noStringsText, part, lineNo) {
-    let usedWords = [];
-    
-    // 💡 1. 提案の天才ロジックを「正規表現」で完全に最上流に実装！
-    // 行の中から「.プロパティ名」の塊（例：.all や .resolve や .write）を、
-    // 単語に分解するよりも前の段階で、物理的にこの世から完全に消し去ります！
-    let cleanText = noStringsText.replace(/\.[a-zA-Z_$][a-zA-Z0-9_$]*/g, " ");
 
-    // 💡 2. 記号の置換をやめ、純粋な「JavaScriptの変数名・単語の塊」だけを正規表現で直接一本釣り！
-    // これにより、console.log は右側が消えて「console」だけになり、"hello" などのノイズも完璧に除外されます
-    let words = cleanText.match(/[a-zA-Z_$][a-zA-Z0-9_$]*/g);
-    
+    // 2. 【V8型 スマート文脈解析】未定義変数の検知
+    // テキストから英単語（識別子）を厳密に抽出
+    const words = analysisText.match(/[a-zA-Z_][a-zA-Z0-9_]*/g);
     if (words) {
-        words.forEach(w => {
-            // 数字のみ、または予約語リスト（consoleやPromiseなど）に含まれていなければ「使われている変数」として登録
-            if (w && isNaN(w) && !RESERVED_WORDS.includes(w)) {
-                usedWords.push({
-                    name: w,
-                    line: lineNo,
-                    all: part
-                });
-            }
-        });
+      words.forEach(word => {
+        // 文脈検査A: 直前にドット「.」がある場合は「オブジェクトのプロパティアクセス」なのでチェックをスキップ
+        const dotCheck = new RegExp(`\\.\\s*${word}`);
+        if (dotCheck.test(analysisText)) return;
+
+        // 文脈検査B: オブジェクトのキー定義（例: key: value）の左側はチェックをスキップ
+        const colonCheck = new RegExp(`${word}\\s*:\\s*`);
+        if (colonCheck.test(analysisText) && !analysisText.includes(`?.*${word}`)) return;
+
+        // 安全データベース、または事前登録スコープのどちらにも存在しない未知の単語のみを弾く！
+        if (!TIDE_BUILTINS.has(word) && !virtualScope.has(word)) {
+          errors.push({
+            type: "REFERENCE_ERROR",
+            hint: `ReferenceError: ${word} is not defined\nヒント: 変数や関数 '${word}' は、定義されていないかタイポの可能性があります。let や const で作成されているか確認してください。`,
+            line: lineNum
+          });
+        }
+      });
     }
-    
-    return usedWords;
+  });
+
+  // 実行可否の判定結果をメインスレッドへ返却
+  return {
+    errors: errors,
+    warnings: warnings,
+    isValid: errors.length === 0
+  };
 }
-
-
-function scanDeprecatedSyntax(part, noStringsText, lineNo) {
-    let alerts = [];
-
-    // コメント文「//」以降をバッサリ削る
-    let cleanText = noStringsText.split("//")[0];
-
-    // 8進数エスケープシーケンス (\0〜\7) の検出（これだけは正規表現の構文上、個別に残します）
-    if (/\\[0-7]/.test(part)) {
-        alerts.push({ name: "octal_escape", line: lineNo, all: part });
-    }
-
-    // 💡 1. すべての単体レガシーキーワードをデータ駆動で一括走査（keyCodeも__proto__もここを自動通過！）
-    DEPRECATED_SINGLE_WORDS.forEach(keyword => {
-        if (cleanText.includes(keyword)) {
-            alerts.push({ name: keyword, line: lineNo, all: part });
-        }
-    });
-
-    // 💡 2. すべてのオブジェクト・プロパティのペアをデータ駆動で厳密走査
-    Object.keys(DEPRECATED_PAIRS).forEach(objName => {
-        DEPRECATED_PAIRS[objName].forEach(propName => {
-            let pairRegex = new RegExp(objName + "\\s*\\.\\s*" + propName);
-            if (pairRegex.test(cleanText) || (objName === "document" && cleanText.includes("." + propName))) {
-                alerts.push({ name: propName, line: lineNo, all: part });
-            }
-        });
-    });
-
-    // 💡 3. すべての文字列ラッパーメソッドをデータ駆動で厳密走査
-    DEPRECATED_STRING_METHODS.forEach(method => {
-        let methodRegex = new RegExp("\\." + method + "\\b\\s*\\(");
-        if (methodRegex.test(cleanText)) {
-            alerts.push({ name: method, line: lineNo, all: part });
-        }
-    });
-
-    return alerts;
-}
-
-
-
-function renderVariables(vars, variablesContainer) {
-    vars.forEach(t => {
-        if (!variablesContainer) return;
-
-        let m = document.createElement("tr");
-        let r = document.createElement("td");
-        let g = document.createElement("tr");
-        let p = document.createElement("s");
-        let q = document.createElement("pre");
-        let c = document.createElement("code");
-        let l = document.createElement("span");
-        let b = document.createElement("br");
-
-        r.classList.add("inline");
-        r.innerText = "値:" + t.value;
-
-        if (t.error) {
-            if (t.errorcode !== 5) { codehaserror = true; }
-            
-            p.innerText = t.name.toUpperCase();
-            g.classList.add("error");
-            if (t.errorcode === 5) { g.classList.add("warning"); }
-
-            let ln = document.querySelector("#line" + (t.line - 1));
-            if (ln) { ln.classList.add(t.errorcode === 5 ? "haswarning" : "haserror"); }
-
-            switch (t.errorcode) {
-                case 1:
-                    q.innerText = "ヒント: この変数はすでに別の場所で定義されています。\nJavaScriptでは同じ変数名を何度も作ることができません。\n変数名を変えてみてください。\n予測されるエラー:";
-                    c.innerText = "SyntaxError: Identifier '" + t.name + "' has already been declared";
-                    l.innerText = "エラー発生箇所: " + t.line + "行目";
-                    break;
-                case 2:
-                    q.innerText = "ヒント: 定数（const）を作る時は、必ず最初に値をセットする必要があります。\nあとから値を変更できないルールだからです。\n例: const " + t.name + " = 値;\n予測されるエラー:";
-                    c.innerText = "SyntaxError: Missing initializer in const declaration";
-                    l.innerText = t.line + "行目";
-                    break;
-                case 3:
-                    q.innerText = "ヒント: 変数 '" + t.name + "' は、まだどこにも作られていません！\n文字の打ち間違い（タイポ）がないか、または事前に let や const で\nこの変数を作ったかどうかを確認してください。\n予測されるエラー:";
-                    c.innerText = "ReferenceError: " + t.name + " is not defined";
-                    l.innerText = "エラー発生箇所: " + t.line + "行目";
-                    break;
-                case 4:
-                    q.innerText = "ヒント: '" + t.name + "' はJavaScriptが最初から特別な意味で使用している「予約語」です。\nこれらを変数名として使用することは禁止されています。\n別の名前に変更してください。\n予測されるエラー:";
-                    c.innerText = "SyntaxError: Unexpected token '" + t.name + "'";
-                    l.innerText = "エラー発生箇所: " + t.line + "行目";
-                    break;
-                case 5:
-                    q.innerText = "警告【非推奨 / 危険】: レガシーまたは非推奨の構文 '" + t.name + "' が検出されました！\n";
-                    if (t.name === "var") {
-                        q.innerText += "現代のJavaScriptでは『let』か『const』を使うのが安全な鉄則です。";
-                        c.innerText = "Warning: 'var' is deprecated. Use 'let' or 'const' instead.";
-                    } else if (t.name === "with") {
-                        q.innerText += "with文はコードの予測を不可能にし、バグの温床になるため厳しく禁止されています。";
-                        c.innerText = "SyntaxError: Strict mode code may not include a with statement";
-                    } else if (t.name === "caller") {
-                        q.innerText += "arguments.caller および callee は現代の厳格モードでは使用できません。";
-                        c.innerText = "TypeError: 'caller' object is not accessible in strict mode";
-                    } else if (t.name === "__proto__") {
-                        q.innerText += ".__proto__ は古い仕様です。代わりに Object.getPrototypeOf() を使用してください。";
-                        c.innerText = "Warning: Use Object.getPrototypeOf() instead of __proto__";
-                    } else if (["anchor", "big", "blink", "bold", "fixed", "fontcolor", "fontsize", "italics", "link", "small", "strike", "sub", "sup"].includes(t.name)) {
-                        q.innerText += "String.prototype のHTML生成メソッドは完全に非推奨です。CSSやDOM操作を使いましょう。";
-                        c.innerText = "Warning: HTML wrapper methods are deprecated. Use DOM manipulation.";
-                    } else if (t.name === "keyCode") {
-                        q.innerText += "KeyboardEvent.keyCode は非推奨です。代わりに .key または .code を使用してください。";
-                        c.innerText = "Hint: Use event.key instead of event.keyCode";
-                    } else if (t.name === "all") {
-                        q.innerText += "document.all はIE時代の遺物であり完全に非推奨です。getElementById 等を使用してください。";
-                        c.innerText = "Warning: document.all is deprecated. Use standard DOM selection APIs.";
-                    } else if (t.name === "write") {
-                        q.innerText += "document.write() はページのパースを破壊する恐れがあります。textContent等を使いましょう。";
-                        c.innerText = "Warning: document.write() is a huge anti-pattern.";
-                    } else if (t.name === "showModalDialog") {
-                        q.innerText += "window.showModalDialog() は完全に廃止されました。HTMLの <dialog> 要素を使いましょう。";
-                        c.innerText = "TypeError: window.showModalDialog is not a function";
-                    } else if (t.name === "getUserMedia") {
-                        q.innerText += "navigator.getUserMedia は古い型です。navigator.mediaDevices.getUserMedia を使います。";
-                        c.innerText = "Hint: Use navigator.mediaDevices.getUserMedia()";
-                    } else if (t.name === "octal_escape") {
-                        q.innerText += "8進数エスケープシーケンス (\\0〜\\7) は、厳格モードのエディタでは使用が禁止されています。";
-                        c.innerText = "SyntaxError: Octal escape sequences are not allowed in strict mode.";
-                    } else if (["alinkColor", "bgColor", "fgColor", "linkColor", "vlinkColor", "anchors", "applets"].includes(t.name)) {
-                        q.innerText += "document." + t.name + " などの古いオブジェクト/プロパティは非推奨です。現代のDOM APIを使用してください。";
-                        c.innerText = "Warning: Legacy document property is deprecated.";
-                    } else if (t.name.includes("Cache") || t.name === "applicationCache") {
-                        q.innerText += "AppCache（Application Cache）は完全に廃止されました。代わりに Service Workers を使用してください。";
-                        c.innerText = "Warning: AppCache is deprecated. Use Service Workers.";
-                    } else {
-                        q.innerText += "この構文は古い仕様のため非推奨です。新しい代替の構文に書き換えてください。";
-                        c.innerText = "Hint: Use '.slice()' instead of '." + t.name + "()'";
-                    }
-                    l.innerText = "該当箇所: " + t.line + "行目";
-                    break;
-            }
-
-            l.lineno = t.line;
-            l.allText = t.all;
-            l.tabIndex = 0;
-            l.classList.add("linenum");
-
-            l.addEventListener("click", (e) => {
-                let tgt = e.currentTarget;
-                resetLineLabels();
-                tgt.innerText += "(" + tgt.lineno + ":" + tgt.allText + ")";
-            });
-
-            g.appendChild(p); g.appendChild(q); g.appendChild(c); g.appendChild(b); g.appendChild(l);
-            variablesContainer.appendChild(g);
-        } else {
-            let j = document.createElement("td");
-            j.innerText = t.type === "const" ? t.name.toUpperCase() + "   [定数]" : t.name;
-            m.appendChild(j); m.appendChild(r);
-            variablesContainer.appendChild(m);
-        }
-    });
-}
-function TIDEPreParse(code) {
-    codehaserror = false;
-    const variablesContainer = document.getElementById("variables") || globalThis.variables;
-    if (variablesContainer) variablesContainer.innerHTML = "";
-    
-    let vars = [];          
-    let usedWords = [];     
-    let deprecatedAlerts = []; 
-
-    // ① 各行をバラして3つの独立スキャナーを実行
-    let cop = code.split("\n");
-    cop.forEach((part, i) => {
-        let lineNo = i + 1;
-        let noStringsText = part.replace(/"[^"\\]*(?:\\.[^"\\]*)*"/g, " ").replace(/'[^'\\]*(?:\\.[^'\\]*)*'/g, " ");
-        noStringsText = noStringsText.replace(/\/\/.*$/, "");
-        let tokens = part.trim().split(/\s+/).filter(Boolean);
-
-        let decl = checkVariableDeclaration(tokens, part, lineNo);
-        if (decl) vars.push(decl);
-
-        usedWords.push(...extractUsedWords(noStringsText, part, lineNo));
-        deprecatedAlerts.push(...scanDeprecatedSyntax(part, noStringsText, lineNo));
-    });
-
-    // ② 重複チェック
-    let declared = [];
-    vars.forEach(item => {
-        if (item.errorcode === 0 || item.errorcode === 5) {
-            if (declared.includes(item.name)) { item.error = true; item.errorcode = 1; }
-            else { declared.push(item.name); }
-        } else {
-            declared.push(item.name);
-        }
-    });
-
-    // ③ 未定義参照の照合
-    usedWords.forEach(word => {
-        if (!declared.includes(word.name)) {
-            let already = vars.some(v => v.name === word.name && v.errorcode === 3 && v.line === word.line);
-            if (!already) vars.push({ name: word.name, value: "N/A", type: "unknown", error: true, errorcode: 3, line: word.line, all: word.all });
-        }
-    });
-
-    // ④ 非推奨アラートの照合
-    deprecatedAlerts.forEach(alert => {
-        let already = vars.some(v => v.name === alert.name && v.errorcode === 5 && v.line === alert.line);
-        if (!already) vars.push({ name: alert.name, value: "Warning", type: "deprecated", error: true, errorcode: 5, line: alert.line, all: alert.all });
-    });
-
-    // ⑤ 画面へのレンダリング処理（後半へ続く）
-    renderVariables(vars, variablesContainer);
-
-    return codehaserror;
-}
-export { TIDEPreParse } 
