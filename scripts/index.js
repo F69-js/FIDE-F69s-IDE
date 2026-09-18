@@ -453,6 +453,7 @@ window.addEventListener('paste', async (e) => {
             await DoEnter();
         }
     }
+    applyFIDEHighlight();
 });
 window.addEventListener("keydown",async e => {
     if (e.isComposing || e.key === "Process") return;
@@ -498,6 +499,7 @@ window.addEventListener("keydown",async e => {
                         await DoEnter();
                         cur.innerText = lines[i];
                     }
+                    applyFIDEHighlight();
                 }
                 break;
             case "j":
@@ -516,6 +518,7 @@ window.addEventListener("keydown",async e => {
                 redoStack = [];
                 cur.innerText = "";
                 raw = "";
+                applyFIDEHighlight();
                 break;
             case "z":
                 e.preventDefault();
@@ -525,6 +528,8 @@ window.addEventListener("keydown",async e => {
                     raw = previousRaw;
                     cur.innerText = previousRaw.split("\n")[lineID] || "";
                 }
+                applyFIDEHighlight();
+                break;
             case "y":
                 e.preventDefault();
                 if (redoStack.length > 0) {
@@ -533,6 +538,7 @@ window.addEventListener("keydown",async e => {
                     raw = nextRaw;
                     cur.innerText = nextRaw.split("\n")[lineID] || "";
                 }
+                applyFIDEHighlight();
                 break;
             case "f":
                 e.preventDefault();
@@ -839,6 +845,7 @@ replt.addEventListener("keydown",e=>{
   elems.forEach(t=>{
     t.innerText=t.innerText.replaceAll(searchi.value,i);
   })
+  applyFIDEHighlight();
   searchresults.innerText=elems.length+Language.for("inscript.replsuccess")
 })
 unl.addEventListener("click",()=>{
