@@ -447,5 +447,5 @@ hr {
   flex-direction: column;
   margin-left: 200px;
 }
-/* --- 🌌 自作ハイライター用カラーテーマ（ここから追記） --- */
-.hl-keyword{color:#569cd6;font-weight:bold}.hl-special{color:#f2c94c;font-weight:bold}.hl-builtin{color:#4ec9b0}.hl-methods{color:#dcdcaa}.hl-arrow{color:#ff007f;font-weight:bold}.hl-operator{color:#c586c0;font-weight:bold}.hl-string{color:#ce9178}.hl-comment{color:#6a9955;font-style:italic}
+/* --- 🌌 FIDE一文字クラス対応・完全圧縮カラーテーマ --- */
+.k{color:#569cd6;font-weight:bold}.s{color:#f2c94c;font-weight:bold}.b{color:#4ec9b0}.m{color:#dcdcaa}.a{color:#ff007f;font-weight:bold}.o{color:#c586c0;font-weight:bold}.str{color:#ce9178}.c{color:#6a9955;font-style:italic}
