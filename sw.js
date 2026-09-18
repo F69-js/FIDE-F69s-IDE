@@ -1,5 +1,5 @@
-// F69's IDE - Custom Service Worker (Ultimate Full-Offline Version v12)
-const CACHE_NAME = 'f69s-ide-full-cache-v12';
+// F69's IDE - Custom Service Worker (Ultimate Full-Offline Version v13)
+const CACHE_NAME = 'f69s-ide-full-cache-v13';
 
 if (!('u' > typeof self && self.addEventListener)){
     console.log("ERR_SELF_NOT_SUPPERTED");
