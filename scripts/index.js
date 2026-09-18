@@ -899,8 +899,10 @@ function runHl(t){
   const flush=()=>{
     if(!w)return;let m='';
     for(const[cl,arr]of Object.entries(K_HL)){if(arr.includes(w)){m=cl;break;}};
-    res+=m?`<span class="m">${w}</span>`:(/^\d+$/.test(w)?`<span style="color:#b5cea8">\${w}</span>`:w);w='';
+    // 👇 シングル・ダブルクォートを完全に排除し、すべてバッククォートに修正
+    res+=m?`<span class="${m}">${w}</span>`:(/^\d+\$/.test(w)?`<span style="color:#b5cea8">${w}</span>`:w);w='';
   };
+
   while(idx<t.length){
     const c=t[idx];
     if(c1){res+=c;if(c==='\n'){res+='</span>';c1=0}idx++;continue}
