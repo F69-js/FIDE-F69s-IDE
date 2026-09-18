@@ -1,19 +1,24 @@
-// FIDE Custom IDE - Syntax Highlighter Module (Object & Property Enhanced Version)
+// FIDE Custom IDE - Syntax Highlighter Module (Generator & Pink-Control Enhanced Version)
 const K_HL = {
-  // 制御構文・予約語（Keyword / Control）
+  // 1. 基本の制御構文（淡いブルー）
   'k': [
-    "if","else","switch","case","break","return","continue","typeof","instanceof","throw","for","let","const","var","class","export","constructor","new","import","from","try","catch","in","async","await","default","do","while","yield","function",
-    "extends","super","finally","with","debugger","arguments","interface","implements","package","private","protected","public","static"
+    "if","else","switch","case","break","return","typeof","instanceof","throw","for","let","const","var","class","export","constructor","new","import","from","try","catch","in","await","default","do","yield","function",
+    "extends","super","finally","with","arguments","interface","implements","package","private","protected","public","static"
   ],
   
-  // 特殊参照（Special References）
+  // 2. 💡【強化】ピンクにする重要キーワード（アロー関数クラス a を流用！）
+  'a': [
+    "async","while","continue","debugger","null"
+  ],
+  
+  // 特殊参照（ゴールド）
   's': [
     "this","window","globalThis","super","self","global","screenLeft","screenTop"
   ],
   
-  // 標準・実験的・歴史的オブジェクト＆グローバル関数（Built-in Objects / Global Functions / Framework Globals）
+  // 標準オブジェクト・グローバルクラス（ライトグリーン）
   'b': [
-    "JSON","console","Math","Date","Promise","String","Map","Set","Object","Number","Error","undefined","null","true","false",
+    "JSON","console","Math","Date","Promise","String","Map","Set","Object","Number","Error","undefined","true","false",
     "Boolean","RegExp","Function","Symbol","Proxy","Reflect","BigInt","URL","URLSearchParams","WeakMap","WeakSet","ArrayBuffer","DataView",
     "Uint8Array","Float64Array","Int32Array","Int8Array","Uint16Array","Int16Array","Uint32Array","Float32Array","BigInt64Array","BigUint64Array",
     "TypeError","ReferenceError","SyntaxError","RangeError","URIError","AggregateError","EvalError",
@@ -25,7 +30,7 @@ const K_HL = {
     "$","_","jQuery","React","ReactDOM","Vue","Angular","Rx"
   ],
   
-  // メソッド・プロパティ名（Methods / Properties）
+  // メソッド・プロパティ名（イエロー）
   'm': [
     "push","pop","unshift","shift","slice","splice","filter","some","findIndex","includes","join","split","match","replace","replaceAll","trim","startsWith","indexOf","lastIndexOf","substring","map","forEach","reduce","padStart","toFixed","has","get","set","delete","entries","add","hasOwnProperty","subscribe","then","repeat","next",
     "parse","stringify","log","warn","error","floor","ceil","abs","max","min","pow","parseFloat","parseInt","isNaN","toString","keys","random","now",
@@ -56,21 +61,21 @@ const K_HL = {
 
 function runHl(t) {
   let idx = 0, res = '', c1 = 0, c2 = 0, s = 0, sC = '', w = '';
-  let lastChar = ''; // 直前の有効な記号を記憶する変数
+  let lastChar = '';
   
   const flush = (isProperty = false) => {
     if (!w) return;
     let m = '';
     const found = Object.entries(K_HL).find(([cl, arr]) => arr.includes(w));
-    if (found) m = found[0];
+    if (found) m = found;
 
     const span = document.createElement("span");
     if (m) {
       span.className = m;
     } else if (isProperty) {
-      span.className = "prop"; // ドットの右側、またはコロンの左側はオブジェクトのプロパティ色に
+      span.className = "prop";
     } else if (/^\d+$/.test(w)) {
-      span.style.color = "#b5cea8"; // 数値の色
+      span.style.color = "#b5cea8";
     }
     
     if (span.className || span.style.color) {
@@ -95,46 +100,41 @@ function runHl(t) {
     if (c === '/' && t[idx + 1] === '*') { flush(); res += '<span class="c">/*'; c2 = 1; idx += 2; continue }
     if (c === "'" || c === '"' || c === '`') { flush(); sC = c; res += `<span class="str">${c}`; s = 1; idx++; continue }
     
-    if (/[a-zA-Z0-9_*]/.test(c)) { 
+    // 💡【ジェネレーター対応】単語判定の正規表現から「*」を排除！これにより、function と * が別々に切り出されます
+    if (/[a-zA-Z0-9_]/.test(c)) { 
       w += c; 
     } else {
-      // 💡【新ロジック】関数名、プロパティ、オブジェクトリテラルのコロン判定
       if (w && c === '(') {
         let m = '';
         const found = Object.entries(K_HL).find(([cl, arr]) => arr.includes(w));
-        if (found) m = found[0];
+        if (found) m = found;
         
         const span = document.createElement("span");
-        span.className = m ? m : "fn"; // 関数名は薄いイエロー
+        span.className = m ? m : "fn";
         span.textContent = w;
         res += span.outerHTML;
         w = '';
       } else if (w && c === ':') {
-        // 連想配列の定義 { key: value } のコロンの手前なら、プロパティとしてフラッシュ
         flush(true);
       } else {
-        // ドットアクセスの直後（lastChar === '.'）ならプロパティとしてフラッシュ
         flush(lastChar === '.');
       }
       
-      // 空白以外の場合のみ、直前の記号履歴（lastChar）を更新
-      if (c.trim() !== '') {
-        lastChar = c;
-      }
+      if (c.trim() !== '') lastChar = c;
 
       if (c === '{' || c === '}') {
         const span = document.createElement("span");
-        span.className = "br1"; // オブジェクト波カッコ：ゴールド
+        span.className = "br1";
         span.textContent = c;
         res += span.outerHTML;
       } else if (c === '[' || c === ']') {
         const span = document.createElement("span");
-        span.className = "br3"; // 配列角カッコ：スクショ映えするライトブルー
+        span.className = "br3";
         span.textContent = c;
         res += span.outerHTML;
       } else if (c === '(' || c === ')') {
         const span = document.createElement("span");
-        span.className = "br2"; // 丸カッコ
+        span.className = "br2";
         span.textContent = c;
         res += span.outerHTML;
       } else if (c === '=' && t[idx + 1] === '>') {
@@ -149,7 +149,15 @@ function runHl(t) {
         span.textContent = "...";
         res += span.outerHTML;
         idx += 2;
-      } else if (['+', '-', '*', '/', '=', '!', '<', '>', '?', '%', ':', '.'].includes(c)) {
+      } 
+      // 💡【ジェネレーター対応】単体で出現した「*」をピンポイントで検知して、赤（専用クラス g-star）で出力！
+      else if (c === '*') {
+        const span = document.createElement("span");
+        span.className = "g-star";
+        span.textContent = "*";
+        res += span.outerHTML;
+      }
+      else if (['+', '-', '/', '=', '!', '<', '>', '?', '%', ':', '.'].includes(c)) {
         const span = document.createElement("span");
         span.className = "o";
         span.textContent = c;
