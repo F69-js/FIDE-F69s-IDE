@@ -1,28 +1,24 @@
-// F69's IDE - Custom Service Worker (Ultimate Full-Offline Version v13)
-const CACHE_NAME = 'f69s-ide-full-cache-v13';
+// F69's IDE - Custom Service Worker (Ultimate Full-Offline Version v14)
+const CACHE_NAME = 'f69s-ide-full-cache-v14';
 
-if (!('u' > typeof self && self.addEventListener)){
-    console.log("ERR_SELF_NOT_SUPPERTED");
-    return;
-}
 // サービスワーカーの配置場所から、GitHub Pagesのサブディレクトリ（例: /FIDE-F69s-IDE/）を自動算出
 const BASE_PATH = new URL('./', self.location).pathname;
 
-// キャッシュするアセットは重複を完璧に排除したミニマルリスト
+// キャッシュするアセットリストに新しいhighlighter.jsを追加
 const ASSETS_TO_CACHE_RELATIVE = [
-    '', // トップページ (index.html用)
+    '',
     'index.html',
     'manifest.json',
     'images/favicon.ico',
     'styles/main.css',
     'scripts/index.js',
+    'scripts/highlighter.js',
     'scripts/fjalu/index.js',
     'scripts/fjalu/emoji.js',
     'scripts/langs/i18n.js',
     'scripts/linter/tide.js'
 ];
 
-// 厳密なキャッシュ用の完全URLリストを動的生成
 const ASSETS_TO_CACHE = ASSETS_TO_CACHE_RELATIVE.map(asset => {
     return new URL(asset, self.location).href;
 });
@@ -59,33 +55,26 @@ self.addEventListener('activate', (event) => {
     );
 });
 
+// 3. フェッチ時（違法リターンを綺麗に削除済み）
+self.addEventListener('fetch', (event) => {
+    if (!event.request.url.startsWith(self.location.origin)) return;
 
-if ('u' > typeof self && self.addEventListener) {
-    self.addEventListener('fetch', (event) => {
-        // 同一オリジンのリクエストのみを対象にする
-        if (!event.request.url.startsWith(self.location.origin)) return;
+    let requestUrl = new URL(event.request.url);
 
-        let requestUrl = new URL(event.request.url);
+    if (requestUrl.pathname === BASE_PATH || requestUrl.pathname === BASE_PATH.slice(0, -1)) {
+        requestUrl.pathname = BASE_PATH + 'index.html';
+    }
 
-        // ルートアクセス（例: /FIDE-F69s-IDE/ または /FIDE-F69s-IDE）の場合の index.html フォールバック処理
-        if (requestUrl.pathname === BASE_PATH || requestUrl.pathname === BASE_PATH.slice(0, -1)) {
-            requestUrl.pathname = BASE_PATH + 'index.html';
-        }
-
-        event.respondWith(
-            caches.match(requestUrl.href).then((cachedResponse) => {
-                if (cachedResponse) {
-                    return cachedResponse;
+    event.respondWith(
+        caches.match(requestUrl.href).then((cachedResponse) => {
+            if (cachedResponse) {
+                return cachedResponse;
+            }
+            return fetch(event.request).catch(() => {
+                if (event.request.headers.get('accept')?.includes('text/html')) {
+                    return caches.match(new URL('index.html', self.location).href);
                 }
-
-                // キャッシュになければネットワークへ
-                return fetch(event.request).catch(() => {
-                    // オフラインかつHTMLリクエストの場合はindex.htmlを返す（SPA用安全ネット）
-                    if (event.request.headers.get('accept')?.includes('text/html')) {
-                        return caches.match(new URL('index.html', self.location).href);
-                    }
-                });
-            })
-        );
-    });
-}
+            });
+        })
+    );
+});
