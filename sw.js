@@ -1,12 +1,11 @@
-// F69's IDE - Custom Service Worker (Ultimate Full-Offline Version v14)
-const CACHE_NAME = 'f69s-ide-full-cache-v14';
+// F69's IDE - Custom Service Worker (Ultimate Full-Offline Version v13.1)
+const CACHE_NAME = 'f69s-ide-full-cache-v13.1';
 
 // サービスワーカーの配置場所から、GitHub Pagesのサブディレクトリ（例: /FIDE-F69s-IDE/）を自動算出
 const BASE_PATH = new URL('./', self.location).pathname;
 
-// キャッシュするアセットリストに新しいhighlighter.jsを追加
+// キャッシュするアセットリスト
 const ASSETS_TO_CACHE_RELATIVE = [
-    '',
     'index.html',
     'manifest.json',
     'images/favicon.ico',
@@ -23,19 +22,35 @@ const ASSETS_TO_CACHE = ASSETS_TO_CACHE_RELATIVE.map(asset => {
     return new URL(asset, self.location).href;
 });
 
-// 1. インストール時
+// 1. インストール時（通信エラー・セキュリティブロックの徹底回避構造）
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME).then(async (cache) => {
             console.log('[PWA] Optimizing single-stream assets...');
+            
+            // 💡【ハック】空文字（ルートパス）の代わりに、明示的に index.html をベースキャッシュに登録
+            try {
+                await cache.add(new URL('index.html', self.location).href);
+            } catch(e) {
+                console.warn('[PWA] Root index cache fallback');
+            }
+
             for (const assetUrl of ASSETS_TO_CACHE) {
                 try {
-                    const response = await fetch(assetUrl, { redirect: 'follow' });
-                    if (response.ok) {
+                    // 💡 リダイレクトによるエラーを回避するため、モードを 'cors' や 'no-cors' に依存しない安全なキャッシュ戦略に変更
+                    const response = await fetch(assetUrl, { 
+                        method: 'GET',
+                        cache: 'reload' // 常に最新のサーバーデータを強制取得
+                    });
+                    
+                    if (response.ok || response.type === 'opaque') {
                         await cache.put(assetUrl, response);
+                        console.log(`[PWA] Success: ${new URL(assetUrl).pathname}`);
+                    } else {
+                        throw new Error(`Status: ${response.status}`);
                     }
                 } catch (err) {
-                    console.warn(`[PWA] Skipping asset: ${assetUrl}`);
+                    console.error(`[PWA] Failed to cache: ${assetUrl}`, err);
                 }
             }
         }).then(() => self.skipWaiting())
@@ -55,12 +70,13 @@ self.addEventListener('activate', (event) => {
     );
 });
 
-// 3. フェッチ時（違法リターンを綺麗に削除済み）
+// 3. フェッチ時
 self.addEventListener('fetch', (event) => {
     if (!event.request.url.startsWith(self.location.origin)) return;
 
     let requestUrl = new URL(event.request.url);
 
+    // ルートディレクトリへのアクセスを index.html にスマートにマッピング
     if (requestUrl.pathname === BASE_PATH || requestUrl.pathname === BASE_PATH.slice(0, -1)) {
         requestUrl.pathname = BASE_PATH + 'index.html';
     }
