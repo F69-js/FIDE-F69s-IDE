@@ -447,5 +447,7 @@ hr {
   flex-direction: column;
   margin-left: 200px;
 }
-/* --- 🌌 FIDE一文字クラス対応・完全圧縮カラーテーマ --- */
-.k{color:#569cd6;font-weight:bold}.s{color:#f2c94c;font-weight:bold}.b{color:#4ec9b0}.m{color:#dcdcaa}.a{color:#ff007f;font-weight:bold}.o{color:#c586c0;font-weight:bold}.str{color:#ce9178}.c{color:#6a9955;font-style:italic}
+/* --- 🌌 FIDEフルカラー対応・完全圧縮カラーテーマ --- */
+.k{color:#569cd6;font-weight:bold}.s{color:#f2c94c;font-weight:bold}.b{color:#4ec9b0}.m{color:#dcdcaa}.a{color:#ff007f;font-weight:bold}.o{color:#c586c0;font-weight:bold}.str{color:#ce9178}.c{color:#6a9955;font-style:italic}.fn{color:#dcdcaa;font-weight:bold}.br1{color:#ffd700;font-weight:bold}.br2{color:#da70d6;font-weight:bold}
+/* 👇 【オブジェクト＆配列強化ピース】プロパティライトブルー ＆ 配列角カッコ */
+.prop{color:#9cdcfe}.br3{color:#17a2b8;font-weight:bold}
