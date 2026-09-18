@@ -1,4 +1,4 @@
-// FIDE Custom IDE - Syntax Highlighter Module (Ultimate Encyclopedia Version)
+// FIDE Custom IDE - Syntax Highlighter Module (Object & Property Enhanced Version)
 const K_HL = {
   // 制御構文・予約語（Keyword / Control）
   'k': [
@@ -56,21 +56,24 @@ const K_HL = {
 
 function runHl(t) {
   let idx = 0, res = '', c1 = 0, c2 = 0, s = 0, sC = '', w = '';
- const flush = () => {
+  let lastChar = ''; // 直前の有効な記号を記憶する変数
+  
+  const flush = (isProperty = false) => {
     if (!w) return;
     let m = '';
     const found = Object.entries(K_HL).find(([cl, arr]) => arr.includes(w));
-    if (found) m = found[0]; // マッチしたグループのキー名（k, s, b, mなど）を確実に取得
+    if (found) m = found[0];
 
+    const span = document.createElement("span");
     if (m) {
-      // 💡 文字列結合を完全に廃止！ブラウザの機能で安全に<span>を生成
-      const span = document.createElement("span");
-      span.className = m;      // クラス名をセット
-      span.textContent = w;    // 単語の中身をセット
-      res += span.outerHTML;   // 完成したHTML文字列をガッチャンコ
+      span.className = m;
+    } else if (isProperty) {
+      span.className = "prop"; // ドットの右側、またはコロンの左側はオブジェクトのプロパティ色に
     } else if (/^\d+$/.test(w)) {
-      const span = document.createElement("span");
-      span.style.color = "#b5cea8";
+      span.style.color = "#b5cea8"; // 数値の色
+    }
+    
+    if (span.className || span.style.color) {
       span.textContent = w;
       res += span.outerHTML;
     } else {
@@ -78,6 +81,7 @@ function runHl(t) {
     }
     w = '';
   };
+
   while (idx < t.length) {
     const c = t[idx];
     if (c1) { res += c; if (c === '\n') { res += '</span>'; c1 = 0 } idx++; continue }
@@ -94,30 +98,69 @@ function runHl(t) {
     if (/[a-zA-Z0-9_*]/.test(c)) { 
       w += c; 
     } else {
+      // 💡【新ロジック】関数名、プロパティ、オブジェクトリテラルのコロン判定
       if (w && c === '(') {
         let m = '';
         const found = Object.entries(K_HL).find(([cl, arr]) => arr.includes(w));
         if (found) m = found[0];
-        res += m ? `<span class="${m}">${w}</span>` : `<span class="fn">${w}</span>`; w = '';
-      } else { 
-        flush(); 
+        
+        const span = document.createElement("span");
+        span.className = m ? m : "fn"; // 関数名は薄いイエロー
+        span.textContent = w;
+        res += span.outerHTML;
+        w = '';
+      } else if (w && c === ':') {
+        // 連想配列の定義 { key: value } のコロンの手前なら、プロパティとしてフラッシュ
+        flush(true);
+      } else {
+        // ドットアクセスの直後（lastChar === '.'）ならプロパティとしてフラッシュ
+        flush(lastChar === '.');
       }
       
+      // 空白以外の場合のみ、直前の記号履歴（lastChar）を更新
+      if (c.trim() !== '') {
+        lastChar = c;
+      }
+
       if (c === '{' || c === '}') {
-        res += `<span class="br1">${c}</span>`;
+        const span = document.createElement("span");
+        span.className = "br1"; // オブジェクト波カッコ：ゴールド
+        span.textContent = c;
+        res += span.outerHTML;
+      } else if (c === '[' || c === ']') {
+        const span = document.createElement("span");
+        span.className = "br3"; // 配列角カッコ：スクショ映えするライトブルー
+        span.textContent = c;
+        res += span.outerHTML;
       } else if (c === '(' || c === ')') {
-        res += `<span class="br2">${c}</span>`;
+        const span = document.createElement("span");
+        span.className = "br2"; // 丸カッコ
+        span.textContent = c;
+        res += span.outerHTML;
       } else if (c === '=' && t[idx + 1] === '>') {
-        res += '<span class="a">=&gt;</span>'; idx++;
+        const span = document.createElement("span");
+        span.className = "a";
+        span.textContent = "=>";
+        res += span.outerHTML;
+        idx++;
       } else if (c === '.' && t[idx + 1] === '.' && t[idx + 2] === '.') {
-        res += '<span class="o">...</span>'; idx += 2;
-      } else if (['+', '-', '*', '/', '=', '!', '<', '>', '?', '%', ':'].includes(c)) {
-        res += `<span class="o">${c}</span>`;
+        const span = document.createElement("span");
+        span.className = "o";
+        span.textContent = "...";
+        res += span.outerHTML;
+        idx += 2;
+      } else if (['+', '-', '*', '/', '=', '!', '<', '>', '?', '%', ':', '.'].includes(c)) {
+        const span = document.createElement("span");
+        span.className = "o";
+        span.textContent = c;
+        res += span.outerHTML;
       } else {
         res += c.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
       }
     } idx++;
-  } flush(); return res;
+  } 
+  flush(lastChar === '.'); 
+  return res;
 }
 
 export function applyFIDEHighlight() {
