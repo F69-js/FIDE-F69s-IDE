@@ -56,11 +56,27 @@ const K_HL = {
 
 function runHl(t) {
   let idx = 0, res = '', c1 = 0, c2 = 0, s = 0, sC = '', w = '';
-  const flush = () => {
-    if (!w) return; let m = '';
+ const flush = () => {
+    if (!w) return;
+    let m = '';
     const found = Object.entries(K_HL).find(([cl, arr]) => arr.includes(w));
-    if (found) m = found[0];
-    res += m ? `<span class="m">{w}</span>` : (/^\d+$/.test(w) ? `<span style="color:#b5cea8">\${w}</span>` : w); w = '';
+    if (found) m = found[0]; // マッチしたグループのキー名（k, s, b, mなど）を確実に取得
+
+    if (m) {
+      // 💡 文字列結合を完全に廃止！ブラウザの機能で安全に<span>を生成
+      const span = document.createElement("span");
+      span.className = m;      // クラス名をセット
+      span.textContent = w;    // 単語の中身をセット
+      res += span.outerHTML;   // 完成したHTML文字列をガッチャンコ
+    } else if (/^\d+$/.test(w)) {
+      const span = document.createElement("span");
+      span.style.color = "#b5cea8";
+      span.textContent = w;
+      res += span.outerHTML;
+    } else {
+      res += w;
+    }
+    w = '';
   };
   while (idx < t.length) {
     const c = t[idx];
