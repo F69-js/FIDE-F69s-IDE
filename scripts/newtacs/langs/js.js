@@ -4,6 +4,7 @@ const GOLD = ["this","window","globalThis","super","self","global"];
 const BUILTINS = ["JSON","console","Math","Date","Promise","String","Map","Set","Object","Number","Error","undefined","null","true","false","process","document","navigator","screen","location","history","Temporal","LanguageModel","ai"];
 const METHODS = ["push","pop","unshift","shift","slice","splice","filter","some","findIndex","includes","join","split","match","replace","replaceAll","trim","startsWith","indexOf","lastIndexOf","substring","map","forEach","reduce","padStart","toFixed","has","get","set","delete","entries","add","then","catch","finally","log","warn","error"];
 
+// 💡 複数行をまたぐための鉄壁の状態記憶ステーショナリー
 let s = 0, sC = '', c1 = 0, c2 = 0;
 
 export const JStheme = `
@@ -52,17 +53,29 @@ export function ApplyHighlighttoJS(t) {
   while (idx < t.length) {
     const c = t[idx];
     
+    // コメントガード
     if (c1) { res += c; if (c === '\n') { res += '</span>'; c1 = 0 } idx++; continue }
     if (c2) { res += c; if (c === '*' && t[idx + 1] === '/') { res += '/</span>'; c2 = 0; idx += 2 } else idx++; continue }
     
+    // 💡 通常の1行文字列モード
     if (s === 1) {
       if (c === '\\') { res += c + (t[idx + 1] || ''); idx += 2; continue }
       res += c.replace(/</g, '&lt;').replace(/>/g, '&gt;');
       if (c === sC) { res += '</span>'; s = 0 } idx++; continue;
     }
 
+    // 💡 テンプレートリテラル（複数行文字列）モード
     if (s === 2) {
       if (c === '\\') { res += c + (t[idx + 1] || ''); idx += 2; continue }
+      
+      // 💡【重要】文字列の中で本物の「改行（\n）」に出会った場合、
+      // DOM構造（各行のdivやspan）を引き裂かないように、一度スパンタグを閉じて改行を出力し、次の行の頭で自動再開させる！
+      if (c === '\n') {
+        res += '</span>\n<span class="tmpl-str">';
+        idx++;
+        continue;
+      }
+
       if (c === '$' && t[idx + 1] === '{') {
         res += '</span><span class="o">${</span><span class="tmpl-var">';
         idx += 2;
