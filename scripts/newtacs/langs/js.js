@@ -1,8 +1,7 @@
-const KEYWORDS = ["if","else","switch","case","break","return","typeof","instanceof","throw","for","let","const","var","class","export","constructor","new","import","from","try","catch","in","await","default","do","yield","function","extends","super","finally","with","arguments","interface","implements","package","private","protected","public","static"];
-const NEON_PINK = ["async","while","continue","debugger","null"];
-const GOLD = ["this","window","globalThis","super","self","global"];
-const BUILTINS = ["JSON","console","Math","Date","Promise","String","Map","Set","Object","Number","Error","undefined","null","true","false","process","document","navigator","screen","location","history","Temporal","LanguageModel","ai"];
-const METHODS = ["push","pop","unshift","shift","slice","splice","filter","some","findIndex","includes","join","split","match","replace","replaceAll","trim","startsWith","indexOf","lastIndexOf","substring","map","forEach","reduce","padStart","toFixed","has","get","set","delete","entries","add","then","catch","finally","log","warn","error"];
+// FIDE Tacs Highlighter© - JS Template Literal Multi-Line Stable Module (v3.0 Final)
+
+// 💡 行をまたいで文字列や複数行コメントの状態を完全に記憶する、鉄壁の外部ステーショナリー
+let s = 0, sC = '', c1 = 0, c2 = 0;
 
 export const JStheme = `
   .k { color: #569cd6; font-weight: bold; }
@@ -11,8 +10,8 @@ export const JStheme = `
   .b { color: #4ec9b0; }
   .m { color: #dcdcaa; }
   .o { color: #c586c0; font-weight: bold; }
-  .str { color: #ce9178; }                  /* 💡 通常の文字列: 渋いオレンジ */
-  .tmpl-str { color: #ff8c00; font-weight: bold; } /* 💡 【新色】テンプレートリテラル: 明るいネオンオレンジ */
+  .str { color: #ce9178; }
+  .tmpl-str { color: #ff8c00; font-weight: bold; } /* ネオンオレンジ */
   .prop { color: #9cdcfe; }
   .c { color: #6a9955; font-style: italic; }
   .fn { color: #dcdcaa; font-weight: bold; }
@@ -23,13 +22,21 @@ export const JStheme = `
   .tmpl-var { color: #9cdcfe; font-weight: bold; }
 `;
 
+// 💡 親玉がファイル全体のハイライトを新しく開始する直前に、状態を一度クリーンにリセットする関数
+export function ResetJSState() {
+  s = 0; sC = ''; c1 = 0; c2 = 0;
+}
+
 export function ApplyHighlighttoJS(t) {
-  let idx = 0, res = '', c1 = 0, c2 = 0, s = 0, sC = '', w = '';
+  let idx = 0, res = '', w = '';
   let lastChar = '';
+
+  // 💡 【核心】前の行からテンプレートリテラル(s==2)や複数行コメント(c2==1)が引き継がれていれば、行頭で自動タグ再開！
+  if (s === 2) res += '<span class="tmpl-str">';
+  if (c2 === 1) res += '<span class="c">';
 
   const flush = (isProperty = false) => {
     if (!w) return;
-    
     let className = "";
     if (KEYWORDS.includes(w)) className = "k";
     else if (NEON_PINK.includes(w)) className = "a";
@@ -40,9 +47,7 @@ export function ApplyHighlighttoJS(t) {
 
     if (className) {
       res += '<span class="' + className + '">' + w + '</span>';
-    } else {
-      res += w;
-    }
+    } else { res += w; }
     w = '';
   };
 
@@ -52,34 +57,29 @@ export function ApplyHighlighttoJS(t) {
     if (c1) { res += c; if (c === '\n') { res += '</span>'; c1 = 0 } idx++; continue }
     if (c2) { res += c; if (c === '*' && t[idx + 1] === '/') { res += '/</span>'; c2 = 0; idx += 2 } else idx++; continue }
     
-    // 1. 通常の文字列（シングル・ダブルクォート）のパース
     if (s === 1) {
       if (c === '\\') { res += c + (t[idx + 1] || ''); idx += 2; continue }
       res += c.replace(/</g, '&lt;').replace(/>/g, '&gt;');
       if (c === sC) { res += '</span>'; s = 0 } idx++; continue;
     }
 
-    // 2. テンプレートリテラル（バッククォート）のパース
     if (s === 2) {
       if (c === '\\') { res += c + (t[idx + 1] || ''); idx += 2; continue }
       
-      // 内蔵変数展開 ${variable} へのカラーリング
+      // 内蔵変数展開 ${variable} の一本釣り着色
       if (c === '$' && t[idx + 1] === '{') {
         res += '</span><span class="o">${</span><span class="tmpl-var">';
         idx += 2;
         while (idx < t.length) {
           if (t[idx] === '}') {
-            // 変数展開が終わったら、再び明るいネオンオレンジの「tmpl-str」へ復帰！
             res += '</span><span class="o">}</span><span class="tmpl-str">';
-            idx++;
-            break;
+            idx++; break;
           }
           res += t[idx].replace(/</g, '&lt;').replace(/>/g, '&gt;');
           idx++;
         }
         continue;
       }
-
       res += c.replace(/</g, '&lt;').replace(/>/g, '&gt;');
       if (c === '`') { res += '</span>'; s = 0 } idx++; continue;
     }
@@ -90,7 +90,6 @@ export function ApplyHighlighttoJS(t) {
     if (c === "'" || c === '"') { 
       flush(); sC = c; res += '<span class="str">' + c; s = 1; idx++; continue; 
     }
-    // 💡 バッククォート時は「tmpl-str」のクラスを流し込む！
     if (c === '`') {
       flush(); res += '<span class="tmpl-str">`'; s = 2; idx++; continue;
     }
@@ -99,8 +98,7 @@ export function ApplyHighlighttoJS(t) {
       if (w) {
         if (c === '(') {
           let className = METHODS.includes(w) ? "m" : (KEYWORDS.includes(w) ? "k" : "fn");
-          res += '<span class="' + className + '">' + w + '</span>';
-          w = '';
+          res += '<span class="' + className + '">' + w + '</span>'; w = '';
         } else if (c === ':') { flush(true); } else { flush(lastChar === '.'); }
       }
       if (c.trim() !== '') lastChar = c;
@@ -120,5 +118,11 @@ export function ApplyHighlighttoJS(t) {
       } else { res += c.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
     } idx++;
   }
-  flush(lastChar === '.'); return res;
+  flush(lastChar === '.');
+  
+  // 💡 【重要】行の終了時にまだ閉じられていなければ、各行のDOM崩れを防ぐために一度綺麗に閉じる！
+  if (s === 2) res += '</span>';
+  if (c2 === 1) res += '</span>';
+  
+  return res;
 }
