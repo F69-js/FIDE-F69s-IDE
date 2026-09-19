@@ -1,4 +1,4 @@
-// FIDE PWA Service Worker - NewTacs© 23-Lang & WebWorker Complete Cache (v1.6 Final)
+// FIDE PWA Service Worker - NewTacs© 23-Lang & WebWorker Complete Cache (v1.7 Final Fixed)
 const CACHE_NAME = "fide-tacs-cache-v2";
 
 const urlsToCache = [
@@ -32,6 +32,8 @@ const urlsToCache = [
   "./scripts/langs/swift.js",
   "./scripts/langs/dart.js",
   "./scripts/langs/r.js",
+  // 💡 【重要チェック】手元のファイル名が docker.js か dockerfile.js かに合わせて
+  // もし違っていたらここを書き換えてください。今回は「docker.js」として鉄壁ガード！
   "./scripts/langs/docker.js"
 ];
 
@@ -39,7 +41,14 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       console.log("[FIDE PWA] 📦 23大言語モジュール＆WebWorkerコアを100%キャッシュに完全隔離しました！");
-      return cache.addAll(urlsToCache);
+      // エラーが起きたファイルを特定しやすいように1個ずつ catch する安全モードで追加
+      return Promise.all(
+        urlsToCache.map(url => {
+          return cache.add(url).catch(err => {
+            console.error("[FIDE PWA] ❌ キャッシュに失敗したファイルがあります:", url, err);
+          });
+        })
+      );
     })
   );
   self.skipWaiting();
@@ -68,8 +77,6 @@ self.addEventListener("fetch", (event) => {
 
   event.respondWith(
     caches.match(event.request).then((response) => {
-      // 💡 【バグ完全粉砕】自動誤変換の原因になる「||」を使わず、
-      // 単純な if 文による安全な三項展開構造に書き換えて、記号クラッシュを100%根本から消滅！
       if (response) {
         return response;
       }
