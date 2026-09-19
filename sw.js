@@ -1,22 +1,15 @@
-// FIDE PWA Service Worker - NewTacs© 23-Lang & WebWorker Complete Cache (v1.5)
+// FIDE PWA Service Worker - NewTacs© 23-Lang & WebWorker Complete Cache (v1.6 Final)
 const CACHE_NAME = "fide-tacs-cache-v2";
 
-// 💡 【鉄壁の防衛ライン】新設した Worker、Gateway、および全23言語プラグインを完全封入！
 const urlsToCache = [
   "./",
   "./index.html",
   "./styles/main.css",
   "./scripts/main.js",
-  
-  // ─── 💡 1. メインハイライター ＆ Web Worker スレッドコア ───
   "./scripts/highlighter.js",
   "./scripts/highlighter-worker.js",
   "./scripts/linter/tide.js",
-  
-  // ─── 💡 2. 言語一括集約ゲートウェイハブ ───
   "./scripts/langs/gateway.js",
-  
-  // ─── 💡 3. 新Tacs 23大言語プラグインアセット全集 ───
   "./scripts/langs/js.js",
   "./scripts/langs/json.js",
   "./scripts/langs/html.js",
@@ -42,7 +35,6 @@ const urlsToCache = [
   "./scripts/langs/docker.js"
 ];
 
-// 💡 Service Worker インストールイベント：全アセットをキャッシュに爆速貯蔵！
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -53,7 +45,6 @@ self.addEventListener("install", (event) => {
   self.skipWaiting();
 });
 
-// 💡 古いキャッシュの自動クリーンアップ
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -70,17 +61,19 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
-// 💡 フェッチイベント：オフライン時でもキャッシュから秒速でアセットを引き出す！
 self.addEventListener("fetch", (event) => {
-  // placehold.co の外部動的アイコンはネットワークから取得（コケた時は alt 属性が防衛［cite: 1］）
   if (event.request.url.includes("placehold.co")) {
     return;
   }
 
   event.respondWith(
     caches.match(event.request).then((response) => {
-      // キャッシュがあればそれを返し、なければ通常の通信を行う
-      return response \vert{}\vert{} fetch(event.request);
+      // 💡 【バグ完全粉砕】自動誤変換の原因になる「||」を使わず、
+      // 単純な if 文による安全な三項展開構造に書き換えて、記号クラッシュを100%根本から消滅！
+      if (response) {
+        return response;
+      }
+      return fetch(event.request);
     })
   );
 });
