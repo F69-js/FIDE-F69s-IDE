@@ -4,16 +4,14 @@ const GOLD = ["root","hover","active","focus","visited","before","after","nth-ch
 const BUILTINS = ["display","position","top","right","bottom","left","width","height","margin","padding","background","color","font","border","box-sizing","flex","grid","opacity","visibility","overflow","z-index","transform","transition","animation"];
 const METHODS = ["calc","url","var","rgba","rgb","hsl","hsla","linear-gradient","translate","rotate","scale"];
 
-// 💡 拡張性抜群！CSS専用のプロ仕様カラーパレットを完全内蔵
 export const CSStheme = `
-  .k { color: #c586c0; font-weight: bold; } /* @media等: マゼンタ */
-  .a { color: #ff007f; font-weight: bold; } /* !important等: ネオンピンク */
-  .s { color: #569cd6; font-weight: bold; } /* 擬似クラス(:hover): ブルー */
-  .b { color: #9cdcfe; }                    /* プロパティ名: ライトブルー */
-  .m { color: #dcdcaa; }                    /* calc()関数: ライトイエロー */
-  .o { color: #ffffff; }                    /* コロン・セミコロン: 白 */
-  .str { color: #ce9178; }                  /* url()内の文字列: オレンジ */
-  .prop { color: #ffffff; }
+  .k { color: #c586c0; font-weight: bold; }
+  .a { color: #ff007f; font-weight: bold; }
+  .s { color: #569cd6; font-weight: bold; }
+  .b { color: #9cdcfe; }
+  .m { color: #dcdcaa; }
+  .o { color: #ffffff; }
+  .str { color: #ce9178; }
   .br1 { color: #00ffaa; font-weight: bold; }
   .br2 { color: #00ffff; font-weight: bold; }
   .br3 { color: #ff00ff; font-weight: bold; }
@@ -45,7 +43,7 @@ export function ApplyHighlighttoCSS(t) {
       res += c.replace(/</g, '&lt;').replace(/>/g, '&gt;');
       if (c === sC) { res += '</span>'; s = 0 } idx++; continue;
     }
-    if (c === "'" || c === '"') { flush(); sC = c; res += `<span class="str">${c}`; s = 1; idx++; continue }
+    if (c === "'" || c === '"') { flush(); sC = c; res += '<span class="str">' + c; s = 1; idx++; continue }
     const isWordChar = /[a-zA-Z0-9_\-#]/.test(c);
     if (isWordChar) { w += c; } else {
       if (w) flush();
