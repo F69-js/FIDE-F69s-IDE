@@ -1,16 +1,16 @@
-// FIDE PWA Service Worker - NewTacs© Universal Path Sync Cache (v2.5 Final Complete)
+// FIDE PWA Service Worker - NewTacs© Universal Path Sync Cache (v3.0 Final Master)
 const CACHE_NAME = "fide-tacs-cache-v2";
 
-// 💡 【バグ完全根絶】架空の main.js を完全に消去し、正しい「./scripts/index.js」へ完全配線！
+// 💡 【物理パス完全同期】すべての新言語・Workerを正しい「scripts/newtacs/」のツリーへ完全配線！
 const urlsToCache = [
   "./",
   "./index.html",
   "./styles/main.css",
   
-  // ─── 💡 1. メインエントリースクリプト（index.js に完全修正） ───
+  // ─── 💡 1. メインエントリースクリプト ───
   "./scripts/index.js",
   
-  // ─── 💡 2. 新TacsマルチスレッドWorkerコア ───
+  // ─── 💡 2. 新TacsマルチスレッドWorkerコア（物理配置） ───
   "./scripts/newtacs/highlighter.js",
   "./scripts/newtacs/highlighter-worker.js",
   "./scripts/linter/tide.js",
@@ -18,7 +18,7 @@ const urlsToCache = [
   // ─── 💡 3. 一括集約ゲートウェイ ───
   "./scripts/newtacs/langs/gateway.js",
   
-  // ─── 💡 4. 新Tacs 23大言語モジュール（真の物理配置） ───
+  // ─── 💡 4. 新Tacs 23大言語プラグイン（全言語を newtacs/langs/ に完全統一！） ───
   "./scripts/newtacs/langs/js.js",
   "./scripts/newtacs/langs/json.js",
   "./scripts/newtacs/langs/html.js",
@@ -30,18 +30,18 @@ const urlsToCache = [
   "./scripts/newtacs/langs/cs.js",
   "./scripts/newtacs/langs/java.js",
   "./scripts/newtacs/langs/ts.js",
-  "./scripts/langs/sql.js",
-  "./scripts/langs/sh.js",
-  "./scripts/langs/yaml.js",
-  "./scripts/langs/toml.js",
-  "./scripts/langs/rust.js",
-  "./scripts/langs/go.js",
-  "./scripts/langs/ruby.js",
-  "./scripts/langs/kt.js",
-  "./scripts/langs/swift.js",
-  "./scripts/langs/dart.js",
-  "./scripts/langs/r.js",
-  "./scripts/langs/docker.js"
+  "./scripts/newtacs/langs/sql.js",
+  "./scripts/newtacs/langs/sh.js",
+  "./scripts/newtacs/langs/yaml.js",
+  "./scripts/newtacs/langs/toml.js",
+  "./scripts/newtacs/langs/rust.js",
+  "./scripts/newtacs/langs/go.js",
+  "./scripts/newtacs/langs/ruby.js",
+  "./scripts/newtacs/langs/kt.js",
+  "./scripts/newtacs/langs/swift.js",
+  "./scripts/newtacs/langs/dart.js",
+  "./scripts/newtacs/langs/r.js",
+  "./scripts/newtacs/langs/docker.js"
 ];
 
 self.addEventListener("install", (event) => {
