@@ -1,37 +1,15 @@
-// FIDE Custom IDE - Tacs© Universe 23-Language Router Master (v24.0 True Fixed)
-// 💡 【配線100%完全復旧】同じ scripts/ 内にある正しい「./langs/」から完璧にインポート！
-import { ApplyHighlighttoJS, JStheme } from "./langs/js.js";
-import { ApplyHighlighttoJSON, JSONtheme } from "./langs/json.js";
-import { ApplyHighlighttoHTML, HTMLtheme } from "./langs/html.js";
-import { ApplyHighlighttoCSS, CSStheme } from "./langs/css.js";
-import { ApplyHighlighttoMD, MDtheme } from "./langs/md.js";
-import { ApplyHighlighttoPY, PYtheme } from "./langs/py.js";
-import { ApplyHighlighttoPHP, PHPtheme } from "./langs/php.js";
-import { ApplyHighlighttoCPP, CPPtheme } from "./langs/cpp.js";
-import { ApplyHighlighttoCS, CStheme } from "./langs/cs.js";
-import { ApplyHighlighttoJAVA, JAVAtheme } from "./langs/java.js";
-import { ApplyHighlighttoTS, TStheme } from "./langs/ts.js";
-import { ApplyHighlighttoSQL, SQLtheme } from "./langs/sql.js";
-import { ApplyHighlighttoSH, SHtheme } from "./langs/sh.js";
-import { ApplyHighlighttoYAML, YAMLtheme } from "./langs/yaml.js";
-import { ApplyHighlighttoTOML, TOMLtheme } from "./langs/toml.js";
-import { ApplyHighlighttoRust, Rusttheme } from "./langs/rust.js";
-import { ApplyHighlighttoGo, Gotheme } from "./langs/go.js";
-import { ApplyHighlighttoRuby, Rubytheme } from "./langs/ruby.js";
-import { ApplyHighlighttoKT, KTtheme } from "./langs/kt.js";
-import { ApplyHighlighttoSwift, Swifttheme } from "./langs/swift.js";
-import { ApplyHighlighttoDart, Darttheme } from "./langs/dart.js";
-import { ApplyHighlighttoR, Rtheme } from "./langs/r.js";
-import { ApplyHighlighttoDocker, Dockertheme } from "./langs/docker.js";
+// FIDE Custom IDE - Text-as-colors (Tacs) Central Gateway Router© (v25.0)
+// 💡 【クリーンリファクタリング】23個のインポート文を、gateway.js からの1行に美しく集約！
+import * as Gateway from "./langs/gateway.js";
 
 let currentLang = 'js';
 
 const COMPONENT_THEMES = {
-  js: JStheme, json: JSONtheme, html: HTMLtheme, css: CSStheme, md: MDtheme,
-  py: PYtheme, php: PHPtheme, cpp: CPPtheme, h: CPPtheme, cs: CStheme, java: JAVAtheme,
-  ts: TStheme, sql: SQLtheme, sh: SHtheme, yaml: YAMLtheme, yml: YAMLtheme, toml: TOMLtheme,
-  rs: Rusttheme, go: Gotheme, rb: Rubytheme, kt: KTtheme, kts: KTtheme, swift: Swifttheme,
-  dart: Darttheme, r: Rtheme, dockerfile: Dockertheme
+  js: Gateway.JStheme, json: Gateway.JSONtheme, html: Gateway.HTMLtheme, css: Gateway.CSStheme, md: Gateway.MDtheme,
+  py: Gateway.PYtheme, php: Gateway.PHPtheme, cpp: Gateway.CPPtheme, h: Gateway.CPPtheme, cs: Gateway.CStheme, java: Gateway.JAVAtheme,
+  ts: Gateway.TStheme, sql: Gateway.SQLtheme, sh: Gateway.SHtheme, yaml: Gateway.YAMLtheme, yml: Gateway.YAMLtheme, toml: Gateway.TOMLtheme,
+  rs: Gateway.Rusttheme, go: Gateway.Gotheme, rb: Gateway.Rubytheme, kt: Gateway.KTtheme, kts: Gateway.KTtheme, swift: Gateway.Swifttheme,
+  dart: Gateway.Darttheme, r: Gateway.Rtheme, dockerfile: Gateway.Dockertheme
 };
 
 function updateDynamicThemeStyle(lang) {
@@ -66,29 +44,30 @@ export function applyFIDEHighlight() {
     const plainText = line.innerText.replace(/\|/g, "\t");
     let h = '';
     
-    if (currentLang === 'json') h = ApplyHighlighttoJSON(plainText);
-    else if (currentLang === 'html') h = ApplyHighlighttoHTML(plainText);
-    else if (currentLang === 'css') h = ApplyHighlighttoCSS(plainText);
-    else if (currentLang === 'md') h = ApplyHighlighttoMD(plainText);
-    else if (currentLang === 'py') h = ApplyHighlighttoPY(plainText);
-    else if (currentLang === 'php') h = ApplyHighlighttoPHP(plainText);
-    else if (currentLang === 'cpp' || currentLang === 'h') h = ApplyHighlighttoCPP(plainText);
-    else if (currentLang === 'cs') h = ApplyHighlighttoCS(plainText);
-    else if (currentLang === 'java') h = ApplyHighlighttoJAVA(plainText);
-    else if (currentLang === 'ts') h = ApplyHighlighttoTS(plainText);
-    else if (currentLang === 'sql') h = ApplyHighlighttoSQL(plainText);
-    else if (currentLang === 'sh') h = ApplyHighlighttoSH(plainText);
-    else if (currentLang === 'yaml' || currentLang === 'yml') h = ApplyHighlighttoYAML(plainText);
-    else if (currentLang === 'toml') h = ApplyHighlighttoTOML(plainText);
-    else if (currentLang === 'rs') h = ApplyHighlighttoRust(plainText);
-    else if (currentLang === 'go') h = ApplyHighlighttoGo(plainText);
-    else if (currentLang === 'rb') h = ApplyHighlighttoRuby(plainText);
-    else if (currentLang === 'kt' || currentLang === 'kts') h = ApplyHighlighttoKT(plainText);
-    else if (currentLang === 'swift') h = ApplyHighlighttoSwift(plainText);
-    else if (currentLang === 'dart') h = ApplyHighlighttoDart(plainText);
-    else if (currentLang === 'r') h = ApplyHighlighttoR(plainText);
-    else if (currentLang === 'dockerfile') h = ApplyHighlighttoDocker(plainText);
-    else h = ApplyHighlighttoJS(plainText);
+    // 💡 ゲートウェイ経由で集約された23大言語の関数を美しくスマートに呼び出し！
+    if (currentLang === 'json') h = Gateway.ApplyHighlighttoJSON(plainText);
+    else if (currentLang === 'html') h = Gateway.ApplyHighlighttoHTML(plainText);
+    else if (currentLang === 'css') h = Gateway.ApplyHighlighttoCSS(plainText);
+    else if (currentLang === 'md') h = Gateway.ApplyHighlighttoMD(plainText);
+    else if (currentLang === 'py') h = Gateway.ApplyHighlighttoPY(plainText);
+    else if (currentLang === 'php') h = Gateway.ApplyHighlighttoPHP(plainText);
+    else if (currentLang === 'cpp' || currentLang === 'h') h = Gateway.ApplyHighlighttoCPP(plainText);
+    else if (currentLang === 'cs') h = Gateway.ApplyHighlighttoCS(plainText);
+    else if (currentLang === 'java') h = Gateway.ApplyHighlighttoJAVA(plainText);
+    else if (currentLang === 'ts') h = Gateway.ApplyHighlighttoTS(plainText);
+    else if (currentLang === 'sql') h = Gateway.ApplyHighlighttoSQL(plainText);
+    else if (currentLang === 'sh') h = Gateway.ApplyHighlighttoSH(plainText);
+    else if (currentLang === 'yaml' || currentLang === 'yml') h = Gateway.ApplyHighlighttoYAML(plainText);
+    else if (currentLang === 'toml') h = Gateway.ApplyHighlighttoTOML(plainText);
+    else if (currentLang === 'rs') h = Gateway.ApplyHighlighttoRust(plainText);
+    else if (currentLang === 'go') h = Gateway.ApplyHighlighttoGo(plainText);
+    else if (currentLang === 'rb') h = Gateway.ApplyHighlighttoRuby(plainText);
+    else if (currentLang === 'kt' || currentLang === 'kts') h = Gateway.ApplyHighlighttoKT(plainText);
+    else if (currentLang === 'swift') h = Gateway.ApplyHighlighttoSwift(plainText);
+    else if (currentLang === 'dart') h = Gateway.ApplyHighlighttoDart(plainText);
+    else if (currentLang === 'r') h = Gateway.ApplyHighlighttoR(plainText);
+    else if (currentLang === 'dockerfile') h = Gateway.ApplyHighlighttoDocker(plainText);
+    else h = Gateway.ApplyHighlighttoJS(plainText);
     
     line.innerHTML = bindHyperlinksToDom(h).replace(/\t/g, "|");
   });
@@ -113,7 +92,7 @@ function updateLangIndicator(lang) {
   else if (['md', 'sh', 'kt', 'kts'].includes(lang)) textColor = 'dcdcaa';
   else if (['py', 'sql', 'yaml', 'yml', 'go', 'dart', 'r'].includes(lang)) textColor = 'f2c94c';
 
-  // 💡 【あなたの100%大正解結合】
+  // 💡 あなたの100%絶対正解結合コードで完全自動連動！
   const targetSrc = "https://placehold.co" + "/128x128/" + bgColor + "/" + textColor + "?text=" + upperLang;
   icon.src = targetSrc;
   icon.alt = upperLang;
