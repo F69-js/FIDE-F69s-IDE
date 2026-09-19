@@ -469,7 +469,7 @@ window.addEventListener("keydown",async e => {
       searchresults.hidden=SearchOpen
       searchg.hidden=SearchOpen
     }
-    console.log(e.key)
+    console.log(e.key,active)
     if(!active)return;
     if(u===1){
       window.addEventListener('beforeunload',HandleUnload);
