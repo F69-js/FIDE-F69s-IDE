@@ -203,7 +203,7 @@ class EnvironmentError extends Error {
 maincontainer.addEventListener("click",()=>{
     active=true;
 })
-filenamei.addEventListener("click",()=>{
+filenamei.addEventListener("click",(e)=>{
     const currentFileName = e.target.value;
     detectLanguageByExtension(currentFileName);
     applyFIDEHighlight();
