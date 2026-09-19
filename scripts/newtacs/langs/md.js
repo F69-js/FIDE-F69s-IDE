@@ -1,100 +1,125 @@
-// FIDE Custom IDE - Text-as-colors (Tacs) Plugin Router & Hyperlink Engine© (v11.0)
-import { ApplyHighlighttoJS, JStheme } from "./langs/js.js";
-import { ApplyHighlighttoJSON, JSONtheme } from "./langs/json.js";
-import { ApplyHighlighttoHTML, HTMLtheme } from "./langs/html.js";
-import { ApplyHighlighttoCSS, CSStheme } from "./langs/css.js";
+v// FIDE Tacs Highlighter© - Markdown (.md) Plugin Module (True Final Fixed)
 
-let currentLang = 'js';
-
-const COMPONENT_THEMES = {
-  js: JStheme,
-  json: JSONtheme,
-  html: HTMLtheme,
-  css: CSStheme
-};
-
-function updateDynamicThemeStyle(lang) {
-  let styleTag = document.getElementById("fide-dynamic-tacs-theme");
-  if (!styleTag) {
-    styleTag = document.createElement("style");
-    styleTag.id = "fide-dynamic-tacs-theme";
-    document.head.appendChild(styleTag);
-  }
-  styleTag.innerText = COMPONENT_THEMES[lang] || COMPONENT_THEMES['js'];
-}
-
-export function detectLanguageByExtension(filename) {
-  if (!filename || !filename.trim() || !filename.includes('.')) {
-    currentLang = 'js';
-    updateDynamicThemeStyle('js');
-    updateLangIndicator('js');
-    return;
-  }
-  const ext = filename.split('.').pop().toLowerCase();
-  if (['js', 'json', 'html', 'css'].includes(ext)) {
-    currentLang = ext;
-    updateDynamicThemeStyle(ext);
-  } else {
-    currentLang = 'js';
-    updateDynamicThemeStyle('js');
-  }
-  updateLangIndicator(currentLang);
-}
+// 💡 拡張性抜群！Markdown専用のミニマルネオンカラーパレットを完全内蔵
+export const MDtheme = `
+  .k { color: #569cd6; font-weight: bold; }   /* 見出し(#): ブルー */
+  .a { color: #ff007f; font-weight: bold; }   /* 太字(**)・斜体: ネオンピンク */
+  .s { color: #f2c94c; font-weight: bold; }   /* リンクのテキスト: ゴールド */
+  .b { color: #4ec9b0; }                      /* 引用(>): エメラルド */
+  .m { color: #dcdcaa; }                      /* リスト記号(-/*): ライトイエロー */
+  .o { color: #ffffff; }                      /* 区切り記号: 白 */
+  .str { color: #ce9178; }                    /* インラインコード・コードブロック: オレンジ */
+  .prop { color: #9cdcfe; }                   /* リンクのURL部分: ライトブルー */
+  .c { color: #6a9955; font-style: italic; }   /* 注釈・コメント: グリーン */
+`;
 
 /**
- * 💡【新機能】レンダリングされたHTML文字列の中から http(s) のURLを検知し、
- * エディタの表示を崩さないスマートな「aタグ（ハイパーリンク）」へ全自動置換する関数
+ * Markdown用のText-as-colorsスキャンを実行する関数
+ * @param {string} t - 生の行テキスト
+ * @returns {string} HTML要素文字列
  */
-function bindHyperlinksToDom(htmlText) {
-  // 💡 安全なURL抽出正規表現（文字列やタグの属性に干渉しないように文字実体を考慮）
-  const urlRegex = /(https?:\/\/[^\s"'<>\(\)]+)/g;
+export function ApplyHighlighttoMD(t) {
+  let idx = 0, res = '', s = 0, w = '';
   
-  return htmlText.replace(urlRegex, (url) => {
-    // 表示上のノイズ（エスケープされた残骸など）を綺麗にクリーンアップ
-    const cleanUrl = url.replace(/&amp;/g, '&');
-    
-    // <a>タグに変身！エディタのネオンカラーを邪魔しないようにアンダーラインと色を透過指定！
-    return '<a href="' + cleanUrl + '" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: underline; text-decoration-style: dashed; cursor: pointer;">' + url + '</a>';
-  });
-}
+  // 行全体の文脈（行頭の見出しやリスト）を一瞬でチェックするための簡易フラグ
+  const trimText = t.trim();
 
-export function applyFIDEHighlight() {
-  const lines = document.querySelectorAll(".line");
-  lines.forEach(line => {
-    const plainText = line.innerText.replace(/\|/g, "\t");
-    let highlightedHtml = '';
-    
-    if (currentLang === 'json') highlightedHtml = ApplyHighlighttoJSON(plainText);
-    else if (currentLang === 'html') highlightedHtml = ApplyHighlighttoHTML(plainText);
-    else if (currentLang === 'css') highlightedHtml = ApplyHighlighttoCSS(plainText);
-    else highlightedHtml = ApplyHighlighttoJS(plainText);
-    
-    // 💡 決定打：各プラグインが色付けした後のHTMLに対して、URLハイパーリンクを自動バインド！
-    const linkedHtml = bindHyperlinksToDom(highlightedHtml);
-    
-    line.innerHTML = linkedHtml.replace(/\t/g, "|");
-  });
-}
+  // 1. 行頭の見出し判定（# Header）
+  if (trimText.startsWith('#')) {
+    const span = document.createElement("span");
+    span.className = "k";
+    span.textContent = t;
+    return span.outerHTML;
+  }
 
-function updateLangIndicator(lang) {
-  const icon = document.getElementById("tacs-lang-icon");
-  if (!icon) return;
+  // 2. 行頭の引用判定（> Quote）
+  if (trimText.startsWith('>')) {
+    const span = document.createElement("span");
+    span.className = "b";
+    span.textContent = t;
+    return span.outerHTML;
+  }
 
-  const upperLang = lang.toUpperCase();
-  let textColor = '569cd6';
-  const bgColor = '1e1e1e';
+  // 3. 1文字ずつの高速クリーン・シリアルスキャン
+  while (idx < t.length) {
+    const c = t[idx];
 
-  if (lang === 'html') textColor = '4ec9b0';
-  else if (lang === 'css') textColor = 'c586c0';
-  else if (lang === 'json') textColor = '9cdcfe';
-  else textColor = '569cd6';
+    // インラインコード（`code`）のパース処理
+    if (s) {
+      res += c.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      if (c === '`') {
+        res += '</span>';
+        s = 0;
+      }
+      idx++;
+      continue;
+    }
 
-  const targetSrc = "https://placehold.co" + bgColor + "/" + textColor + "?text=" + upperLang;
-  icon.src = targetSrc;
-  icon.alt = upperLang;
-}
+    // バッククォートを見つけたらインラインコードモード（オレンジ）へ突入！
+    if (c === '`') {
+      res += '<span class="str">`';
+      s = 1;
+      idx++;
+      continue;
+    }
 
-if (typeof document !== "undefined") {
-  updateDynamicThemeStyle('js');
-  updateLangIndicator('js');
+    // 太字（**bold**）のトークン検出
+    if (c === '*' && t[idx + 1] === '*') {
+      res += '<span class="a">**';
+      idx += 2;
+      while (idx < t.length) {
+        if (t[idx] === '*' && t[idx + 1] === '*') {
+          res += '**</span>';
+          idx += 2;
+          break;
+        }
+        res += t[idx].replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        idx++;
+      }
+      continue;
+    }
+
+    // リンク記法（[Text](URL)）のコンテキスト検出
+    if (c === '[') {
+      res += '<span class="o">[</span><span class="s">';
+      idx++;
+      while (idx < t.length) {
+        if (t[idx] === ']') {
+          res += '</span><span class="o">]</span>';
+          idx++;
+          if (t[idx] === '(') {
+            res += '<span class="o">(</span><span class="prop">';
+            idx++;
+            while (idx < t.length) {
+              if (t[idx] === ')') {
+                res += '</span><span class="o">)</span>';
+                idx++;
+                break;
+              }
+              res += t[idx];
+              idx++;
+            }
+          }
+          break;
+        }
+        res += t[idx].replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        idx++;
+      }
+      continue;
+    }
+
+    // 一般的な記号・箇条書き（-, *, +, |）の着色
+    if (idx === 0 && ['-', '*', '+'].includes(c) && t[idx + 1] === ' ') {
+      const span = document.createElement("span");
+      span.className = "m"; span.textContent = c; res += span.outerHTML;
+    } else if (['|', '[', ']', '(', ')', '#', '`'].includes(c)) {
+      const span = document.createElement("span");
+      span.className = "o"; span.textContent = c; res += span.outerHTML;
+    } else {
+      res += c.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+    idx++;
+  }
+
+  return res;
 }
