@@ -1,4 +1,4 @@
-// FIDE Custom IDE - Text-as-colors (Tacs) PWA Web Worker Engine© (v28.0 True Final Complete)
+// FIDE Custom IDE - Text-as-colors (Tacs) PWA Web Worker Engine© (v30.0 Serial Master)
 // 💡 【疑似DOMエミュレーター】Worker内部の未定義エラーを完全粉砕！プラグインを一切汚さない鉄壁ハック！
 
 self.document = {
@@ -21,7 +21,6 @@ self.document = {
   }
 };
 
-// 💡 疑似DOM環境が100%完全に整ったので、ゲートウェイを一斉インポート！
 import * as Gateway from "./langs/gateway.js";
 
 let currentLang = 'js';
@@ -42,11 +41,9 @@ function bindHyperlinksToDom(htmlText) {
   });
 }
 
-// ⌨️ メインスレッドからの並列処理メッセージイベント
 self.addEventListener("message", (e) => {
   const { type, filename, linesText, lang } = e.data;
 
-  // 1. 拡張子・本文による言語切り替え判定
   if (type === "DETECT_LANG") {
     if (!filename || !filename.trim() || !filename.includes('.')) {
       currentLang = 'js';
@@ -61,7 +58,6 @@ self.addEventListener("message", (e) => {
       }
     }
     
-    // 決定した言語と専用CSSテーマをメインスレッドへ返送
     self.postMessage({
       type: "LANG_CHANGED",
       currentLang: currentLang,
@@ -70,50 +66,55 @@ self.addEventListener("message", (e) => {
     return;
   }
 
-  // 2. 🚀 ハイライト一括パースコマンド
+  // 💡 2. 【究極進化】ハイライト一括シリアルパースコマンド
   if (type === "HIGHLIGHT") {
     if (lang) currentLang = lang;
 
-    // 💡 【重要】複数行文字列のために、毎回のファイルパースのド頭で行またぎフラグをクリーンにリセット！
-    // ゲートウェイ経由で js.js 内の ResetJSState 関数をスマートに大起動！
+    // 🧠 状態リセット
     if (Gateway.ResetJSState) {
       Gateway.ResetJSState();
     }
 
-    const highlightedLines = linesText.map(plainText => {
-      let h = '';
-      switch (currentLang) {
-        case 'json':       h = Gateway.ApplyHighlighttoJSON(plainText); break;
-        case 'html':       h = Gateway.ApplyHighlighttoHTML(plainText); break;
-        case 'css':        h = Gateway.ApplyHighlighttoCSS(plainText); break;
-        case 'md':         h = Gateway.ApplyHighlighttoMD(plainText); break;
-        case 'py':         h = Gateway.ApplyHighlighttoPY(plainText); break;
-        case 'php':        h = Gateway.ApplyHighlighttoPHP(plainText); break;
-        case 'cpp':
-        case 'h':          h = Gateway.ApplyHighlighttoCPP(plainText); break;
-        case 'cs':         h = Gateway.ApplyHighlighttoCS(plainText); break;
-        case 'java':       h = Gateway.ApplyHighlighttoJAVA(plainText); break;
-        case 'ts':         h = Gateway.ApplyHighlighttoTS(plainText); break;
-        case 'sql':        h = Gateway.ApplyHighlighttoSQL(plainText); break;
-        case 'sh':         h = Gateway.ApplyHighlighttoSH(plainText); break;
-        case 'yaml':
-        case 'yml':        h = Gateway.ApplyHighlighttoYAML(plainText); break;
-        case 'toml':       h = Gateway.ApplyHighlighttoTOML(plainText); break;
-        case 'rs':         h = Gateway.ApplyHighlighttoRust(plainText); break;
-        case 'go':         h = Gateway.ApplyHighlighttoGo(plainText); break;
-        case 'rb':         h = Gateway.ApplyHighlighttoRuby(plainText); break;
-        case 'kt':
-        case 'kts':        h = Gateway.ApplyHighlighttoKT(plainText); break;
-        case 'swift':      h = Gateway.ApplyHighlighttoSwift(plainText); break;
-        case 'dart':       h = Gateway.ApplyHighlighttoDart(plainText); break;
-        case 'r':          h = Gateway.ApplyHighlighttoR(plainText); break;
-        case 'dockerfile': h = Gateway.ApplyHighlighttoDocker(plainText); break;
-        default:           h = Gateway.ApplyHighlighttoJS(plainText); break;
-      }
-      return bindHyperlinksToDom(h).replace(/\t/g, "|");
-    });
+    // 💡 配列でぶつ切りにするのを完全に廃止！
+    // すべての行を特別な改行マーカー「\n」で繋ぎ、1本の巨大なテキストとして一気にスキャンさせる！
+    const fullCombinedText = linesText.join("\n");
+    let highlightedCombinedHtml = "";
 
-    // パース完了した極彩色HTMLアレイを送信！
+    switch (currentLang) {
+      case 'json':       highlightedCombinedHtml = Gateway.ApplyHighlighttoJSON(fullCombinedText); break;
+      case 'html':       highlightedCombinedHtml = Gateway.ApplyHighlighttoHTML(fullCombinedText); break;
+      case 'css':        highlightedCombinedHtml = Gateway.ApplyHighlighttoCSS(fullCombinedText); break;
+      case 'md':         highlightedCombinedHtml = Gateway.ApplyHighlighttoMD(fullCombinedText); break;
+      case 'py':         highlightedCombinedHtml = Gateway.ApplyHighlighttoPY(fullCombinedText); break;
+      case 'php':        highlightedCombinedHtml = Gateway.ApplyHighlighttoPHP(fullCombinedText); break;
+      case 'cpp':
+      case 'h':          highlightedCombinedHtml = Gateway.ApplyHighlighttoCPP(fullCombinedText); break;
+      case 'cs':         highlightedCombinedHtml = Gateway.ApplyHighlighttoCS(fullCombinedText); break;
+      case 'java':       highlightedCombinedHtml = Gateway.ApplyHighlighttoJAVA(fullCombinedText); break;
+      case 'ts':         highlightedCombinedHtml = Gateway.ApplyHighlighttoTS(fullCombinedText); break;
+      case 'sql':        highlightedCombinedHtml = Gateway.ApplyHighlighttoSQL(fullCombinedText); break;
+      case 'sh':         highlightedCombinedHtml = Gateway.ApplyHighlighttoSH(fullCombinedText); break;
+      case 'yaml':
+      case 'yml':        highlightedCombinedHtml = Gateway.ApplyHighlighttoYAML(fullCombinedText); break;
+      case 'toml':       highlightedCombinedHtml = Gateway.ApplyHighlighttoTOML(fullCombinedText); break;
+      case 'rs':         highlightedCombinedHtml = Gateway.ApplyHighlighttoRust(fullCombinedText); break;
+      case 'go':         highlightedCombinedHtml = Gateway.ApplyHighlighttoGo(fullCombinedText); break;
+      case 'rb':         highlightedCombinedHtml = Gateway.ApplyHighlighttoRuby(fullCombinedText); break;
+      case 'kt':
+      case 'kts':        highlightedCombinedHtml = Gateway.ApplyHighlighttoKT(fullCombinedText); break;
+      case 'swift':      highlightedCombinedHtml = Gateway.ApplyHighlighttoSwift(fullCombinedText); break;
+      case 'dart':       highlightedCombinedHtml = Gateway.ApplyHighlighttoDart(fullCombinedText); break;
+      case 'r':          highlightedCombinedHtml = Gateway.ApplyHighlighttoR(fullCombinedText); break;
+      case 'dockerfile': highlightedCombinedHtml = Gateway.ApplyHighlighttoDocker(fullCombinedText); break;
+      default:           highlightedCombinedHtml = Gateway.ApplyHighlighttoJS(fullCombinedText); break;
+    }
+
+    // ハイパーリンクを全自動バインド
+    const linkedCombinedHtml = bindHyperlinksToDom(highlightedCombinedHtml);
+
+    // 💡 完璧に一括色付けが終わった巨大なHTMLを、元の行ごとの配列へと安全に復元スプリット！
+    const highlightedLines = linkedCombinedHtml.split("\n");
+
     self.postMessage({
       type: "HIGHLIGHT_COMPLETE",
       highlightedLines: highlightedLines
