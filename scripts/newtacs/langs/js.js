@@ -4,16 +4,15 @@ const GOLD = ["this","window","globalThis","super","self","global"];
 const BUILTINS = ["JSON","console","Math","Date","Promise","String","Map","Set","Object","Number","Error","undefined","null","true","false","process","document","navigator","screen","location","history","Temporal","LanguageModel","ai"];
 const METHODS = ["push","pop","unshift","shift","slice","splice","filter","some","findIndex","includes","join","split","match","replace","replaceAll","trim","startsWith","indexOf","lastIndexOf","substring","map","forEach","reduce","padStart","toFixed","has","get","set","delete","entries","add","then","catch","finally","log","warn","error"];
 
-// 💡 拡張性抜群！JS専用のカラーテーマ定義
 export const JStheme = `
-  .k { color: #569cd6; font-weight: bold; } /* 予約語: ブルー */
-  .a { color: #ff007f; font-weight: bold; } /* async/while: ネオンピンク */
-  .s { color: #f2c94c; font-weight: bold; } /* this/super: ゴールド */
-  .b { color: #4ec9b0; }                    /* ビルトイン: エメラルド */
-  .m { color: #dcdcaa; }                    /* メソッド: ライトイエロー */
-  .o { color: #c586c0; font-weight: bold; } /* 演算子: マゼンタ */
-  .str { color: #ce9178; }                  /* 文字列: オレンジ */
-  .prop { color: #9cdcfe; }                 /* プロパティ: ライトブルー */
+  .k { color: #569cd6; font-weight: bold; }
+  .a { color: #ff007f; font-weight: bold; }
+  .s { color: #f2c94c; font-weight: bold; }
+  .b { color: #4ec9b0; }
+  .m { color: #dcdcaa; }
+  .o { color: #c586c0; font-weight: bold; }
+  .str { color: #ce9178; }
+  .prop { color: #9cdcfe; }
   .c { color: #6a9955; font-style: italic; }
   .fn { color: #dcdcaa; font-weight: bold; }
   .br1 { color: #00ffaa; font-weight: bold; }
@@ -29,55 +28,45 @@ export function ApplyHighlighttoJS(t) {
   const flush = (isProperty = false) => {
     if (!w) return;
     const span = document.createElement("span");
-    
     if (KEYWORDS.includes(w)) span.className = "k";
     else if (NEON_PINK.includes(w)) span.className = "a";
     else if (GOLD.includes(w)) span.className = "s";
     else if (BUILTINS.includes(w)) span.className = "b";
     else if (METHODS.includes(w)) span.className = "m";
     else if (isProperty) span.className = "prop";
-    else if (/^\\d+$/.test(w)) span.style.color = "#b5cea8";
 
-    if (span.className || span.style.color) {
-      span.textContent = w;
-      res += span.outerHTML;
-    } else {
-      res += w;
-    }
+    if (span.className) {
+      span.textContent = w; res += span.outerHTML;
+    } else { res += w; }
     w = '';
   };
 
   while (idx < t.length) {
     const c = t[idx];
-    if (c1) { res += c; if (c === '\\n') { res += '</span>'; c1 = 0 } idx++; continue }
+    if (c1) { res += c; if (c === '\n') { res += '</span>'; c1 = 0 } idx++; continue }
     if (c2) { res += c; if (c === '*' && t[idx + 1] === '/') { res += '/</span>'; c2 = 0; idx += 2 } else idx++; continue }
     if (s) {
-      if (c === '\\\\') { res += c + (t[idx + 1] || ''); idx += 2; continue }
+      if (c === '\\') { res += c + (t[idx + 1] || ''); idx += 2; continue }
       res += c.replace(/</g, '&lt;').replace(/>/g, '&gt;');
       if (c === sC) { res += '</span>'; s = 0 } idx++; continue;
     }
 
     if (c === '/' && t[idx + 1] === '/') { flush(); res += '<span class="c">//'; c1 = 1; idx += 2; continue }
     if (c === '/' && t[idx + 1] === '*') { flush(); res += '<span class="c">/*'; c2 = 1; idx += 2; continue }
-    if (c === "'" || c === '"' || c === '`') { flush(); sC = c; res += `<span class="str">\${c}`; s = 1; idx++; continue }
+    
+    // 💡 【大修正】不気味なテンプレート展開タイポを物理的に完全消滅！
+    if (c === "'" || c === '"' || c === '`') { 
+      flush(); sC = c; res += '<span class="str">' + c; s = 1; idx++; continue; 
+    }
 
-    if (/[a-zA-Z0-9_]/.test(c)) {
-      w += c;
-    } else {
+    if (/[a-zA-Z0-9_]/.test(c)) { w += c; } else {
       if (w) {
         if (c === '(') {
           const span = document.createElement("span");
           span.className = METHODS.includes(w) ? "m" : (KEYWORDS.includes(w) ? "k" : "fn");
-          span.textContent = w;
-          res += span.outerHTML;
-          w = '';
-        } else if (c === ':') {
-          flush(true);
-        } else {
-          flush(lastChar === '.');
-        }
+          span.textContent = w; res += span.outerHTML; w = '';
+        } else if (c === ':') { flush(true); } else { flush(lastChar === '.'); }
       }
-      
       if (c.trim() !== '') lastChar = c;
 
       if (c === '{' || c === '}') {
@@ -92,11 +81,8 @@ export function ApplyHighlighttoJS(t) {
         const span = document.createElement("span"); span.className = "g-star"; span.textContent = "*"; res += span.outerHTML;
       } else if (['+', '-', '/', '=', '!', '<', '>', '?', '%', ':', '.'].includes(c)) {
         const span = document.createElement("span"); span.className = "o"; span.textContent = c; res += span.outerHTML;
-      } else {
-        res += c.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-      }
+      } else { res += c.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
     } idx++;
   }
-  flush(lastChar === '.');
-  return res;
+  flush(lastChar === '.'); return res;
 }
