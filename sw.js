@@ -1,26 +1,35 @@
-// FIDE PWA Service Worker - NewTacs© 23-Lang & WebWorker Complete Cache (v1.7 Final Fixed)
+// FIDE PWA Service Worker - NewTacs© Universal Path Sync Cache (v2.5 Final Complete)
 const CACHE_NAME = "fide-tacs-cache-v2";
 
+// 💡 【バグ完全根絶】架空の main.js を完全に消去し、正しい「./scripts/index.js」へ完全配線！
 const urlsToCache = [
   "./",
   "./index.html",
   "./styles/main.css",
-  "./scripts/main.js",
-  "./scripts/highlighter.js",
-  "./scripts/highlighter-worker.js",
+  
+  // ─── 💡 1. メインエントリースクリプト（index.js に完全修正） ───
+  "./scripts/index.js",
+  
+  // ─── 💡 2. 新TacsマルチスレッドWorkerコア ───
+  "./scripts/newtacs/highlighter.js",
+  "./scripts/newtacs/highlighter-worker.js",
   "./scripts/linter/tide.js",
-  "./scripts/langs/gateway.js",
-  "./scripts/langs/js.js",
-  "./scripts/langs/json.js",
-  "./scripts/langs/html.js",
-  "./scripts/langs/css.js",
-  "./scripts/langs/md.js",
-  "./scripts/langs/py.js",
-  "./scripts/langs/php.js",
-  "./scripts/langs/cpp.js",
-  "./scripts/langs/cs.js",
-  "./scripts/langs/java.js",
-  "./scripts/langs/ts.js",
+  
+  // ─── 💡 3. 一括集約ゲートウェイ ───
+  "./scripts/newtacs/langs/gateway.js",
+  
+  // ─── 💡 4. 新Tacs 23大言語モジュール（真の物理配置） ───
+  "./scripts/newtacs/langs/js.js",
+  "./scripts/newtacs/langs/json.js",
+  "./scripts/newtacs/langs/html.js",
+  "./scripts/newtacs/langs/css.js",
+  "./scripts/newtacs/langs/md.js",
+  "./scripts/newtacs/langs/py.js",
+  "./scripts/newtacs/langs/php.js",
+  "./scripts/newtacs/langs/cpp.js",
+  "./scripts/newtacs/langs/cs.js",
+  "./scripts/newtacs/langs/java.js",
+  "./scripts/newtacs/langs/ts.js",
   "./scripts/langs/sql.js",
   "./scripts/langs/sh.js",
   "./scripts/langs/yaml.js",
@@ -32,8 +41,6 @@ const urlsToCache = [
   "./scripts/langs/swift.js",
   "./scripts/langs/dart.js",
   "./scripts/langs/r.js",
-  // 💡 【重要チェック】手元のファイル名が docker.js か dockerfile.js かに合わせて
-  // もし違っていたらここを書き換えてください。今回は「docker.js」として鉄壁ガード！
   "./scripts/langs/docker.js"
 ];
 
@@ -41,7 +48,6 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       console.log("[FIDE PWA] 📦 23大言語モジュール＆WebWorkerコアを100%キャッシュに完全隔離しました！");
-      // エラーが起きたファイルを特定しやすいように1個ずつ catch する安全モードで追加
       return Promise.all(
         urlsToCache.map(url => {
           return cache.add(url).catch(err => {
