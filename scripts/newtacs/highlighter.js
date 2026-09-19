@@ -1,4 +1,3 @@
-// FIDE Custom IDE - Text-as-colors (Tacs) Plugin Theme Router© (v9.9 Final Complete)
 import { ApplyHighlighttoJS, JStheme } from "./langs/js.js";
 import { ApplyHighlighttoJSON, JSONtheme } from "./langs/json.js";
 import { ApplyHighlighttoHTML, HTMLtheme } from "./langs/html.js";
@@ -56,30 +55,27 @@ export function applyFIDEHighlight() {
   });
 }
 
-/**
- * 💡【サイズ指定完全復旧】
- * placehold.co の直後に "128x128/" を確実に結合し、URLのミスの息の根を止める！
- */
 function updateLangIndicator(lang) {
   const icon = document.getElementById("tacs-lang-icon");
   if (!icon) return;
 
   const upperLang = lang.toUpperCase();
-  let textColor = '569cd6'; // デフォルトJS: ブルー
-  const bgColor = '1e1e1e';   // エディタに溶け込むダークグレー
+  let textColor = '569cd6';
+  const bgColor = '1e1e1e';
 
   if (lang === 'html') {
-    textColor = '4ec9b0';   // HTML: エメラルドグリーン
+    textColor = '4ec9b0';
   } else if (lang === 'css') {
-    textColor = 'c586c0';   // CSS: マゼンタピンク
+    textColor = 'c586c0';
   } else if (lang === 'json') {
-    textColor = '9cdcfe';   // JSON: ライトブルー
+    textColor = '9cdcfe';
   } else {
-    textColor = '569cd6';   // JS: ブルー
+    textColor = '569cd6';
   }
 
-  // 💡 【超強力修正】"128x128/" のパス指定を完璧に完全復旧させてドッキング！！
-  const targetSrc = "https://placehold.co" + bgColor + "/" + textColor + "?text=" + upperLang;
+  // 💡 【あなたの正解コードを完全封入！】
+  // これでサイズ指定も結合順序も1ミリの狂いもなく、末尾まで100%綺麗に出力されきりました！
+  const targetSrc = "https://placehold.co" + "/128x128/" + bgColor + "/" + textColor + "?text=" + upperLang;
   
   icon.src = targetSrc;
   icon.alt = upperLang;
