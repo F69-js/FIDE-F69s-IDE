@@ -16,10 +16,19 @@ export function ApplyHighlighttoHTML(t) {
   const flush = () => {
     if (!w) return;
     const span = document.createElement("span");
-    if (inTag) {
-      if (TAGS.includes(w)) span.className = "k";
-      else if (ATTRS.includes(w)) span.className = "a";
+    
+    // 💡【重要】 w の中身が "/div" や "/body" のようにスラッシュから始まっている場合は、
+    // 先頭の "/" を取り除いた純粋なタグ名（div, body）が登録リストにあるかスマートに照合！
+    let cleanWord = w;
+    if (w.startsWith("/")) {
+      cleanWord = w.slice(1);
     }
+
+    if (inTag) {
+      if (TAGS.includes(cleanWord)) span.className = "k";      // HTMLタグ名ならエメラルド
+      else if (ATTRS.includes(cleanWord)) span.className = "a"; // 属性名ならゴールド
+    }
+
     if (span.className) {
       span.textContent = w; res += span.outerHTML;
     } else { res += w; }
@@ -52,9 +61,7 @@ export function ApplyHighlighttoHTML(t) {
     if (c === '<') { flush(); inTag = true; res += '&lt;'; idx++; continue; }
     if (c === '>') { flush(); inTag = false; res += '&gt;'; idx++; continue; }
 
-    // 💡【バグ完全粉砕ガード】
-    // クォート（" や '）を見つけたとき、『タグの内部（inTag === true）』にいる時だけ文字列モードを起動！
-    // タグの外（普通の文章内）にあるアポストロフィ（F69's IDEなど）は、100%安全にスルーさせます！
+    // 4. タグ外クォートの安全ガード
     if (c === '"' || c === "'") { 
       if (inTag) {
         flush(); 
@@ -66,7 +73,11 @@ export function ApplyHighlighttoHTML(t) {
       }
     }
 
-    const isWordChar = inTag ? /[a-zA-Z0-9_\-]/.test(c) : /[a-zA-Z0-9_]/.test(c);
+    // 💡【閉じタグバグ完全粉砕パッチ】
+    // タグの内部（inTag === true）を解析している時に限り、スラッシュ「/」も単語の一部（isWordChar）として
+    // 完璧に許容し、タグ名と記号を綺麗に1つの塊（例: /div）としてバインドさせます！
+    const isWordChar = inTag ? /[a-zA-Z0-9_\-\/]/.test(c) : /[a-zA-Z0-9_]/.test(c);
+    
     if (isWordChar) { 
       w += c; 
     } else {
