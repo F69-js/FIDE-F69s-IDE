@@ -2,7 +2,7 @@
 import { _jala, _fjalu } from "./fjalu/index.js"
 import {TIDEPreParse} from "./linter/tide.js"
 import {Language,LanguageTable} from "./langs/i18n.js"
-import { applyFIDEHighlight } from "./newtacs/highlighter.js";
+import { detectLanguageByExtension, applyFIDEHighlight } from "./highlighter/highlighter.js";
 Language.textlist=LanguageTable;
 let sec = location.search
 function getParams(p) {
@@ -204,6 +204,8 @@ maincontainer.addEventListener("click",()=>{
     active=true;
 })
 filenamei.addEventListener("click",()=>{
+    detectLanguageByExtension(currentFileName);
+    applyFIDEHighlight();
     active=false;
 })
 flags.addEventListener("click",()=>{
