@@ -79,7 +79,7 @@ function updateLangIndicator(lang) {
   }
 
   // 1. placehold.coの動的グラフィックURLをセット
-  icon.src = `https://placehold.co{bgColor}/${textColor}?text=${upperLang}`;
+  icon.src = `https://placehold.co/${bgColor}/${textColor}?text=${upperLang}`;
   
   // 💡 2. 【天才設計】alt属性に言語名を確実に流し込み、セマンティクスを完全防衛！
   icon.alt = upperLang;
