@@ -4,6 +4,14 @@
 import * as Gateway from "./langs/gateway.js";
 
 let currentLang = 'js';
+// 💡 Workerの先頭にこれを3行置くだけで、23言語すべての document エラーが全滅！
+self.document = {
+  createElement: () => ({
+    set className(val) { this._class = val; },
+    set textContent(val) { this._text = val; },
+    get outerHTML() { return `<span class="${this._class || ''}">${this._text || ''}</span>`; }
+  })
+};
 
 const COMPONENT_THEMES = {
   js: Gateway.JStheme, json: Gateway.JSONtheme, html: Gateway.HTMLtheme, css: Gateway.CSStheme, md: Gateway.MDtheme,
