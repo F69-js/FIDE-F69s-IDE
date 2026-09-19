@@ -68,7 +68,6 @@ body {
   height: 40px;
   display: inline-block;
   flex-grow: 1;
-  min-width: 200px; /* 💡 最低幅を確保し、文字の入力領域を絶対に潰さない */
   overflow: visible;
   white-space: pre;
   box-sizing: border-box;
