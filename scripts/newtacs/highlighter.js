@@ -1,8 +1,8 @@
 // FIDE Custom IDE - Text-as-colors (Tacs) Plugin Theme Router©
-import { ApplyHighlighttoJS, JStheme } from "./newtacs/js.js";
-import { ApplyHighlighttoJSON, JSONtheme } from "./newtacs/json.js";
-import { ApplyHighlighttoHTML, HTMLtheme } from "./newtacs/html.js";
-import { ApplyHighlighttoCSS, CSStheme } from "./newtacs/css.js";
+import { ApplyHighlighttoJS, JStheme } from "./langs/js.js";
+import { ApplyHighlighttoJSON, JSONtheme } from "./langs/json.js";
+import { ApplyHighlighttoHTML, HTMLtheme } from "./langs/html.js";
+import { ApplyHighlighttoCSS, CSStheme } from "./langs/css.js";
 
 let currentLang = 'js';
 
