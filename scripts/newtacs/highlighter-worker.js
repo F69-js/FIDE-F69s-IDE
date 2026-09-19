@@ -4,13 +4,27 @@
 import * as Gateway from "./langs/gateway.js";
 
 let currentLang = 'js';
-// 💡 Workerの先頭にこれを3行置くだけで、23言語すべての document エラーが全滅！
 self.document = {
-  createElement: () => ({
-    set className(val) { this._class = val; },
-    set textContent(val) { this._text = val; },
-    get outerHTML() { return `<span class="${this._class || ''}">${this._text || ''}</span>`; }
-  })
+  createElement: (tagName) => {
+    return {
+      _class: "",
+      _text: "",
+      style: { color: "" },
+      // 💡 【超強力修正】セッターだけでなく、ゲッターもしっかり用意して値を100%同期！
+      set className(val) { this._class = val; },
+      get className() { return this._class; },
+      
+      set textContent(val) { this._text = val; },
+      get textContent() { return this._text; },
+      
+      get outerHTML() {
+        if (this.style.color) {
+          return '<span style="color: ' + this.style.color + '">' + this._text + '</span>';
+        }
+        return '<span class="' + this._class + '">' + this._text + '</span>';
+      }
+    };
+  }
 };
 
 const COMPONENT_THEMES = {
