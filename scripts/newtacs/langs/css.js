@@ -14,7 +14,16 @@ export function ApplyHighlighttoCSS(t) {
     else if (GOLD.includes(w)) span.className = "s";
     else if (BUILTINS.includes(w)) span.className = "b";
     else if (METHODS.includes(w)) span.className = "m";
-    else if (/^\d+\(/.test(w) \vert{}\vert{} /^#[0-9a-fA-F]{3,8}\)/.test(w)) span.style.color = "#b5cea8";
+    else {
+      // 💡 システムの誤変換の引き金になる「||」を物理的に完全消滅！
+      // 2つの条件（数値リテラルか、CSSカラーコードか）を完全に独立させて安全に判定します。
+      if (/^\d+\$/.test(w)) {
+        span.style.color = "#b5cea8";
+      }
+      if (/^#[0-9a-fA-F]{3,8}\$/.test(w)) {
+        span.style.color = "#b5cea8";
+      }
+    }
     if (span.className || span.style.color) {
       span.textContent = w; res += span.outerHTML;
     } else { res += w; }
