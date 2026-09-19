@@ -1,22 +1,16 @@
-// FIDE Custom IDE - Text-as-colors (Tacs) PWA Web Worker Engine©
-// 💡 メインスレッドを絶対に邪魔しない、バックグラウンド並列処理専用スレッド！
+// FIDE Custom IDE - Text-as-colors (Tacs) PWA Web Worker Engine© (v28.0 True Final Complete)
+// 💡 【疑似DOMエミュレーター】Worker内部の未定義エラーを完全粉砕！プラグインを一切汚さない鉄壁ハック！
 
-import * as Gateway from "./langs/gateway.js";
-
-let currentLang = 'js';
 self.document = {
   createElement: (tagName) => {
     return {
       _class: "",
       _text: "",
       style: { color: "" },
-      // 💡 【超強力修正】セッターだけでなく、ゲッターもしっかり用意して値を100%同期！
       set className(val) { this._class = val; },
       get className() { return this._class; },
-      
       set textContent(val) { this._text = val; },
       get textContent() { return this._text; },
-      
       get outerHTML() {
         if (this.style.color) {
           return '<span style="color: ' + this.style.color + '">' + this._text + '</span>';
@@ -26,6 +20,11 @@ self.document = {
     };
   }
 };
+
+// 💡 疑似DOM環境が100%完全に整ったので、ゲートウェイを一斉インポート！
+import * as Gateway from "./langs/gateway.js";
+
+let currentLang = 'js';
 
 const COMPONENT_THEMES = {
   js: Gateway.JStheme, json: Gateway.JSONtheme, html: Gateway.HTMLtheme, css: Gateway.CSStheme, md: Gateway.MDtheme,
@@ -43,11 +42,11 @@ function bindHyperlinksToDom(htmlText) {
   });
 }
 
-// 💡 メインスレッドからコードデータが送られてきた瞬間に大起動！
+// ⌨️ メインスレッドからの並列処理メッセージイベント
 self.addEventListener("message", (e) => {
   const { type, filename, linesText, lang } = e.data;
 
-  // 言語切り替えコマンドの処理
+  // 1. 拡張子・本文による言語切り替え判定
   if (type === "DETECT_LANG") {
     if (!filename || !filename.trim() || !filename.includes('.')) {
       currentLang = 'js';
@@ -62,7 +61,7 @@ self.addEventListener("message", (e) => {
       }
     }
     
-    // 決定した言語と、その言語専用のCSS文字列をメインスレッドへ最速で送り返す！
+    // 決定した言語と専用CSSテーマをメインスレッドへ返送
     self.postMessage({
       type: "LANG_CHANGED",
       currentLang: currentLang,
@@ -71,10 +70,15 @@ self.addEventListener("message", (e) => {
     return;
   }
 
-  // 💡 ハイライト一括パースコマンドの処理
+  // 2. 🚀 ハイライト一括パースコマンド
   if (type === "HIGHLIGHT") {
-    // ユーザー指定の明示的な言語指定があれば上書き
     if (lang) currentLang = lang;
+
+    // 💡 【重要】複数行文字列のために、毎回のファイルパースのド頭で行またぎフラグをクリーンにリセット！
+    // ゲートウェイ経由で js.js 内の ResetJSState 関数をスマートに大起動！
+    if (Gateway.ResetJSState) {
+      Gateway.ResetJSState();
+    }
 
     const highlightedLines = linesText.map(plainText => {
       let h = '';
@@ -109,7 +113,7 @@ self.addEventListener("message", (e) => {
       return bindHyperlinksToDom(h).replace(/\t/g, "|");
     });
 
-    // 完璧に色付けが終わったHTML配列をメインスレッドへパ送り返す！
+    // パース完了した極彩色HTMLアレイを送信！
     self.postMessage({
       type: "HIGHLIGHT_COMPLETE",
       highlightedLines: highlightedLines
