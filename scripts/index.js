@@ -204,6 +204,7 @@ maincontainer.addEventListener("click",()=>{
     active=true;
 })
 filenamei.addEventListener("click",()=>{
+    const currentFileName = e.target.value;
     detectLanguageByExtension(currentFileName);
     applyFIDEHighlight();
     active=false;
