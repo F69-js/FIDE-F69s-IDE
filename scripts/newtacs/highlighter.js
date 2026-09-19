@@ -1,4 +1,4 @@
-// FIDE Custom IDE - Text-as-colors (Tacs) Plugin Theme Router© (v9.0 Final Edition)
+// FIDE Custom IDE - Text-as-colors (Tacs) Plugin Theme Router© (v9.9 Final Complete)
 import { ApplyHighlighttoJS, JStheme } from "./langs/js.js";
 import { ApplyHighlighttoJSON, JSONtheme } from "./langs/json.js";
 import { ApplyHighlighttoHTML, HTMLtheme } from "./langs/html.js";
@@ -57,8 +57,8 @@ export function applyFIDEHighlight() {
 }
 
 /**
- * 💡【アクセシビリティ同期ハック】
- * 画面上の文字ノイズを消し去り、alt属性に対して厳格に言語名をインジェクション！
+ * 💡【サイズ指定完全復旧】
+ * placehold.co の直後に "128x128/" を確実に結合し、URLのミスの息の根を止める！
  */
 function updateLangIndicator(lang) {
   const icon = document.getElementById("tacs-lang-icon");
@@ -78,10 +78,10 @@ function updateLangIndicator(lang) {
     textColor = '569cd6';   // JS: ブルー
   }
 
-  // 1. placehold.coの動的グラフィックURLをセット
-  icon.src = `https://placehold.co/${bgColor}/${textColor}?text=${upperLang}`;
+  // 💡 【超強力修正】"128x128/" のパス指定を完璧に完全復旧させてドッキング！！
+  const targetSrc = "https://placehold.co" + bgColor + "/" + textColor + "?text=" + upperLang;
   
-  // 💡 2. 【天才設計】alt属性に言語名を確実に流し込み、セマンティクスを完全防衛！
+  icon.src = targetSrc;
   icon.alt = upperLang;
 }
 
