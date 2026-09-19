@@ -4,7 +4,7 @@ const GOLD = ["this","window","globalThis","super","self","global"];
 const BUILTINS = ["JSON","console","Math","Date","Promise","String","Map","Set","Object","Number","Error","undefined","null","true","false","process","document","navigator","screen","location","history","Temporal","LanguageModel","ai"];
 const METHODS = ["push","pop","unshift","shift","slice","splice","filter","some","findIndex","includes","join","split","match","replace","replaceAll","trim","startsWith","indexOf","lastIndexOf","substring","map","forEach","reduce","padStart","toFixed","has","get","set","delete","entries","add","then","catch","finally","log","warn","error"];
 
-// 💡 拡張性抜群！JS専用のネオンカラーパレットを完全内蔵
+// 💡 拡張性抜群！JS専用のカラーテーマ定義
 export const JStheme = `
   .k { color: #569cd6; font-weight: bold; } /* 予約語: ブルー */
   .a { color: #ff007f; font-weight: bold; } /* async/while: ネオンピンク */
@@ -23,58 +23,80 @@ export const JStheme = `
 `;
 
 export function ApplyHighlighttoJS(t) {
-  let idx = 0, res = '';
-  const tokenRegex = /(?:\/\/.*|\/\*[\s\S]*?\*\/)|(?:"[^"\\]*(?:\\.[^"\\]*)*"|'[^'\\]*(?:\\.[^'\\]*)*'|`[^`\\]*(?:\\.[^`\\]*)*`)|(?:\b\d+\b)|(=>|\*\*=|\|\|=|&&=|\?\?=|===|!==|==|!=|\+\+|\-\-|\+=|\-=|\*=|\/=|%=|&=|\|=|\^=|<<=|>>=|>>>=|<=|>=|&&|\|\||\?\?|\?.|\*\*|->|[\{\}\[\]\(\)\+\-\*\/%=&\|\^!<>:;,\.])|([a-zA-Z_\(][a-zA-Z0-9_\)]*)|(\s+)|(.)/g;
-  let match;
-  let lastTokenWasDot = false;
+  let idx = 0, res = '', c1 = 0, c2 = 0, s = 0, sC = '', w = '';
+  let lastChar = '';
 
-  while ((match = tokenRegex.exec(t)) !== null) {
-    const [raw, comment, str, num, op, word, space, any] = match;
-    if (comment) {
-      const span = document.createElement("span"); span.className = "c"; span.textContent = raw; res += span.outerHTML; lastTokenWasDot = false; continue;
-    }
-    if (str) {
-      const span = document.createElement("span"); span.className = "str"; span.textContent = raw; res += span.outerHTML; lastTokenWasDot = false; continue;
-    }
-    if (num) {
-      const span = document.createElement("span"); span.style.color = "#b5cea8"; span.textContent = raw; res += span.outerHTML; lastTokenWasDot = false; continue;
-    }
-    if (op) {
-      const span = document.createElement("span");
-      if (op === '{' || op === '}') span.className = "br1";
-      else if (op === '(' || op === ')') span.className = "br2";
-      else if (op === '[' || op === ']') span.className = "br3";
-      else if (op === '=>') span.className = "a";
-      else if (op === '*') span.className = "g-star";
-      else if (['===','!==','==','!=','=','+','-','/','%','!','<','>','?','&&','||','??','?.',':','.'].includes(op)) span.className = "o";
-      if (span.className) {
-        span.textContent = raw; res += span.outerHTML;
-      } else { res += raw.replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
-      lastTokenWasDot = (op === '.'); continue;
-    }
-    if (word) {
-      const span = document.createElement("span");
-      let isFunctionCall = false;
-      const nextIdx = tokenRegex.lastIndex;
-      const tail = t.slice(nextIdx).match(/^\s*\(/);
-      if (tail) isFunctionCall = true;
+  const flush = (isProperty = false) => {
+    if (!w) return;
+    const span = document.createElement("span");
+    
+    if (KEYWORDS.includes(w)) span.className = "k";
+    else if (NEON_PINK.includes(w)) span.className = "a";
+    else if (GOLD.includes(w)) span.className = "s";
+    else if (BUILTINS.includes(w)) span.className = "b";
+    else if (METHODS.includes(w)) span.className = "m";
+    else if (isProperty) span.className = "prop";
+    else if (/^\\d+$/.test(w)) span.style.color = "#b5cea8";
 
-      if (KEYWORDS.includes(word)) span.className = "k";
-      else if (NEON_PINK.includes(word)) span.className = "a";
-      else if (GOLD.includes(word)) span.className = "s";
-      else if (BUILTINS.includes(word)) span.className = "b";
-      else if (METHODS.includes(word) || isFunctionCall) span.className = METHODS.includes(word) ? "m" : "fn";
-      else if (lastTokenWasDot) span.className = "prop";
+    if (span.className || span.style.color) {
+      span.textContent = w;
+      res += span.outerHTML;
+    } else {
+      res += w;
+    }
+    w = '';
+  };
 
-      if (span.className) {
-        span.textContent = raw; res += span.outerHTML;
-      } else { res += raw; }
-      lastTokenWasDot = false; continue;
+  while (idx < t.length) {
+    const c = t[idx];
+    if (c1) { res += c; if (c === '\\n') { res += '</span>'; c1 = 0 } idx++; continue }
+    if (c2) { res += c; if (c === '*' && t[idx + 1] === '/') { res += '/</span>'; c2 = 0; idx += 2 } else idx++; continue }
+    if (s) {
+      if (c === '\\\\') { res += c + (t[idx + 1] || ''); idx += 2; continue }
+      res += c.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      if (c === sC) { res += '</span>'; s = 0 } idx++; continue;
     }
-    if (space) { res += raw; continue; }
-    if (any) {
-      res += raw.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); lastTokenWasDot = false;
-    }
+
+    if (c === '/' && t[idx + 1] === '/') { flush(); res += '<span class="c">//'; c1 = 1; idx += 2; continue }
+    if (c === '/' && t[idx + 1] === '*') { flush(); res += '<span class="c">/*'; c2 = 1; idx += 2; continue }
+    if (c === "'" || c === '"' || c === '`') { flush(); sC = c; res += `<span class="str">\${c}`; s = 1; idx++; continue }
+
+    if (/[a-zA-Z0-9_]/.test(c)) {
+      w += c;
+    } else {
+      if (w) {
+        if (c === '(') {
+          const span = document.createElement("span");
+          span.className = METHODS.includes(w) ? "m" : (KEYWORDS.includes(w) ? "k" : "fn");
+          span.textContent = w;
+          res += span.outerHTML;
+          w = '';
+        } else if (c === ':') {
+          flush(true);
+        } else {
+          flush(lastChar === '.');
+        }
+      }
+      
+      if (c.trim() !== '') lastChar = c;
+
+      if (c === '{' || c === '}') {
+        const span = document.createElement("span"); span.className = "br1"; span.textContent = c; res += span.outerHTML;
+      } else if (c === '[' || c === ']') {
+        const span = document.createElement("span"); span.className = "br3"; span.textContent = c; res += span.outerHTML;
+      } else if (c === '(' || c === ')') {
+        const span = document.createElement("span"); span.className = "br2"; span.textContent = c; res += span.outerHTML;
+      } else if (c === '=' && t[idx + 1] === '>') {
+        const span = document.createElement("span"); span.className = "a"; span.textContent = "=>"; res += span.outerHTML; idx++;
+      } else if (c === '*') {
+        const span = document.createElement("span"); span.className = "g-star"; span.textContent = "*"; res += span.outerHTML;
+      } else if (['+', '-', '/', '=', '!', '<', '>', '?', '%', ':', '.'].includes(c)) {
+        const span = document.createElement("span"); span.className = "o"; span.textContent = c; res += span.outerHTML;
+      } else {
+        res += c.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      }
+    } idx++;
   }
+  flush(lastChar === '.');
   return res;
 }
