@@ -4,6 +4,21 @@ const GOLD = ["root","hover","active","focus","visited","before","after","nth-ch
 const BUILTINS = ["display","position","top","right","bottom","left","width","height","margin","padding","background","color","font","border","box-sizing","flex","grid","opacity","visibility","overflow","z-index","transform","transition","animation"];
 const METHODS = ["calc","url","var","rgba","rgb","hsl","hsla","linear-gradient","translate","rotate","scale"];
 
+// 💡 拡張性抜群！CSS専用のプロ仕様カラーパレットを完全内蔵
+export const CSStheme = `
+  .k { color: #c586c0; font-weight: bold; } /* @media等: マゼンタ */
+  .a { color: #ff007f; font-weight: bold; } /* !important等: ネオンピンク */
+  .s { color: #569cd6; font-weight: bold; } /* 擬似クラス(:hover): ブルー */
+  .b { color: #9cdcfe; }                    /* プロパティ名: ライトブルー */
+  .m { color: #dcdcaa; }                    /* calc()関数: ライトイエロー */
+  .o { color: #ffffff; }                    /* コロン・セミコロン: 白 */
+  .str { color: #ce9178; }                  /* url()内の文字列: オレンジ */
+  .prop { color: #ffffff; }
+  .br1 { color: #00ffaa; font-weight: bold; }
+  .br2 { color: #00ffff; font-weight: bold; }
+  .br3 { color: #ff00ff; font-weight: bold; }
+`;
+
 export function ApplyHighlighttoCSS(t) {
   let idx = 0, res = '', s = 0, sC = '', w = '';
   const flush = () => {
@@ -15,14 +30,8 @@ export function ApplyHighlighttoCSS(t) {
     else if (BUILTINS.includes(w)) span.className = "b";
     else if (METHODS.includes(w)) span.className = "m";
     else {
-      // 💡 システムの誤変換の引き金になる「||」を物理的に完全消滅！
-      // 2つの条件（数値リテラルか、CSSカラーコードか）を完全に独立させて安全に判定します。
-      if (/^\d+\$/.test(w)) {
-        span.style.color = "#b5cea8";
-      }
-      if (/^#[0-9a-fA-F]{3,8}\$/.test(w)) {
-        span.style.color = "#b5cea8";
-      }
+      if (/^\d+\$/.test(w)) span.style.color = "#b5cea8";
+      if (/^#[0-9a-fA-F]{3,8}\$/.test(w)) span.style.color = "#b5cea8";
     }
     if (span.className || span.style.color) {
       span.textContent = w; res += span.outerHTML;
