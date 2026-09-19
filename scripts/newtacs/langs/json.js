@@ -1,15 +1,11 @@
 const NEON_PINK = ["true","false","null"];
 
-// 💡 JSON専用のシックなデータカラーパレットを完全内蔵
 export const JSONtheme = `
   .k { color: #ffffff; }
-  .a { color: #ff007f; font-weight: bold; } /* true/false: ネオンピンク */
-  .s { color: #ffffff; }
-  .b { color: #ffffff; }
-  .m { color: #ffffff; }
-  .o { color: #b5cea8; }                    /* コロン・カンマ: 淡いグリーン */
-  .str { color: #ce9178; }                  /* 通常の文字列値: オレンジ */
-  .prop { color: #9cdcfe; font-weight: bold; } /* JSONのキー: ライトブルー */
+  .a { color: #ff007f; font-weight: bold; }
+  .o { color: #b5cea8; }
+  .str { color: #ce9178; }
+  .prop { color: #9cdcfe; font-weight: bold; }
   .json-num { color: #b5cea8; }
   .br1 { color: #00ffaa; font-weight: bold; }
   .br3 { color: #ff00ff; font-weight: bold; }
@@ -42,7 +38,7 @@ export function ApplyHighlighttoJSON(t) {
         if (t[forwardIdx] === '"') break;
         forwardIdx++;
       }
-      res += `<span class="${isKey ? 'prop' : 'str'}">${c}`; s = 1; idx++; continue;
+      res += '<span class="' + (isKey ? 'prop' : 'str') + '">' + c; s = 1; idx++; continue;
     }
     if (/[a-zA-Z0-9_]/.test(c)) { w += c; } else {
       if (w) flush();
