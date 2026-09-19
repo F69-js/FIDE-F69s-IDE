@@ -1,14 +1,13 @@
 // FIDE Custom IDE - Core UI Event Listeners Module (v1.0.1 Stable Final)
+// 💡 【直下パス修正】 newtacsを撤去し、同じフォルダ直下の highlighter.js から美しくロード！
 import { detectLanguageByExtension, applyFIDEHighlight } from "./highlighter.js";
 
-// 💡 メインスレッドから各変数や状態、関数をブリッジ接続するための、一斉初期化配線ゲート！
 export function initUIListeners(context) {
     const {
         getRaw, setRaw, getCursorIdx, setCursorIdx, getLineID, setLineID, getCur, setCur,
         undoStack, redoStack, DoEnter, refreshLineUI, SwitchTheme, ExecuteCode, TIDEPreParse, Language, HandleUnload
     } = context;
 
-    // 💡 1. 設定ボタンの開閉イベント
     if (globalThis.settings) {
         settings.addEventListener("click", () => {
             let settingsmode = !settingscontainer.hidden;
@@ -22,7 +21,6 @@ export function initUIListeners(context) {
         });
     }
 
-    // 💡 2. テーマ切り替えイベント
     if (globalThis.maintheme) {
         maintheme.addEventListener("input", () => {
             let v = maintheme.value;
@@ -31,7 +29,6 @@ export function initUIListeners(context) {
         });
     }
 
-    // 💡 3. コード実行（rawexec）イベント
     if (globalThis.rawexec) {
         rawexec.addEventListener("click", () => {
             let h = TIDEPreParse(getRaw());
@@ -39,7 +36,6 @@ export function initUIListeners(context) {
         });
     }
 
-    // 💡 4. アンロード警告設定
     if (globalThis.unl) {
         unl.addEventListener("click", () => {
             let res = unl.checked ? "1" : "0";
@@ -47,14 +43,12 @@ export function initUIListeners(context) {
         });
     }
 
-    // 💡 5. カラーパレット文字挿入イベント
     if (globalThis.setc) {
         setc.addEventListener("click", () => {
             if (getCur()) getCur().innerText += palettecolor.value;
         });
     }
 
-    // 💡 6. キャンバスお絵描き（img1）イベント
     if (globalThis.img1) {
         let oldx = 0, oldy = 0, drawing = false;
         let ctx = img1.getContext("2d");
@@ -73,7 +67,6 @@ export function initUIListeners(context) {
         img1.addEventListener("mouseup", () => { drawing = false; });
     }
 
-    // 💡 7. ファイル保存（savefile）イベント
     if (globalThis.savefile) {
         savefile.addEventListener("click", async () => {
             try {
@@ -113,7 +106,6 @@ export function initUIListeners(context) {
         });
     }
 
-    // 💡 8. ファイル読み込み（openfile）イベント
     if (globalThis.openfile) {
         openfile.addEventListener("click", async () => {
             if (Number(localStorage?.getItem?.("fide:check_unload")) === 1) {
@@ -135,7 +127,7 @@ export function initUIListeners(context) {
                 detectLanguageByExtension(globalThis.filename);
                 applyFIDEHighlight();
 
-                if (["png","svg","jpeg","jpg","gif","webp","heic","tiff","bmp"].includes(globalThis.filename.split(".").slice(-1)[0])) {
+                if (["png","svg","jpeg","jpg","gif","webp","heic","tiff","bmp"].includes(globalThis.filename.split(".").slice(-1))) {
                     globalThis.filetype = "image";
                     maincontainer.hidden = true; imgcontainer.hidden = false;
                     let url = URL.createObjectURL(file);
@@ -154,8 +146,8 @@ export function initUIListeners(context) {
 
                     const content = await file.text();
                     const lines = content.split("\n");
-                    if (getCur()) getCur().innerText = lines[0] || "";
-                    setRaw(lines[0] || "");
+                    if (getCur()) getCur().innerText = lines || "";
+                    setRaw(lines || "");
 
                     for (let i = 1; i < lines.length; i++) {
                         await DoEnter();
@@ -171,7 +163,6 @@ export function initUIListeners(context) {
         });
     }
 
-    // 💡 9. ファイル名入力欄のplaceholderアニメーション
     if (globalThis.filenamei) {
         filenamei.addEventListener("input", async () => {
             if (filenamei.value.length === 0) {
