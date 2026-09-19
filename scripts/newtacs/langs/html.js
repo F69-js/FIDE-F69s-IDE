@@ -1,6 +1,19 @@
 const TAGS = ["DOCTYPE","html","head","body","meta","title","link","script","style","div","span","p","a","img","ul","ol","li","table","tr","td","th","thead","tbody","form","input","button","textarea","label","select","option","iframe","canvas","svg"];
 const ATTRS = ["id","class","style","href","src","alt","type","value","name","placeholder","disabled","checked","readonly","required","onclick","onload"];
 
+// 💡 拡張性抜群！HTML専用のすっきりカラーパレットを完全内蔵
+export const HTMLtheme = `
+  .k { color: #4ec9b0; font-weight: bold; } /* HTMLタグ名: エメラルド */
+  .a { color: #f2c94c; font-weight: bold; } /* 属性名(id/class): ゴールド */
+  .s { color: #ffffff; }
+  .b { color: #ffffff; }
+  .m { color: #ffffff; }
+  .o { color: #569cd6; }                    /* イコール記号等: ブルー */
+  .str { color: #ce9178; }                  /* 属性の値: オレンジ */
+  .prop { color: #ffffff; }
+  .c { color: #6a9955; font-style: italic; }
+`;
+
 export function ApplyHighlighttoHTML(t) {
   let idx = 0, res = '', s = 0, sC = '', w = '';
   let inTag = false;
@@ -32,7 +45,7 @@ export function ApplyHighlighttoHTML(t) {
     }
     if (c === '<') { flush(); inTag = true; res += '&lt;'; idx++; continue; }
     if (c === '>') { flush(); inTag = false; res += '&gt;'; idx++; continue; }
-    if (c === '"' || c === "'") { flush(); sC = c; res += `<span class="str">${c}`; s = 1; idx++; continue; }
+    if (c === '"' || c === "'") { flush(); sC = c; res += `<span class="str">${c}`; s = 1; idx++; continue }
     const isWordChar = inTag ? /[a-zA-Z0-9_\-]/.test(c) : /[a-zA-Z0-9_]/.test(c);
     if (isWordChar) { w += c; } else {
       if (w) flush();
