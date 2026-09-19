@@ -1,4 +1,4 @@
-v// FIDE Tacs Highlighter© - Markdown (.md) Plugin Module (True Final Fixed)
+// FIDE Tacs Highlighter© - Markdown (.md) Plugin Module (True Final Fixed)
 
 // 💡 拡張性抜群！Markdown専用のミニマルネオンカラーパレットを完全内蔵
 export const MDtheme = `
