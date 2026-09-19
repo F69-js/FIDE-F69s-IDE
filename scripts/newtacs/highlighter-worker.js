@@ -1,20 +1,14 @@
-// FIDE Custom IDE - Text-as-colors (Tacs) PWA Web Worker Engine© (v30.0 Serial Master)
-// 💡 【疑似DOMエミュレーター】Worker内部の未定義エラーを完全粉砕！プラグインを一切汚さない鉄壁ハック！
-
+// FIDE Custom IDE - Text-as-colors (Tacs) PWA Web Worker Engine© (v35.0 Native Serial Final)
 self.document = {
   createElement: (tagName) => {
     return {
-      _class: "",
-      _text: "",
-      style: { color: "" },
+      _class: "", _text: "", style: { color: "" },
       set className(val) { this._class = val; },
       get className() { return this._class; },
       set textContent(val) { this._text = val; },
       get textContent() { return this._text; },
       get outerHTML() {
-        if (this.style.color) {
-          return '<span style="color: ' + this.style.color + '">' + this._text + '</span>';
-        }
+        if (this.style.color) { return '<span style="color: ' + this.style.color + '">' + this._text + '</span>'; }
         return '<span class="' + this._class + '">' + this._text + '</span>';
       }
     };
@@ -49,34 +43,22 @@ self.addEventListener("message", (e) => {
       currentLang = 'js';
     } else {
       const ext = filename.split('.').pop().toLowerCase();
-      if (COMPONENT_THEMES[ext] || ext === 'dockerfile') {
-        currentLang = ext;
-      } else if (filename.toLowerCase().includes('dockerfile')) {
-        currentLang = 'dockerfile';
-      } else {
-        currentLang = 'js';
-      }
+      if (COMPONENT_THEMES[ext] || ext === 'dockerfile') { currentLang = ext; }
+      else if (filename.toLowerCase().includes('dockerfile')) { currentLang = 'dockerfile'; }
+      else { currentLang = 'js'; }
     }
-    
-    self.postMessage({
-      type: "LANG_CHANGED",
-      currentLang: currentLang,
-      themeCss: COMPONENT_THEMES[currentLang] || COMPONENT_THEMES['js']
-    });
+    self.postMessage({ type: "LANG_CHANGED", currentLang: currentLang, themeCss: COMPONENT_THEMES[currentLang] || COMPONENT_THEMES['js'] });
     return;
   }
 
-  // 💡 2. 【究極進化】ハイライト一括シリアルパースコマンド
   if (type === "HIGHLIGHT") {
     if (lang) currentLang = lang;
 
-    // 🧠 状態リセット
     if (Gateway.ResetJSState) {
       Gateway.ResetJSState();
     }
 
-    // 💡 配列でぶつ切りにするのを完全に廃止！
-    // すべての行を特別な改行マーカー「\n」で繋ぎ、1本の巨大なテキストとして一気にスキャンさせる！
+    // 💡 特殊なマーカーを廃止し、本物の改行コード「\n」で1本に完全結合！
     const fullCombinedText = linesText.join("\n");
     let highlightedCombinedHtml = "";
 
@@ -109,15 +91,11 @@ self.addEventListener("message", (e) => {
       default:           highlightedCombinedHtml = Gateway.ApplyHighlighttoJS(fullCombinedText); break;
     }
 
-    // ハイパーリンクを全自動バインド
     const linkedCombinedHtml = bindHyperlinksToDom(highlightedCombinedHtml);
 
-    // 💡 完璧に一括色付けが終わった巨大なHTMLを、元の行ごとの配列へと安全に復元スプリット！
+    // 💡 本物の改行コードを基準に、安全に行ごとのアレイに完全分解！
     const highlightedLines = linkedCombinedHtml.split("\n");
 
-    self.postMessage({
-      type: "HIGHLIGHT_COMPLETE",
-      highlightedLines: highlightedLines
-    });
+    self.postMessage({ type: "HIGHLIGHT_COMPLETE", highlightedLines: highlightedLines });
   }
 });
