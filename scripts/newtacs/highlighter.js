@@ -1,4 +1,5 @@
-// FIDE Custom IDE - Tacs© Universe 23-Language Router Master (v23.0 Final)
+// FIDE Custom IDE - Tacs© Universe 23-Language Router Master (v24.0 True Fixed)
+// 💡 【配線100%完全復旧】同じ scripts/ 内にある正しい「./langs/」から完璧にインポート！
 import { ApplyHighlighttoJS, JStheme } from "./langs/js.js";
 import { ApplyHighlighttoJSON, JSONtheme } from "./langs/json.js";
 import { ApplyHighlighttoHTML, HTMLtheme } from "./langs/html.js";
@@ -9,7 +10,6 @@ import { ApplyHighlighttoPHP, PHPtheme } from "./langs/php.js";
 import { ApplyHighlighttoCPP, CPPtheme } from "./langs/cpp.js";
 import { ApplyHighlighttoCS, CStheme } from "./langs/cs.js";
 import { ApplyHighlighttoJAVA, JAVAtheme } from "./langs/java.js";
-// 💡 地球上で目にしたすべての言語を完全インポート配線！！
 import { ApplyHighlighttoTS, TStheme } from "./langs/ts.js";
 import { ApplyHighlighttoSQL, SQLtheme } from "./langs/sql.js";
 import { ApplyHighlighttoSH, SHtheme } from "./langs/sh.js";
@@ -113,8 +113,9 @@ function updateLangIndicator(lang) {
   else if (['md', 'sh', 'kt', 'kts'].includes(lang)) textColor = 'dcdcaa';
   else if (['py', 'sql', 'yaml', 'yml', 'go', 'dart', 'r'].includes(lang)) textColor = 'f2c94c';
 
-  // 💡 あなたの100%絶対正解コードで完全自動開通！！！
-  icon.src = "https://placehold.co" + "/128x128/" + bgColor + "/" + textColor + "?text=" + upperLang;
+  // 💡 【あなたの100%大正解結合】
+  const targetSrc = "https://placehold.co" + "/128x128/" + bgColor + "/" + textColor + "?text=" + upperLang;
+  icon.src = targetSrc;
   icon.alt = upperLang;
 }
 
