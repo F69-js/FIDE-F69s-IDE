@@ -2,7 +2,7 @@
 import { _jala, _fjalu } from "./fjalu/index.js"
 import {TIDEPreParse} from "./linter/tide.js"
 import {Language,LanguageTable} from "./langs/i18n.js"
-import { detectLanguageByExtension, applyFIDEHighlight } from "./highlighter/highlighter.js";
+import { detectLanguageByExtension, applyFIDEHighlight } from "./newtacs/highlighter.js";
 Language.textlist=LanguageTable;
 let sec = location.search
 function getParams(p) {
