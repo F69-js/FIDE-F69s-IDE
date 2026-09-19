@@ -1,6 +1,6 @@
-// FIDE Tacs Highlighter© - Markdown (.md) Plugin Module (True Final Fixed)
+// FIDE Tacs Highlighter© - Markdown (.md) CodeBlock Embedded Module (v2.0)
+import * as Gateway from "./gateway.js";
 
-// 💡 拡張性抜群！Markdown専用のミニマルネオンカラーパレットを完全内蔵
 export const MDtheme = `
   .k { color: #569cd6; font-weight: bold; }   /* 見出し(#): ブルー */
   .a { color: #ff007f; font-weight: bold; }   /* 太字(**)・斜体: ネオンピンク */
@@ -13,113 +13,114 @@ export const MDtheme = `
   .c { color: #6a9955; font-style: italic; }   /* 注釈・コメント: グリーン */
 `;
 
-/**
- * Markdown用のText-as-colorsスキャンを実行する関数
- * @param {string} t - 生の行テキスト
- * @returns {string} HTML要素文字列
- */
+// コードブロックの内部状態を管理するグローバル(モジュール)ステーショナリー
+let inCodeBlock = false;
+let codeBlockLang = 'js';
+
 export function ApplyHighlighttoMD(t) {
   let idx = 0, res = '', s = 0, w = '';
-  
-  // 行全体の文脈（行頭の見出しやリスト）を一瞬でチェックするための簡易フラグ
   const trimText = t.trim();
 
-  // 1. 行頭の見出し判定（# Header）
+  // 💡 【核心：コードブロックの開始と終了の検知】
+  // 行が "```" で始まっている場合の超高度な多重ルーティング制御！
+  if (trimText.startsWith('```')) {
+    if (inCodeBlock) {
+      // 終了検知：ブロックを閉じて、閉じタグ自体はオレンジ色で発光
+      inCodeBlock = false;
+      const span = document.createElement("span");
+      span.className = "str"; span.textContent = t;
+      return span.outerHTML;
+    } else {
+      // 開始検知： ```py などの記述から埋め込み対象の言語を一本釣り抽出！
+      inCodeBlock = true;
+      const targetLang = trimText.slice(3).toLowerCase().trim();
+      
+      // 対応している言語リポジトリに存在するかチェック、なければデフォルトでjs
+      codeBlockLang = targetLang ? targetLang : 'js';
+      
+      const span = document.createElement("span");
+      span.className = "str"; span.textContent = t;
+      return span.outerHTML;
+    }
+  }
+
+  // 💡 【コードブロック内部のインターセプトルーティング】
+  // ブロックの中にいる間は、Markdownの解析を完全にミュートし、
+  // 指定された言語（PythonやC++など）の専門スキャナーに処理を丸投げ委託！
+  if (inCodeBlock) {
+    if (codeBlockLang === 'js') return Gateway.ApplyHighlighttoJS(t);
+    if (codeBlockLang === 'json') return Gateway.ApplyHighlighttoJSON(t);
+    if (codeBlockLang === 'html') return Gateway.ApplyHighlighttoHTML(t);
+    if (codeBlockLang === 'css') return Gateway.ApplyHighlighttoCSS(t);
+    if (codeBlockLang === 'py') return Gateway.ApplyHighlighttoPY(t);
+    if (codeBlockLang === 'php') return Gateway.ApplyHighlighttoPHP(t);
+    if (codeBlockLang === 'cpp' || codeBlockLang === 'h') return Gateway.ApplyHighlighttoCPP(t);
+    if (codeBlockLang === 'cs') return Gateway.ApplyHighlighttoCS(t);
+    if (codeBlockLang === 'java') return Gateway.ApplyHighlighttoJAVA(t);
+    if (codeBlockLang === 'ts') return Gateway.ApplyHighlighttoTS(t);
+    if (codeBlockLang === 'sql') return Gateway.ApplyHighlighttoSQL(t);
+    if (codeBlockLang === 'sh') return Gateway.ApplyHighlighttoSH(t);
+    if (codeBlockLang === 'yaml' || codeBlockLang === 'yml') return Gateway.ApplyHighlighttoYAML(t);
+    if (codeBlockLang === 'toml') return Gateway.ApplyHighlighttoTOML(t);
+    if (codeBlockLang === 'rs') return Gateway.ApplyHighlighttoRust(t);
+    if (codeBlockLang === 'go') return Gateway.ApplyHighlighttoGo(t);
+    if (codeBlockLang === 'rb') return Gateway.ApplyHighlighttoRuby(t);
+    if (codeBlockLang === 'kt' || codeBlockLang === 'kts') return Gateway.ApplyHighlighttoKT(t);
+    if (codeBlockLang === 'swift') return Gateway.ApplyHighlighttoSwift(t);
+    if (codeBlockLang === 'dart') return Gateway.ApplyHighlighttoDart(t);
+    if (codeBlockLang === 'r') return Gateway.ApplyHighlighttoR(t);
+    if (codeBlockLang === 'dockerfile') return Gateway.ApplyHighlighttoDocker(t);
+    return Gateway.ApplyHighlighttoJS(t);
+  }
+
+  // ─── 以下、通常のMarkdownスキャンロジック（鉄壁版） ───
   if (trimText.startsWith('#')) {
-    const span = document.createElement("span");
-    span.className = "k";
-    span.textContent = t;
-    return span.outerHTML;
+    const span = document.createElement("span"); span.className = "k"; span.textContent = t; return span.outerHTML;
   }
-
-  // 2. 行頭の引用判定（> Quote）
   if (trimText.startsWith('>')) {
-    const span = document.createElement("span");
-    span.className = "b";
-    span.textContent = t;
-    return span.outerHTML;
+    const span = document.createElement("span"); span.className = "b"; span.textContent = t; return span.outerHTML;
   }
 
-  // 3. 1文字ずつの高速クリーン・シリアルスキャン
   while (idx < t.length) {
     const c = t[idx];
-
-    // インラインコード（`code`）のパース処理
     if (s) {
       res += c.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-      if (c === '`') {
-        res += '</span>';
-        s = 0;
-      }
-      idx++;
-      continue;
+      if (c === '`') { res += '</span>'; s = 0; } idx++; continue;
     }
-
-    // バッククォートを見つけたらインラインコードモード（オレンジ）へ突入！
     if (c === '`') {
-      res += '<span class="str">`';
-      s = 1;
-      idx++;
-      continue;
+      res += '<span class="str">`'; s = 1; idx++; continue;
     }
-
-    // 太字（**bold**）のトークン検出
     if (c === '*' && t[idx + 1] === '*') {
-      res += '<span class="a">**';
-      idx += 2;
+      res += '<span class="a">**'; idx += 2;
       while (idx < t.length) {
-        if (t[idx] === '*' && t[idx + 1] === '*') {
-          res += '**</span>';
-          idx += 2;
-          break;
-        }
-        res += t[idx].replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        idx++;
-      }
-      continue;
+        if (t[idx] === '*' && t[idx + 1] === '*') { res += '**</span>'; idx += 2; break; }
+        res += t[idx].replace(/</g, '&lt;').replace(/>/g, '&gt;'); idx++;
+      } continue;
     }
-
-    // リンク記法（[Text](URL)）のコンテキスト検出
     if (c === '[') {
-      res += '<span class="o">[</span><span class="s">';
-      idx++;
+      res += '<span class="o">[</span><span class="s">'; idx++;
       while (idx < t.length) {
         if (t[idx] === ']') {
-          res += '</span><span class="o">]</span>';
-          idx++;
+          res += '</span><span class="o">]</span>'; idx++;
           if (t[idx] === '(') {
-            res += '<span class="o">(</span><span class="prop">';
-            idx++;
+            res += '<span class="o">(</span><span class="prop">'; idx++;
             while (idx < t.length) {
-              if (t[idx] === ')') {
-                res += '</span><span class="o">)</span>';
-                idx++;
-                break;
-              }
-              res += t[idx];
-              idx++;
+              if (t[idx] === ')') { res += '</span><span class="o">)</span>'; idx++; break; }
+              res += t[idx]; idx++;
             }
-          }
-          break;
+          } break;
         }
-        res += t[idx].replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        idx++;
-      }
-      continue;
+        res += t[idx].replace(/</g, '&lt;').replace(/>/g, '&gt;'); idx++;
+      } continue;
     }
-
-    // 一般的な記号・箇条書き（-, *, +, |）の着色
     if (idx === 0 && ['-', '*', '+'].includes(c) && t[idx + 1] === ' ') {
-      const span = document.createElement("span");
-      span.className = "m"; span.textContent = c; res += span.outerHTML;
+      const span = document.createElement("span"); span.className = "m"; span.textContent = c; res += span.outerHTML;
     } else if (['|', '[', ']', '(', ')', '#', '`'].includes(c)) {
-      const span = document.createElement("span");
-      span.className = "o"; span.textContent = c; res += span.outerHTML;
+      const span = document.createElement("span"); span.className = "o"; span.textContent = c; res += span.outerHTML;
     } else {
       res += c.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
     idx++;
   }
-
   return res;
 }
