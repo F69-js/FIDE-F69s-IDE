@@ -679,6 +679,8 @@ openfile.addEventListener("click", async () => {
         filename = file?.name
         if(!filename)return;
         filenamei.value = filename;
+        detectLanguageByExtension(filename);
+        applyFIDEHighlight()
         switch(filename.split(".").slice(-1)[0]){
             case "png":
             case "svg":
@@ -707,6 +709,10 @@ openfile.addEventListener("click", async () => {
                 filetype = "text"
                 maincontainer.hidden=false;
                 imgcontainer.hidden=true;
+                undoStack.push(raw);
+                redoStack = [];
+                cur.innerText = "";
+                raw = "";
                 const content = await file.text();
                 content
                    .split("\n")
