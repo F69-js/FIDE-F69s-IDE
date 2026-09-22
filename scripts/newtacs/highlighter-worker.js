@@ -1,20 +1,4 @@
 // FIDE Custom IDE - Text-as-colors (Tacs) PWA Web Worker Engine© (v35.0 Native Serial Final)
-self.document = {
-  createElement: (tagName) => {
-    return {
-      _class: "", _text: "", style: { color: "" },
-      set className(val) { this._class = val; },
-      get className() { return this._class; },
-      set textContent(val) { this._text = val; },
-      get textContent() { return this._text; },
-      get outerHTML() {
-        if (this.style.color) { return '<span style="color: ' + this.style.color + '">' + this._text + '</span>'; }
-        return '<span class="' + this._class + '">' + this._text + '</span>';
-      }
-    };
-  }
-};
-
 import * as Gateway from "./langs/gateway.js";
 
 let currentLang = 'js';
