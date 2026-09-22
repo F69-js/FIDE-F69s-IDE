@@ -23,7 +23,16 @@ fideWorker.addEventListener("message", (e) => {
         document.head.appendChild(styleTag);
       }
       styleTag.innerText = themeCss;
-      updateLangIndicator(currentLang);
+      if (typeof document !== "undefined") {
+  if (document.readyState === "loading") {
+    // HTMLの構築が終わったら初期化を走らせる
+    document.addEventListener("DOMContentLoaded", () => {
+      detectLanguageByExtension("");
+    });
+  } else {
+    detectLanguageByExtension("");
+  }
+}
     }
   }
 
@@ -81,10 +90,12 @@ function updateLangIndicator(lang) {
   }
 }
 
-// 💡 起動時の最上部での即時実行を廃止し、DOMが確実に組み上がってから安全に初期化
 if (typeof document !== "undefined") {
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", () => detectLanguageByExtension(""));
+    // HTMLの構築が終わったら初期化を走らせる
+    document.addEventListener("DOMContentLoaded", () => {
+      detectLanguageByExtension("");
+    });
   } else {
     detectLanguageByExtension("");
   }
