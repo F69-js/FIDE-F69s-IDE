@@ -1,4 +1,4 @@
-// FIDE Tacs Highlighter© - HTML Multi-Embedded Script/Style Module (v2.0)
+// FIDE Tacs Highlighter© - HTML Multi-Embedded Script/Style Module (v2.1 - Fixed)
 import * as Gateway from "./gateway.js";
 
 const TAGS = ["DOCTYPE","html","head","body","meta","title","link","script","style","div","span","p","a","img","ul","ol","li","table","tr","td","th","thead","tbody","form","input","button","textarea","label","select","option","iframe","canvas","svg"];
@@ -12,11 +12,11 @@ export const HTMLtheme = `
   .c { color: #6a9955; font-style: italic; }
 `;
 
-let innerBlockMode = null; // 'js' | 'css' | null
-
 export function ApplyHighlighttoHTML(t) {
   let idx = 0, res = '', s = 0, sC = '', w = '';
   let inTag = false;
+  let innerBlockMode = null; // 関数内にスコープを閉じ込めて状態汚染を防止
+
   const trimText = t.trim().toLowerCase();
 
   if (innerBlockMode === 'js' && (trimText.includes('</script>') || trimText.includes('&lt;/script&gt;'))) {
@@ -40,10 +40,11 @@ export function ApplyHighlighttoHTML(t) {
       else if (ATTRS.includes(cleanWord)) className = "a";
     }
 
+    const safeW = w.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     if (className) {
-      res += '<span class="' + className + '">' + w + '</span>';
+      res += '<span class="' + className + '">' + safeW + '</span>';
     } else { 
-      res += w; 
+      res += safeW; 
     }
 
     if (inTag && cleanWord === 'script' && !w.startsWith('/')) innerBlockMode = 'js';
@@ -54,32 +55,77 @@ export function ApplyHighlighttoHTML(t) {
 
   while (idx < t.length) {
     const c = t[idx];
+    
     if (s) {
-      if (c === '\\') { res += c + (t[idx + 1] || ''); idx += 2; continue; }
-      res += c.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-      if (c === sC) { res += '</span>'; s = 0; } idx++; continue;
+      if (c === '\\') { 
+        res += (c + (t[idx + 1] || '')).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); 
+        idx += 2; 
+        continue; 
+      }
+      res += c.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      if (c === sC) { res += '</span>'; s = 0; } 
+      idx++; 
+      continue;
     }
+    
+    // コメントの処理
     if (c === '<' && t[idx + 1] === '!' && t[idx + 2] === '-' && t[idx + 3] === '-') {
-      flush(); res += '<span class="c">&lt;!--'; idx += 4;
+      flush(); 
+      res += '<span class="c">&lt;!--'; 
+      idx += 4;
       while (idx < t.length) {
-        if (t[idx] === '-' && t[idx + 1] === '-' && t[idx + 2] === '>') { res += '--&gt;</span>'; idx += 3; break; }
-        res += t[idx].replace(/</g, '&lt;').replace(/>/g, '&gt;'); idx++;
-      } continue;
+        if (t[idx] === '-' && t[idx + 1] === '-' && t[idx + 2] === '>') { 
+          res += '--&gt;</span>'; 
+          idx += 3; 
+          break; 
+        }
+        res += t[idx].replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); 
+        idx++;
+      } 
+      continue;
     }
-    if (c === '<') { flush(); inTag = true; res += '&lt;'; idx++; continue; }
-    if (c === '>') { flush(); inTag = false; res += '&gt;'; idx++; continue; }
+    
+    if (c === '<') { 
+      flush(); 
+      inTag = true; 
+      res += '&lt;'; 
+      idx++; 
+      continue; 
+    }
+    
+    if (c === '>') { 
+      flush(); 
+      inTag = false; 
+      res += '&gt;'; 
+      idx++; 
+      continue; 
+    }
+    
     if (c === '"' || c === "'") {
-      if (inTag) { flush(); sC = c; res += '<span class="str">' + c; s = 1; idx++; continue; }
+      if (inTag) { 
+        flush(); 
+        sC = c; 
+        res += '<span class="str">' + c; 
+        s = 1; 
+        idx++; 
+        continue; 
+      }
     }
+    
     const isWordChar = inTag ? /[a-zA-Z0-9_\-\/]/.test(c) : /[a-zA-Z0-9_]/.test(c);
-    if (isWordChar) { w += c; } else {
+    if (isWordChar) { 
+      w += c; 
+    } else {
       if (w) flush();
       if (c === '=' && inTag) {
         res += '<span class="o">=</span>';
-      } else { res += c.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+      } else { 
+        res += c.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); 
+      }
     }
     idx++;
   }
+  
   if (w) flush(); 
   return res;
 }
