@@ -4,7 +4,6 @@ const KEYWORDS = ["@media","@keyframes","@import","@font-face","@charset","@supp
 const NEON_PINK = ["important","inherit","initial","unset","none","auto"];
 const GOLD = ["root","hover","active","focus","visited","before","after","nth-child","first-child","last-child","not"];
 
-// 💡 【超強力アプデ】ハイフンを含む、Web制作で絶対に使う主要プロパティをこれでもかと完全網羅！！！
 const BUILTINS = [
   "display","position","top","right","bottom","left","width","height","margin","padding","background","color","font","border","opacity","visibility","overflow","z-index",
   "box-sizing","background-color","background-image","background-size","background-position","background-repeat",
@@ -37,26 +36,22 @@ export function ApplyHighlighttoCSS(t) {
 
   const flush = () => {
     if (!w) return;
-    const span = document.createElement("span");
+    let className = "";
     
-    // 💡 単語アレイの照合（大文字小文字を安全に考慮）
-    const lowerWord = w.toLowerCase();
-
-    if (KEYWORDS.includes(w)) span.className = "k";
-    else if (NEON_PINK.includes(w)) span.className = "a";
-    else if (GOLD.includes(w)) span.className = "s";
-    else if (BUILTINS.includes(w)) span.className = "b"; // 💡 ここでハイフン入りプロパティが美しくライトブルーに染まる！
-    else if (METHODS.includes(w)) span.className = "m";
-    else {
-      // 数値リテラルやカラーコード（#fff, 10px等）のカラーリング
-      if (/^[0-9]+/.test(w) \(\vert{\)}\(\vert{}\) w.startsWith('#')) {
-        span.className = "css-num";
-      }
+    if (KEYWORDS.includes(w)) className = "k";
+    else if (NEON_PINK.includes(w)) className = "a";
+    else if (GOLD.includes(w)) className = "s";
+    else if (BUILTINS.includes(w)) className = "b";
+    else if (METHODS.includes(w)) className = "m";
+    else if (/^[0-9]+/.test(w) || w.startsWith('#')) {
+      className = "css-num";
     }
 
-    if (span.className) {
-      span.textContent = w; res += span.outerHTML;
-    } else { res += w; }
+    if (className) {
+      res += '<span class="' + className + '">' + w + '</span>';
+    } else { 
+      res += w; 
+    }
     w = '';
   };
 
@@ -68,26 +63,27 @@ export function ApplyHighlighttoCSS(t) {
       res += c.replace(/</g, '&lt;').replace(/>/g, '&gt;');
       if (c === sC) { res += '</span>'; s = 0 } idx++; continue;
     }
-    if (c === "'" \(\vert{\)}\(\vert{}\) c === '"') { flush(); sC = c; res += '<span class="str">' + c; s = 1; idx++; continue }
+    if (c === "'" || c === '"') { flush(); sC = c; res += '<span class="str">' + c; s = 1; idx++; continue }
 
-    // 💡 【核心の修正】英数字だけでなく、ハイフン「-」やシャープ「#」も
-    // 単語を切り出すための文字（isWordChar）として完璧に許容し、プロパティ名を1つの塊として認識！
     const isWordChar = /[a-zA-Z0-9_\-#]/.test(c);
     
     if (isWordChar) { 
       w += c; 
     } else {
       if (w) flush();
-      if (c \(=== '{' \vert{}\vert{}\) c === '}') {
+      if (c === '{' || c === '}') {
         res += '<span class="br1">' + c + '</span>';
-      } else if (c \(=== '[' \vert{}\vert{}\) c === ']') {
+      } else if (c === '[' || c === ']') {
         res += '<span class="br3">' + c + '</span>';
-      } else if (c \(=== '(' \vert{}\vert{}\) c === ')') {
+      } else if (c === '(' || c === ')') {
         res += '<span class="br2">' + c + '</span>';
       } else if ([':', ';', ','].includes(c)) {
         res += '<span class="o">' + c + '</span>';
-      } else { res += c.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+      } else { 
+        res += c.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); 
+      }
     } idx++;
   }
-  if (w) flush(); return res;
+  if (w) flush(); 
+  return res;
 }
