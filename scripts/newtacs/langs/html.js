@@ -12,7 +12,6 @@ export const HTMLtheme = `
   .c { color: #6a9955; font-style: italic; }
 `;
 
-// HTML内の特殊埋め込み（JS/CSS領域）の状態を管理するフラグ
 let innerBlockMode = null; // 'js' | 'css' | null
 
 export function ApplyHighlighttoHTML(t) {
@@ -20,8 +19,6 @@ export function ApplyHighlighttoHTML(t) {
   let inTag = false;
   const trimText = t.trim().toLowerCase();
 
-  // 💡 【核心：HTML閉じタグのインターセプトリインジェクション】
-  // スクリプトやスタイルの領域が終わる瞬間を先読み検知！
   if (innerBlockMode === 'js' && (trimText.includes('</script>') || trimText.includes('&lt;/script&gt;'))) {
     innerBlockMode = null;
   }
@@ -29,27 +26,26 @@ export function ApplyHighlighttoHTML(t) {
     innerBlockMode = null;
   }
 
-  // 💡 【特殊ブロック内部のパース分岐】
-  // <script>タグの直後にいる間は、自動でJS専用プラグインへ行データを委託流し込み！
   if (innerBlockMode === 'js') return Gateway.ApplyHighlighttoJS(t);
   if (innerBlockMode === 'css') return Gateway.ApplyHighlighttoCSS(t);
 
-  // ─── 以下、通常のHTMLシリアルスキャン（閉じタグスラッシュ融合版） ───
   const flush = () => {
     if (!w) return;
-    const span = document.createElement("span");
     let cleanWord = w;
     if (w.startsWith("/")) { cleanWord = w.slice(1); }
 
+    let className = "";
     if (inTag) {
-      if (TAGS.includes(cleanWord)) span.className = "k";
-      else if (ATTRS.includes(cleanWord)) span.className = "a";
+      if (TAGS.includes(cleanWord)) className = "k";
+      else if (ATTRS.includes(cleanWord)) className = "a";
     }
-    if (span.className) {
-      span.textContent = w; res += span.outerHTML;
-    } else { res += w; }
 
-    // 💡 【状態遷移の引き金】今開いたタグが script か style かを記憶し、次の行から多重色分けを起動！
+    if (className) {
+      res += '<span class="' + className + '">' + w + '</span>';
+    } else { 
+      res += w; 
+    }
+
     if (inTag && cleanWord === 'script' && !w.startsWith('/')) innerBlockMode = 'js';
     if (inTag && cleanWord === 'style' && !w.startsWith('/')) innerBlockMode = 'css';
 
@@ -79,10 +75,11 @@ export function ApplyHighlighttoHTML(t) {
     if (isWordChar) { w += c; } else {
       if (w) flush();
       if (c === '=' && inTag) {
-        const span = document.createElement("span"); span.className = "o"; span.textContent = c; res += span.outerHTML;
+        res += '<span class="o">=</span>';
       } else { res += c.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
     }
     idx++;
   }
-  if (w) flush(); return res;
+  if (w) flush(); 
+  return res;
 }
