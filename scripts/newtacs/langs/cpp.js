@@ -21,21 +21,21 @@ export function ApplyHighlighttoCPP(t) {
 
   // 💡 マクロ・プリプロセッサ文を一発で行ごとゴールドに一本釣り！
   if (trimText.startsWith('#')) {
-    const span = document.createElement("span");
-    span.className = "s"; span.textContent = t; return span.outerHTML;
+    return '<span class="s">' + t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</span>';
   }
 
-  const flush = () => {
+  const flush = (isBuiltin = false) => {
     if (!w) return;
-    const span = document.createElement("span");
-    if (KEYWORDS.includes(w)) span.className = "k";
-    else if (NEON_PINK.includes(w)) span.className = "a";
-    else if (BUILTINS.includes(w)) span.className = "b";
-    else if (/^\d+\$/.test(w)) span.style.color = "#b5cea8";
+    let className = "";
+    if (KEYWORDS.includes(w)) className = "k";
+    else if (NEON_PINK.includes(w)) className = "a";
+    else if (BUILTINS.includes(w) || isBuiltin) className = "b";
 
-    if (span.className || span.style.color) {
-      span.textContent = w; res += span.outerHTML;
-    } else { res += w; }
+    if (className) {
+      res += '<span class="' + className + '">' + w + '</span>';
+    } else { 
+      res += w; 
+    }
     w = '';
   };
 
@@ -58,21 +58,24 @@ export function ApplyHighlighttoCPP(t) {
     } else {
       if (w) {
         if (c === '(') {
-          const span = document.createElement("span");
-          span.className = BUILTINS.includes(w) ? "b" : "m";
-          span.textContent = w; res += span.outerHTML; w = '';
-        } else { flush(); }
+          let className = BUILTINS.includes(w) ? "b" : "m";
+          res += '<span class="' + className + '">' + w + '</span>'; w = '';
+        } else { 
+          flush(); 
+        }
       }
 
       if (c === ':' && t[idx + 1] === ':') {
-        const span = document.createElement("span"); span.className = "o"; span.textContent = "::"; res += span.outerHTML; idx += 2; continue;
+        res += '<span class="o">::</span>'; idx += 2; continue;
       } else if (c === '<' && t[idx + 1] === '<') {
-        const span = document.createElement("span"); span.className = "o"; span.textContent = "<<"; res += span.outerHTML; idx += 2; continue;
+        res += '<span class="o">&lt;&lt;</span>'; idx += 2; continue;
       } else if (c === '>' && t[idx + 1] === '>') {
-        const span = document.createElement("span"); span.className = "o"; span.textContent = ">>"; res += span.outerHTML; idx += 2; continue;
+        res += '<span class="o">&gt;&gt;</span>'; idx += 2; continue;
       } else if (['+', '-', '*', '/', '=', '!', '<', '>', '%', '&', '|', '^', '.'].includes(c)) {
-        const span = document.createElement("span"); span.className = "o"; span.textContent = c; res += span.outerHTML;
-      } else { res += c.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+        res += '<span class="o">' + c.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</span>';
+      } else { 
+        res += c.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); 
+      }
     } idx++;
   }
   flush(); return res;
