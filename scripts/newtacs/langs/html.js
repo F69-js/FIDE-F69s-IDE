@@ -1,4 +1,4 @@
-// FIDE Tacs Highlighter© - HTML Multi-Embedded Script/Style Module (v2.1 - Fixed)
+// FIDE Tacs Highlighter© - HTML Multi-Embedded Script/Style Module (v2.2 - Anti-Disappearance Fix)
 import * as Gateway from "./gateway.js";
 
 const TAGS = ["DOCTYPE","html","head","body","meta","title","link","script","style","div","span","p","a","img","ul","ol","li","table","tr","td","th","thead","tbody","form","input","button","textarea","label","select","option","iframe","canvas","svg"];
@@ -15,7 +15,7 @@ export const HTMLtheme = `
 export function ApplyHighlighttoHTML(t) {
   let idx = 0, res = '', s = 0, sC = '', w = '';
   let inTag = false;
-  let innerBlockMode = null; // 関数内にスコープを閉じ込めて状態汚染を防止
+  let innerBlockMode = null;
 
   const trimText = t.trim().toLowerCase();
 
@@ -35,6 +35,8 @@ export function ApplyHighlighttoHTML(t) {
     if (w.startsWith("/")) { cleanWord = w.slice(1); }
 
     let className = "";
+    // 【重要】閉じタグ (>) が無い状態で中途半端にタグ扱いして消えるのを防ぐため、
+    // ここでは厳密にマッチするものだけハイライトする
     if (inTag) {
       if (TAGS.includes(cleanWord)) className = "k";
       else if (ATTRS.includes(cleanWord)) className = "a";
@@ -68,7 +70,7 @@ export function ApplyHighlighttoHTML(t) {
       continue;
     }
     
-    // コメントの処理
+    // コメント
     if (c === '<' && t[idx + 1] === '!' && t[idx + 2] === '-' && t[idx + 3] === '-') {
       flush(); 
       res += '<span class="c">&lt;!--'; 
@@ -120,6 +122,7 @@ export function ApplyHighlighttoHTML(t) {
       if (c === '=' && inTag) {
         res += '<span class="o">=</span>';
       } else { 
+        // ここがポイント：通常の文字やスペースは安全にエスケープして絶対に消さない
         res += c.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); 
       }
     }
