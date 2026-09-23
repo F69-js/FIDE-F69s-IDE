@@ -1,15 +1,15 @@
 // FIDE Tacs Highlighter© - PHP (.php) Plugin Module
 
 export const PHPtheme = `
-  .k { color: #c586c0; font-weight: bold; }   /* function, class, namespace: マゼンタ */
-  .a { color: #ff007f; font-weight: bold; }   /* $this, if, foreach, echo, return: ネオンピンク */
-  .s { color: #f2c94c; font-weight: bold; }   /* 変数全体($から始まる単語): ゴールド */
-  .b { color: #4ec9b0; }                      /* array, explode, count等標準関数: エメラルド */
-  .m { color: #569cd6; }                      /* 特殊キーワード(public, static): ブルー */
-  .o { color: #ffffff; }                      /* アロー(->)や各種演算子: 白 */
-  .str { color: #ce9178; }                    /* 文字列: オレンジ */
+  .k { color: #c586c0; font-weight: bold; }    /* function, class, namespace: マゼンタ */
+  .a { color: #ff007f; font-weight: bold; }    /* $this, if, foreach, echo, return: ネオンピンク */
+  .s { color: #f2c94c; font-weight: bold; }    /* 変数全体($から始まる単語): ゴールド */
+  .b { color: #4ec9b0; }                       /* array, explode, count等標準関数: エメラルド */
+  .m { color: #569cd6; }                       /* 特殊キーワード(public, static): ブルー */
+  .o { color: #ffffff; }                       /* アロー(->)や各種演算子: 白 */
+  .str { color: #ce9178; }                     /* 文字列: オレンジ */
   .c { color: #6a9955; font-style: italic; }   /* コメント(//, /*): グリーン */
-  .prop { color: #9cdcfe; }                   /* プロパティ: ライトブルー */
+  .prop { color: #9cdcfe; }                    /* プロパティ: ライトブルー */
 `;
 
 const KEYWORDS = ["class","interface","namespace","use","extends","implements","new","try","catch","throw"];
@@ -23,55 +23,89 @@ export function ApplyHighlighttoPHP(t) {
 
   const flush = (isProperty = false) => {
     if (!w) return;
-    const span = document.createElement("span");
-    
-    if (w.startsWith('\$')) span.className = "s"; // 💡 PHP最大のアイデンティティである変数をゴールドに！
-    else if (KEYWORDS.includes(w)) span.className = "k";
-    else if (MODIFIERS.includes(w)) span.className = "m";
-    else if (NEON_PINK.includes(w)) span.className = "a";
-    else if (BUILTINS.includes(w)) span.className = "b";
-    else if (isProperty) span.className = "prop";
-    else if (/^\d+\$/.test(w)) span.style.color = "#b5cea8";
+    let className = "";
+    let inlineStyle = "";
 
-    if (span.className || span.style.color) {
-      span.textContent = w; res += span.outerHTML;
-    } else { res += w; }
+    if (w.startsWith('$')) className = "s";
+    else if (KEYWORDS.includes(w)) className = "k";
+    else if (MODIFIERS.includes(w)) className = "m";
+    else if (NEON_PINK.includes(w)) className = "a";
+    else if (BUILTINS.includes(w)) className = "b";
+    else if (isProperty) className = "prop";
+    else if (/^\d+$/.test(w)) inlineStyle = "color: #b5cea8;";
+
+    const safeW = w.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+    if (className) {
+      res += '<span class="' + className + '">' + safeW + '</span>';
+    } else if (inlineStyle) {
+      res += '<span style="' + inlineStyle + '">' + safeW + '</span>';
+    } else { 
+      res += safeW; 
+    }
     w = '';
   };
 
   while (idx < t.length) {
     const c = t[idx];
-    if (c1) { res += c; if (c === '\n') { res += '</span>'; c1 = 0 } idx++; continue }
-    if (c2) { res += c; if (c === '*' && t[idx + 1] === '/') { res += '/</span>'; c2 = 0; idx += 2 } else idx++; continue }
+    if (c1) { 
+      res += c.replace(/</g, '&lt;').replace(/>/g, '&gt;'); 
+      if (c === '\n') { 
+        res += '</span>'; 
+        c1 = 0; 
+      } 
+      idx++; 
+      continue; 
+    }
+    if (c2) { 
+      res += c.replace(/</g, '&lt;').replace(/>/g, '&gt;'); 
+      if (c === '*' && t[idx + 1] === '/') { 
+        res += '/</span>'; 
+        c2 = 0; 
+        idx += 2; 
+      } else {
+        idx++;
+      } 
+      continue; 
+    }
     if (s) {
-      if (c === '\\') { res += c + (t[idx + 1] || ''); idx += 2; continue }
+      if (c === '\\') { res += c + (t[idx + 1] || ''); idx += 2; continue; }
       res += c.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-      if (c === sC) { res += '</span>'; s = 0 } idx++; continue;
+      if (c === sC) { res += '</span>'; s = 0; } 
+      idx++; 
+      continue;
     }
 
-    if (c === '/' && t[idx + 1] === '/') { flush(); res += '<span class="c">//'; c1 = 1; idx += 2; continue }
-    if (c === '/' && t[idx + 1] === '*') { flush(); res += '<span class="c">/*'; c2 = 1; idx += 2; continue }
-    if (c === "'" || c === '"') { flush(); sC = c; res += '<span class="str">' + c; s = 1; idx++; continue }
+    if (c === '/' && t[idx + 1] === '/') { flush(); res += '<span class="c">//'; c1 = 1; idx += 2; continue; }
+    if (c === '/' && t[idx + 1] === '*') { flush(); res += '<span class="c">/*'; c2 = 1; idx += 2; continue; }
+    if (c === "'" || c === '"') { flush(); sC = c; res += '<span class="str">' + c; s = 1; idx++; continue; }
 
-    // PHPは変数に「」がつくため、単語の構成文字として「」をスマートに許容！
     if (/[a-zA-Z0-9_\$]/.test(c)) {
       w += c;
     } else {
       if (w) {
         if (c === '(') {
-          const span = document.createElement("createElement");
-          span.className = BUILTINS.includes(w) ? "b" : "b";
-          span.textContent = w; res += span.outerHTML; w = '';
-        } else { flush(lastChar === '>'); }
+          let className = "b";
+          res += '<span class="' + className + '">' + w.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</span>'; 
+          w = '';
+        } else { 
+          flush(lastChar === '>'); 
+        }
       }
       if (c.trim() !== '') lastChar = c;
 
       if (c === '-' && t[idx + 1] === '>') {
-        const span = document.createElement("span"); span.className = "o"; span.textContent = "->"; res += span.outerHTML; idx += 2; continue;
+        res += '<span class="o">-&gt;</span>'; 
+        idx += 2; 
+        continue;
       } else if (['+', '-', '*', '/', '=', '!', '<', '?', '%', ':', '.', '&'].includes(c)) {
-        const span = document.createElement("span"); span.className = "o"; span.textContent = c; res += span.outerHTML;
-      } else { res += c.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
-    } idx++;
+        res += '<span class="o">' + c.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</span>';
+      } else { 
+        res += c.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); 
+      }
+    } 
+    idx++;
   }
-  flush(lastChar === '>'); return res;
+  flush(lastChar === '>'); 
+  return res;
 }
