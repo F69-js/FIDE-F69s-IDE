@@ -36,24 +36,33 @@ fideWorker.addEventListener("message", (e) => {
     }
   }
 
-  // 2. ハイライトパースがすべて完了して返ってきた時
-  if (type === "HIGHLIGHT_COMPLETE") {
-    const lines = document.querySelectorAll(".line");
-    lines.forEach((line, idx) => {
-      if (highlightedLines[idx] !== undefined && line) {
-        // 💡 計算済みの極彩色HTMLを安全にフラッシュ反映
-        line.innerHTML = highlightedLines[idx];
-      }
-    });
-      // ⭕ 【ここに用がある！】ハイライト直後に、独自カーソルを強制復活させる！
-    // ※お使いの独自カーソルのHTML要素（例: id="cursor"など）に合わせてください
-    const cursorHTML = '<span id="cursor" class="blink">|</span>';
+ if (type === "HIGHLIGHT_COMPLETE") {
     
-    // 現在の画面全体のHTMLの、正しい cursorIdx（文字の位置）にカーソル要素を再挿入
+    const cursorHTML = '<span id="cursor" class="blink">|</span>';
     let currentHTML = cur.innerHTML;
     
-    // 画面全体のHTMLのカーソル位置にガチャンと結合して復元！
-       cur.innerHTML = currentHTML.slice(0, insertionIdx) + cursorHTML + currentHTML.slice(insertionIdx);
+    let textCount = 0;
+    // 💡 変数の宣言漏れを絶対に防ぐために、ここで明示的に初期化
+    let finalInsertionIdx = currentHTML.length;
+
+    // HTMLタグを避けて、純粋な文字数（cursorIdx）の位置を計算
+    for (let i = 0; i < currentHTML.length; i++) {
+      if (currentHTML[i] === '<') {
+        while (i < currentHTML.length && currentHTML[i] !== '>') {
+          i++;
+        }
+        continue;
+      }
+      
+      if (textCount === cursorIdx) {
+        finalInsertionIdx = i;
+        break;
+      }
+      textCount++;
+    }
+
+    // 正確な位置にカーソルを再挿入して完全復活！
+    cur.innerHTML = currentHTML.slice(0, finalInsertionIdx) + cursorHTML + currentHTML.slice(finalInsertionIdx);
   }
 });
 
