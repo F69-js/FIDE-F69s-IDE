@@ -225,14 +225,36 @@ window.addEventListener('paste', async e => {
 	e.preventDefault();
 	const text = (e.clipboardData || window.clipboardData).getData('text');
 	if (!text) return;
-	const lines = text.split(/\r?\n/);
+	
+	// 💡 タブ文字（\t）をインデントガイド（|）に事前置換
+	const formattedText = text.replace(/\t/g, "|");
+	const lines = formattedText.split(/\r?\n/);
+	
 	for (let i = 0; i < lines.length; i++) {
-		cur.innerText += lines[i].replace(/\t/g, "|");
-		raw += lines[i];
-		if (i !== lines.length - 1) await DoEnter()
+		let mi = cur.innerText.replace(/\|/g, "");
+		const chunk = lines[i];
+
+		// 1. 画面の表示用テキストの「カーソル位置」に正確に挿入
+		cur.innerText = mi.slice(0, cursorIdx) + chunk + mi.slice(cursorIdx);
+		
+		// 2. 内部データ（raw）も、元のタブ文字（\t）に戻した状態で「カーソル位置」に正確に挿入！
+		const rawChunk = chunk.replace(/\|/g, "\t");
+		raw = raw.slice(0, cursorIdx) + rawChunk + raw.slice(cursorIdx);
+		
+		// 3. 挿入した文字数の分だけカーソルを進める
+		cursorIdx += chunk.length;
+
+		// 4. 改行がある場合は、行をまたぐ処理を実行
+		if (i !== lines.length - 1) {
+			await DoEnter();
+		}
 	}
-	applyFIDEHighlight()
+	applyFIDEHighlight();
 });
+
+function add(key) {
+    raw = raw.slice(0, cursorIdx) + key + raw.slice(cursorIdx); 
+}
 window.addEventListener("keydown", async e => {
 	if (e.isComposing || e.key === "Process" || !active) return;
 	if (["ArrowLeft", "ArrowRight", "Backspace", "Enter"].includes(e.key)) e.preventDefault();
@@ -373,26 +395,24 @@ window.addEventListener("keydown", async e => {
 				refreshLineUI()
 			}
 			break;
-		case "Tab":
-			e.preventDefault();
-			cur.innerText = mi.slice(0, cursorIdx) + "|" + mi.slice(cursorIdx);
-			raw += "  ";
-			cursorIdx+=2;
-			refreshLineUI();
-			break;
-		case "Enter":
-			DoEnter();
-			break;
-		default:
-			if (e.key.length === 1 && !e.ctrlKey) {
-				cur.innerText = mi.slice(0, cursorIdx) + e.key + mi.slice(cursorIdx);
-				raw += e.key;
-				cursorIdx++;
-				refreshLineUI()
-			}
-			break
-	}
-});
+case "Tab":
+  e.preventDefault();
+  cur.innerText = mi.slice(0, cursorIdx) + "|" + mi.slice(cursorIdx);
+  add("\t"); // 💡 末尾追加（+=）ではなく、カーソル位置に正確にタブが入る！
+  cursorIdx++;
+  refreshLineUI();
+  break;
+default:
+  if (e.key.length === 1 && !e.ctrlKey) {
+    add(e.key); // 💡 これだけで内部データ（raw）の更新が完了！
+
+    // あとは見た目の更新だけ
+    let mi = cur.innerText.replace(/\|/g, "");
+    cur.innerText = mi.slice(0, cursorIdx) + e.key + mi.slice(cursorIdx);
+    cursorIdx++; 
+    refreshLineUI(); 
+  }
+  break;
 window.addEventListener("error", e => {
 	error.innerText += e.message + "\n"
 });
