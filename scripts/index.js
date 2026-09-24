@@ -2,6 +2,7 @@
 import {_jala, _fjalu} from "./fjalu/index.js";
 import {TIDEPreParse} from "./linter/tide.js";
 import {Language, LanguageTable} from "./langs/i18n.js";
+let cursorIdx = 0;
 import {detectLanguageByExtension, applyFIDEHighlight} from "./newtacs/highlighter.js";
 // 💡 【完璧なる直下ファイル分割】同じフォルダから ai.js と ui.js をダイレクト接続ロード！
 import {initBuiltInAI, sendBtnCheck} from "./ai.js";
@@ -24,7 +25,6 @@ globalThis.filename = "";
 globalThis.filetype = "text";
 let raw = "";
 let g;
-let cursorIdx = 0;
 let list = ["#error", "#showraw", "#settings", "#settingscontainer",
 	"#middlearea", "#maincontainer", "#filenamei", "#openfile", "#savefile",
 	"#maintheme", "#theme_area", "#rawexec", "#input", "#searchi",
