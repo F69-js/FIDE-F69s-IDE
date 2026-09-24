@@ -6,33 +6,6 @@ let currentLang = 'js';
 // 💡 【マルチスレッド起動】ハイライト専用のWeb Workerインスタンスを生成！
 const fideWorker = new Worker(new URL("./highlighter-worker.js", import.meta.url), { type: "module" });
 
-// 💡 Workerから計算完了のメッセージが届いた時の非同期処理フック
-fideWorker.addEventListener("message", (e) => {
-  const { type, currentLang: lang, themeCss, highlightedLines } = e.data;
-
-  // 1. 言語・CSS切り替えが返ってきた時
-  if (type === "LANG_CHANGED") {
-    // 💡 【重要】本当に言語が変わった時だけ処理を行うことで、無限ループと描画崩壊を阻止！
-    if (currentLang !== lang || !document.getElementById("fide-dynamic-tacs-theme")) {
-      currentLang = lang;
-      
-      let styleTag = document.getElementById("fide-dynamic-tacs-theme");
-      if (!styleTag) {
-        styleTag = document.createElement("style");
-        styleTag.id = "fide-dynamic-tacs-theme";
-        document.head.appendChild(styleTag);
-      }
-      styleTag.innerText = themeCss;
-      if (typeof document !== "undefined") {
-  if (document.readyState === "loading") {
-    // HTMLの構築が終わったら初期化を走らせる
-    document.addEventListener("DOMContentLoaded", () => {
-      detectLanguageByExtension("");
-    });
-  } else {
-    detectLanguageByExtension("");
-  }
-}
     }
   }
 
@@ -118,3 +91,5 @@ if (typeof document !== "undefined") {
     detectLanguageByExtension("");
   }
 }
+
+export{fideWorker};
