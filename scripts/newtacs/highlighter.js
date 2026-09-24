@@ -53,7 +53,7 @@ fideWorker.addEventListener("message", (e) => {
     let currentHTML = cur.innerHTML;
     
     // 画面全体のHTMLのカーソル位置にガチャンと結合して復元！
-    cur.innerHTML = currentHTML.slice(0, cursorIdx) + cursorHTML + currentHTML.slice(cursorIdx);
+       cur.innerHTML = currentHTML.slice(0, insertionIdx) + cursorHTML + currentHTML.slice(insertionIdx);
   }
 });
 
