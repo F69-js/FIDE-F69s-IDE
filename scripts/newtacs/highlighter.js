@@ -45,6 +45,15 @@ fideWorker.addEventListener("message", (e) => {
         line.innerHTML = highlightedLines[idx];
       }
     });
+      // ⭕ 【ここに用がある！】ハイライト直後に、独自カーソルを強制復活させる！
+    // ※お使いの独自カーソルのHTML要素（例: id="cursor"など）に合わせてください
+    const cursorHTML = '<span id="cursor" class="blink">|</span>';
+    
+    // 現在の画面全体のHTMLの、正しい cursorIdx（文字の位置）にカーソル要素を再挿入
+    let currentHTML = cur.innerHTML;
+    
+    // 画面全体のHTMLのカーソル位置にガチャンと結合して復元！
+    cur.innerHTML = currentHTML.slice(0, cursorIdx) + cursorHTML + currentHTML.slice(cursorIdx);
   }
 });
 
