@@ -37,7 +37,7 @@ let list = ["#error", "#showraw", "#settings", "#settingscontainer",
 	"#menu"
 ];
 list.forEach(t => {
-	let d = document ? .querySelector(t);
+	let d = document?.querySelector(t);
 	if (d) globalThis[t.slice(1)] = d
 });
 pencolor.value = "#FF0000";
