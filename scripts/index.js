@@ -413,6 +413,8 @@ default:
     refreshLineUI(); 
   }
   break;
+		}
+}
 window.addEventListener("error", e => {
 	error.innerText += e.message + "\n"
 });
