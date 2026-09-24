@@ -81,7 +81,7 @@ function updateLangIndicator(lang) {
   else if (['md', 'sh', 'kt', 'kts'].includes(lang)) textColor = 'dcdcaa';
   else if (['py', 'sql', 'yaml', 'yml', 'go', 'dart', 'r'].includes(lang)) textColor = 'f2c94c';
 
-  const targetSrc = "https://placehold.co" + bgColor + "/" + textColor + "?text=" + encodeURIComponent(upperLang);
+  const targetSrc = "https://placehold.co/" + bgColor + "/" + textColor + "?text=" + encodeURIComponent(upperLang);
   
   // 💡 現在のsrcと異なる場合のみ書き換えて、ブラウザのリロード地獄をストップ
   if (icon.src !== targetSrc) {
