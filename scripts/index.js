@@ -46,7 +46,7 @@ let active = false,
 	replaccoOpen = false,
 	isSearched = false,
 	lang;
-let paramlang = getParams(sec).find(t => Object.keys(t).includes("lang")) ? .lang;
+let paramlang = getParams(sec).find(t => Object.keys(t).includes("lang"))?.lang;
 lang = !paramlang ? (navigator.language === "ja" ? "ja" : "en") : (["ja", "en"]
 	.includes(paramlang) ? paramlang : "ja");
 Language.language = lang;
@@ -57,7 +57,7 @@ ttl1.innerText = Language.for("htmltext.thmelabel1");
 tul1.innerText = Language.for("htmltext.unllabel1");
 tul2.innerText = Language.for("htmltext.unllabel2");
 spanc.innerText = Language.for("htmltext.spanc");
-let u = Number(localStorage ? .getItem ? .("fide:check_unload"));
+let u = Number(localStorage ?.getItem ?.("fide:check_unload"));
 if (Number.isNaN(u)) u = 1;
 unl.checked = u !== 1;
 replg.hidden = true;
@@ -80,14 +80,14 @@ function refreshLineUI() {
 	cur.innerHTML = pureText.slice(0, cursorIdx) +
 		'<span class="cursol" id="cursol' + lineID + '"></span>' + pureText.slice(
 			cursorIdx);
-	detectLanguageByExtension(filenamei ? .value || "");
+	detectLanguageByExtension(filenamei ?.value || "");
 	applyFIDEHighlight()
 }
 
 function Search(raw, searchwords) {
 	let q = [];
 	let rs = raw.split("\n");
-	let flagss = (flags ? .value) ? .length === 0 ? "gmu" : flags.value.split(",")
+	let flagss = (flags ?.value) ?.length === 0 ? "gmu" : flags.value.split(",")
 		.join("");
 	let rgx = new RegExp(searchwords, flagss);
 	rs.forEach((t, i) => {
@@ -419,7 +419,7 @@ window.addEventListener("error", e => {
 showraw.addEventListener("click", () => {
 	alert(raw)
 });
-localStorage ? .getItem ? .("fide:theme") && SwitchTheme(localStorage.getItem(
+localStorage ?.getItem ?.("fide:theme") && SwitchTheme(localStorage.getItem(
 	"fide:theme"));
 if ('serviceWorker' in navigator) {
 	window.addEventListener('load', () => {
