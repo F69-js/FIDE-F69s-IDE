@@ -61,4 +61,4 @@ if (typeof document !== "undefined") {
   }
 }
 
-export{fideWorker};
+export{fideWorker,currentLang};
