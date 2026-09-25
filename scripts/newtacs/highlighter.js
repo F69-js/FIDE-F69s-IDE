@@ -7,35 +7,6 @@ let currentLang = 'js';
 const fideWorker = new Worker(new URL("./highlighter-worker.js", import.meta.url), { type: "module" });
 
 
- if (type === "HIGHLIGHT_COMPLETE") {
-    
-    const cursorHTML = '<span id="cursor" class="blink">|</span>';
-    let currentHTML = cur.innerHTML;
-    
-    let textCount = 0;
-    // 💡 変数の宣言漏れを絶対に防ぐために、ここで明示的に初期化
-    let finalInsertionIdx = currentHTML.length;
-
-    // HTMLタグを避けて、純粋な文字数（cursorIdx）の位置を計算
-    for (let i = 0; i < currentHTML.length; i++) {
-      if (currentHTML[i] === '<') {
-        while (i < currentHTML.length && currentHTML[i] !== '>') {
-          i++;
-        }
-        continue;
-      }
-      
-      if (textCount === cursorIdx) {
-        finalInsertionIdx = i;
-        break;
-      }
-      textCount++;
-    }
-
-    // 正確な位置にカーソルを再挿入して完全復活！
-    cur.innerHTML = currentHTML.slice(0, finalInsertionIdx) + cursorHTML + currentHTML.slice(finalInsertionIdx);
-  }
-});
 
 export function detectLanguageByExtension(filename) {
   fideWorker.postMessage({ type: "DETECT_LANG", filename: filename });
