@@ -9,31 +9,34 @@ import {initBuiltInAI, sendBtnCheck} from "./ai.js";
 import {initUIListeners} from "./ui.js";
 Language.textlist = LanguageTable;
 fideWorker.addEventListener("message", (e) => {
-  const { type, currentLang: lang, themeCss, highlightedLines } = e.data;
+    const { type, currentLang: lang, themeCss, highlightedLines } = e.data;
 
-  // 1. 言語・CSS切り替えが返ってきた時
-  if (type === "LANG_CHANGED") {
-    // 💡 【重要】本当に言語が変わった時だけ処理を行うことで、無限ループと描画崩壊を阻止！
-    if (currentLang !== lang || !document.getElementById("fide-dynamic-tacs-theme")) {
-      currentLang = lang;
+    // 1. 言語・CSS切り替えが返ってきた時
+    if (type === "LANG_CHANGED") {
+        // 💡 【重要】本当に言語が変わった時だけ処理を行うことで、無限ループと描画崩壊を阻止！
+        if (currentLang !== lang || !document.getElementById("fide-dynamic-tacs-theme")) {
+            currentLang = lang;
       
-      let styleTag = document.getElementById("fide-dynamic-tacs-theme");
-      if (!styleTag) {
-        styleTag = document.createElement("style");
-        styleTag.id = "fide-dynamic-tacs-theme";
-        document.head.appendChild(styleTag);
-      }
-      styleTag.innerText = themeCss;
-      if (typeof document !== "undefined") {
-  if (document.readyState === "loading") {
-    // HTMLの構築が終わったら初期化を走らせる
-    document.addEventListener("DOMContentLoaded", () => {
-      detectLanguageByExtension("");
-    });
-  } else {
-    detectLanguageByExtension("");
-  }
-}
+            let styleTag = document.getElementById("fide-dynamic-tacs-theme");
+            if (!styleTag) {
+                styleTag = document.createElement("style");
+                styleTag.id = "fide-dynamic-tacs-theme";
+                document.head.appendChild(styleTag);
+            }
+            styleTag.innerText = themeCss;
+            if (typeof document !== "undefined") {
+                if (document.readyState === "loading") {
+                    // HTMLの構築が終わったら初期化を走らせる
+                    document.addEventListener("DOMContentLoaded", () => {
+                        detectLanguageByExtension("");
+                    });
+                } else {
+                    detectLanguageByExtension("");
+                }
+            }
+        }
+    }
+});
 let sec = location.search;
 function getParams(p) {
 	let c = {};
