@@ -11,7 +11,6 @@ Language.textlist = LanguageTable;
 fideWorker.addEventListener("message", (e) => {
   const { type, currentLang: lang, themeCss, highlightedLines } = e.data;
 
-  // 1. 言語・CSS切り替えが返ってきた時
   if (type === "LANG_CHANGED") {
     // 💡 本当に言語が変わった時だけ処理を行うことで、無限ループと描画崩壊を阻止！
     if (currentLang !== lang || !document.getElementById("fide-dynamic-tacs-theme")) {
@@ -24,6 +23,24 @@ fideWorker.addEventListener("message", (e) => {
         document.head.appendChild(styleTag);
       }
       styleTag.innerText = themeCss;
+
+      // ⭕ 【ここに用があった！】
+      // Workerから届いた「lang」を元に、画面の隅の<img>要素を直接上書きしてアイコンを大出現させる！
+      const icon = document.getElementById("tacs-lang-icon");
+      if (icon) {
+        const upperLang = lang === 'h' ? 'C++ H' : (lang === 'rs' ? 'RUST' : (lang === 'rb' ? 'RUBY' : lang.toUpperCase()));
+        let textColor = '569cd6'; const bgColor = '1e1e1e';
+        
+        if (['html', 'cpp', 'h', 'rs'].includes(lang)) textColor = '4ec9b0';
+        else if (['css', 'php', 'dockerfile'].includes(lang)) textColor = 'c586c0';
+        else if (['json', 'ts', 'toml', 'swift'].includes(lang)) textColor = '9cdcfe';
+        else if (['md', 'sh', 'kt', 'kts'].includes(lang)) textColor = 'dcdcaa';
+        else if (['py', 'sql', 'yaml', 'yml', 'go', 'dart', 'r'].includes(lang)) textColor = 'f2c94c';
+
+        icon.src = "https://placehold.co" + bgColor + "/" + textColor + "?text=" + encodeURIComponent(upperLang);
+        icon.alt = upperLang;
+      }
+
       if (typeof document !== "undefined") {
         if (document.readyState === "loading") {
           // HTMLの構築が終わったら初期化を走らせる
@@ -36,6 +53,7 @@ fideWorker.addEventListener("message", (e) => {
       }
     }
   }
+
 
   // 2. 💡【大復活】ハイライトパースがすべて完了して返ってきた時
   if (type === "HIGHLIGHT_COMPLETE" && highlightedLines) {
