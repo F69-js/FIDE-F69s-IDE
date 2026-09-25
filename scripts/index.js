@@ -217,47 +217,63 @@ async function DoEnter() {
 	redoStack = [];
 	let old = cur;
 	
-	// 💡 【超重要】現在の行のテキストから、カーソルより「後ろ」の文字（efgh）を切り取ってキープしておく！
+	// 💡 1. 現在の行（old）から、カーソルより「後ろ」の文字（efgh）を正確に切り取る
 	let oldText = old ? old.innerText.replace(/\|/g, "") : "";
-	let remainingText = oldText.slice(cursorIdx); // カーソル以降の文字（例: efgh）
-	let keptText = oldText.slice(0, cursorIdx);   // カーソルより前の文字（例: abcd）
+	let remainingText = oldText.slice(cursorIdx); // 改行後に2行目へ持っていく文字
+	let keptText = oldText.slice(0, cursorIdx);   // 1行目に残す文字
 	
-	if (old) old.innerText = keptText; // 1行目にはカーソル前までの文字（abcd）だけを残す
+	if (old) {
+		old.innerText = keptText;
+		// 古い行からアクティブ状態のクラスを綺麗に剥ぎ取る
+		old.classList.remove("active-line", "focused", "active");
+	}
 	
 	let cur2 = document.querySelector("#cursol" + old.id.slice(4));
 	if (cur2) cur2.hidden = true;
 	
+	// 💡 2. 新しい行のHTML要素（レゴブロック）を生成
 	let elemGroup = document.createElement("div");
 	elemGroup.innerHTML =
 		`<div class="lineno"></div><div class="line"></div><div class="cursol"></div>`;
 	elemGroup.classList.add("group");
 	let newElem = elemGroup.querySelector(".line");
 	
-	// ⭕ 【画面側のテキスト引き継ぎ】新しく作られた2行目に、切り取っておいた後半の文字（efgh）を流し込む！
+	// 新しく作られた2行目に、切り取っておいた後半の文字を流し込む
 	newElem.innerText = remainingText;
 	
-	if (old.closest(".group")) old.closest(".group").insertAdjacentElement(
-		"afterend", elemGroup);
-	else maincontainer.appendChild(elemGroup);
+	// 💡 3. ドキュメント（DOM）へ新要素を挿入
+	if (old.closest(".group")) {
+		old.closest(".group").insertAdjacentElement("afterend", elemGroup);
+	} else {
+		maincontainer.appendChild(elemGroup);
+	}
 	
+	// 💡 4. すべての行のIDと行番号を完璧に再計算して配置
 	maincontainer.querySelectorAll(".group").forEach((group, index) => {
 		group.querySelector(".line").id = "line" + index;
 		let lineno = group.querySelector(".lineno");
 		lineno.id = "lineno" + index;
 		lineno.innerText = String(index + 1);
-		group.querySelector(".cursol").id = "cursol" + index
+		group.querySelector(".cursol").id = "cursol" + index;
 	});
 	
 	lineID = Array.from(maincontainer.querySelectorAll(".group")).indexOf(elemGroup);
-	cur = newElem;
 	
-	// ⭕ 内部データ（raw）の「現在のカーソル位置」に正確に改行を割り込ませる
+	// 💡 5. 【最重要】文字の入力先ターゲットを、2行目の新要素へ物理的に完全移行！
+	cur = newElem;
+	cur.classList.add("active-line", "focused", "active");
+	cur.focus(); // ブラウザ自体のフォーカスも強制移動
+
+	// 💡 6. 内部データ（raw）の「現在のカーソル位置」に正確に改行を割り込ませる
 	raw = raw.slice(0, cursorIdx) + "\n" + raw.slice(cursorIdx);
 	
-	// 💡 2行目の先頭にカーソルが移るので、インデックスは0リセットで完璧
+	// 2. 2行目の先頭にカーソルが移るため、インデックスを0にリセット
 	cursorIdx = 0;
+	
+	// 画面のUIとインデントガイドを一新
 	refreshLineUI();
 }
+
 
 function SwitchTheme(v) {
 	switch (v) {
