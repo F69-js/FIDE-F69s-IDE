@@ -216,17 +216,30 @@ async function DoEnter() {
 	undoStack.push(raw);
 	redoStack = [];
 	let old = cur;
-	if (old) old.innerText = old.innerText.replace(/\|/g, "");
+	
+	// 💡 【超重要】現在の行のテキストから、カーソルより「後ろ」の文字（efgh）を切り取ってキープしておく！
+	let oldText = old ? old.innerText.replace(/\|/g, "") : "";
+	let remainingText = oldText.slice(cursorIdx); // カーソル以降の文字（例: efgh）
+	let keptText = oldText.slice(0, cursorIdx);   // カーソルより前の文字（例: abcd）
+	
+	if (old) old.innerText = keptText; // 1行目にはカーソル前までの文字（abcd）だけを残す
+	
 	let cur2 = document.querySelector("#cursol" + old.id.slice(4));
 	if (cur2) cur2.hidden = true;
+	
 	let elemGroup = document.createElement("div");
 	elemGroup.innerHTML =
 		`<div class="lineno"></div><div class="line"></div><div class="cursol"></div>`;
 	elemGroup.classList.add("group");
 	let newElem = elemGroup.querySelector(".line");
+	
+	// ⭕ 【画面側のテキスト引き継ぎ】新しく作られた2行目に、切り取っておいた後半の文字（efgh）を流し込む！
+	newElem.innerText = remainingText;
+	
 	if (old.closest(".group")) old.closest(".group").insertAdjacentElement(
 		"afterend", elemGroup);
 	else maincontainer.appendChild(elemGroup);
+	
 	maincontainer.querySelectorAll(".group").forEach((group, index) => {
 		group.querySelector(".line").id = "line" + index;
 		let lineno = group.querySelector(".lineno");
@@ -234,12 +247,16 @@ async function DoEnter() {
 		lineno.innerText = String(index + 1);
 		group.querySelector(".cursol").id = "cursol" + index
 	});
-	lineID = Array.from(maincontainer.querySelectorAll(".group")).indexOf(
-		elemGroup);
+	
+	lineID = Array.from(maincontainer.querySelectorAll(".group")).indexOf(elemGroup);
 	cur = newElem;
+	
+	// ⭕ 内部データ（raw）の「現在のカーソル位置」に正確に改行を割り込ませる
+	raw = raw.slice(0, cursorIdx) + "\n" + raw.slice(cursorIdx);
+	
+	// 💡 2行目の先頭にカーソルが移るので、インデックスは0リセットで完璧
 	cursorIdx = 0;
-	raw += "\n";
-	refreshLineUI()
+	refreshLineUI();
 }
 
 function SwitchTheme(v) {
@@ -471,6 +488,9 @@ window.addEventListener("keydown", async e => {
             cursorIdx++;
             refreshLineUI();
         break;
+		case "Enter":
+			doEnter()
+		break;
         default:
             if (e.key.length === 1 && !e.ctrlKey) {
                 add(e.key); // 💡 これだけで内部データ（raw）の更新が完了！
