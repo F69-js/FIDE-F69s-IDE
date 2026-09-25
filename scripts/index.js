@@ -430,6 +430,7 @@ window.addEventListener("keydown", async e => {
 		case "Meta":
 		case "Alt":
 		case "CapsLock":
+		case "ZenkakuHankaku":
 			break;
 		case "ArrowLeft":
 			if (cursorIdx > 0) {
@@ -489,7 +490,7 @@ window.addEventListener("keydown", async e => {
             refreshLineUI();
         break;
 		case "Enter":
-			doEnter()
+			DoEnter();
 		break;
         default:
             if (e.key.length === 1 && !e.ctrlKey) {
