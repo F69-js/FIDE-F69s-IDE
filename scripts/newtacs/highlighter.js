@@ -6,8 +6,6 @@ let currentLang = 'js';
 // 💡 【マルチスレッド起動】ハイライト専用のWeb Workerインスタンスを生成！
 const fideWorker = new Worker(new URL("./highlighter-worker.js", import.meta.url), { type: "module" });
 
-    }
-  }
 
  if (type === "HIGHLIGHT_COMPLETE") {
     
