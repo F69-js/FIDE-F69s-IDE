@@ -360,11 +360,11 @@ window.addEventListener("keydown", async e => {
 						searchInput.focus()
 					}, 10)
 				}
-				break
+				break;
 		}
-		return
+		return;
 	}
-	switch (e.key) {
+    switch (e.key) {
 		case "Shift":
 		case "Control":
 		case "Meta":
@@ -421,25 +421,25 @@ window.addEventListener("keydown", async e => {
 				refreshLineUI()
 			}
 			break;
-case "Tab":
-  e.preventDefault();
-  cur.innerText = mi.slice(0, cursorIdx) + "|" + mi.slice(cursorIdx);
-  add("\t"); // 💡 末尾追加（+=）ではなく、カーソル位置に正確にタブが入る！
-  cursorIdx++;
-  refreshLineUI();
-  break;
-default:
-  if (e.key.length === 1 && !e.ctrlKey) {
-    add(e.key); // 💡 これだけで内部データ（raw）の更新が完了！
+        case "Tab":
+            e.preventDefault();
+            cur.innerText = mi.slice(0, cursorIdx) + "|" + mi.slice(cursorIdx);
+            add("\t"); // 💡 末尾追加（+=）ではなく、カーソル位置に正確にタブが入る！
+            cursorIdx++;
+            refreshLineUI();
+        break;
+        default:
+            if (e.key.length === 1 && !e.ctrlKey) {
+                add(e.key); // 💡 これだけで内部データ（raw）の更新が完了！
 
-    // あとは見た目の更新だけ
-    let mi = cur.innerText.replace(/\|/g, "");
-    cur.innerText = mi.slice(0, cursorIdx) + e.key + mi.slice(cursorIdx);
-    cursorIdx++; 
-    refreshLineUI(); 
-  }
-  break;
-		}
+                // あとは見た目の更新だけ
+                let mi = cur.innerText.replace(/\|/g, "");
+                cur.innerText = mi.slice(0, cursorIdx) + e.key + mi.slice(cursorIdx);
+                cursorIdx++; 
+                refreshLineUI(); 
+            }
+        break;
+    }
 })
 window.addEventListener("error", e => {
 	error.innerText += e.message + "\n"
@@ -461,4 +461,4 @@ if (typeof document !== "undefined") {
 	style.innerText =
 		"@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }";
 	document.head.appendChild(style)
-}
+};
