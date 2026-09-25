@@ -3,7 +3,7 @@ import {_jala, _fjalu} from "./fjalu/index.js";
 import {TIDEPreParse} from "./linter/tide.js";
 import {Language, LanguageTable} from "./langs/i18n.js";
 let cursorIdx = 0;
-import {detectLanguageByExtension, applyFIDEHighlight,fideWorker} from "./newtacs/highlighter.js";
+import {detectLanguageByExtension, applyFIDEHighlight,fideWorker,currentLang} from "./newtacs/highlighter.js";
 // 💡 【完璧なる直下ファイル分割】同じフォルダから ai.js と ui.js をダイレクト接続ロード！
 import {initBuiltInAI, sendBtnCheck} from "./ai.js";
 import {initUIListeners} from "./ui.js";
