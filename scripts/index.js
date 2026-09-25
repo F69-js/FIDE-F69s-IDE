@@ -9,42 +9,55 @@ import {initBuiltInAI, sendBtnCheck} from "./ai.js";
 import {initUIListeners} from "./ui.js";
 Language.textlist = LanguageTable;
 fideWorker.addEventListener("message", (e) => {
-    const { type, currentLang: lang, themeCss, highlightedLines } = e.data;
+  const { type, currentLang: lang, themeCss, highlightedLines } = e.data;
 
-    // 1. 言語・CSS切り替えが返ってきた時
-    if (type === "LANG_CHANGED") {
-        // 💡 【重要】本当に言語が変わった時だけ処理を行うことで、無限ループと描画崩壊を阻止！
-        if (currentLang !== lang || !document.getElementById("fide-dynamic-tacs-theme")) {
-            currentLang = lang;
+  // 1. 言語・CSS切り替えが返ってきた時
+  if (type === "LANG_CHANGED") {
+    // 💡 本当に言語が変わった時だけ処理を行うことで、無限ループと描画崩壊を阻止！
+    if (currentLang !== lang || !document.getElementById("fide-dynamic-tacs-theme")) {
+      currentLang = lang;
       
-            let styleTag = document.getElementById("fide-dynamic-tacs-theme");
-            if (!styleTag) {
-                styleTag = document.createElement("style");
-                styleTag.id = "fide-dynamic-tacs-theme";
-                document.head.appendChild(styleTag);
-            }
-            styleTag.innerText = themeCss;
-            if (typeof document !== "undefined") {
-                if (document.readyState === "loading") {
-                    // HTMLの構築が終わったら初期化を走らせる
-                    document.addEventListener("DOMContentLoaded", () => {
-                        detectLanguageByExtension("");
-                    });
-                } else {
-                    detectLanguageByExtension("");
-                }
-            }
+      let styleTag = document.getElementById("fide-dynamic-tacs-theme");
+      if (!styleTag) {
+        styleTag = document.createElement("style");
+        styleTag.id = "fide-dynamic-tacs-theme";
+        document.head.appendChild(styleTag);
+      }
+      styleTag.innerText = themeCss;
+      if (typeof document !== "undefined") {
+        if (document.readyState === "loading") {
+          // HTMLの構築が終わったら初期化を走らせる
+          document.addEventListener("DOMContentLoaded", () => {
+            detectLanguageByExtension("");
+          });
+        } else {
+          detectLanguageByExtension("");
         }
+      }
     }
-	if (type === "HIGHLIGHT_COMPLETE") {
-    const cursorHTML = '<span id="cursor" class="blink">|</span>';
-    let currentHTML = cur.innerHTML;
+  }
+
+  // 2. 💡【大復活】ハイライトパースがすべて完了して返ってきた時
+  if (type === "HIGHLIGHT_COMPLETE" && highlightedLines) {
+    const lines = document.querySelectorAll(".line");
     
+    // ⭕ 計算済みの極彩色HTMLを安全にフラッシュ反映！（ここで一旦古いカーソルは消滅）
+    lines.forEach((line, idx) => {
+      if (highlightedLines[idx] !== undefined && line) {
+        line.innerHTML = highlightedLines[idx];
+      }
+    });
+
+    // ⭕【カーソル2本分裂の暗殺＆1本化ロジック】
+    // ハイライトが当たった直後の画面から、ダブって残ってしまった古いカーソルタグや縦棒（|）をすべて綺麗に抹消！
+    let currentHTML = cur.innerHTML.replace(/<span id="cursor".*?>.*?<\/span>/g, "").replace(/\|/g, "");
+    
+    const cursorHTML = '<span id="cursor" class="blink">|</span>';
     let textCount = 0;
     // 💡 変数の宣言漏れを絶対に防ぐために、ここで明示的に初期化
     let finalInsertionIdx = currentHTML.length;
 
-    // HTMLタグを避けて、純粋な文字数（cursorIdx）の位置を計算
+    // 3. HTMLタグを避けて、同じファイル内にある本物の「cursorIdx」の位置を正確に計算
     for (let i = 0; i < currentHTML.length; i++) {
       if (currentHTML[i] === '<') {
         while (i < currentHTML.length && currentHTML[i] !== '>') {
@@ -60,9 +73,9 @@ fideWorker.addEventListener("message", (e) => {
       textCount++;
     }
 
-    // 正確な位置にカーソルを再挿入して完全復活！
+    // 4. 正確な位置にカーソルを『1本だけ』再挿入して完全復活！
     cur.innerHTML = currentHTML.slice(0, finalInsertionIdx) + cursorHTML + currentHTML.slice(finalInsertionIdx);
-}
+  }
 });
 let sec = location.search;
 function getParams(p) {
