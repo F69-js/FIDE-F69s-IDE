@@ -9,7 +9,7 @@ import {initBuiltInAI, sendBtnCheck} from "./ai.js";
 import {initUIListeners} from "./ui.js";
 Language.textlist = LanguageTable;
 fideWorker.addEventListener("message", (e) => {
-  let { type, currentLang: lang, themeCss, highlightedLines } = e.data;
+  var { type, currentLang: lang, themeCss, highlightedLines } = e.data;
 
   if (type === "LANG_CHANGED") {
     // 💡 本当に言語が変わった時だけ処理を行うことで、無限ループと描画崩壊を阻止！
