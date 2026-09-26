@@ -9,6 +9,10 @@ const fideWorker = new Worker(new URL("./highlighter-worker.js", import.meta.url
 
 
 export function detectLanguageByExtension(filename) {
+  if(!filename) updateLangIndicator("js")
+  let langs = filename.split(".")
+  let lang=langs.at(-1);
+  updateLangIndicator(lang)
   fideWorker.postMessage({ type: "DETECT_LANG", filename: filename });
 }
 
@@ -60,5 +64,6 @@ if (typeof document !== "undefined") {
     detectLanguageByExtension("");
   }
 }
+updateLangIndicator("js")
 
 export{fideWorker,currentLang};
