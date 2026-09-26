@@ -1,4 +1,4 @@
-const KEYWORDS = ["if","else","switch","case","break","return","typeof","instanceof","throw","for","let","const","var","class","export","constructor","new","import","from","try","catch","in","await","default","do","yield","function","extends","super","finally","with","arguments","interface","implements","package","private","protected","public","static"];
+const KEYWORDS = ["if","else","switch","case","break","return","typeof","instanceof","throw","for","let","const","var","class","export","constructor","new","import","from","try","catch","in","await","default","do","yield","extends","super","finally","with","arguments","interface","implements","package","private","protected","public","static"];
 const NEON_PINK = ["async","while","continue","debugger","null"];
 const GOLD = ["this","window","globalThis","super","self","global"];
 const BUILTINS = ["JSON","console","Math","Date","Promise","String","Map","Set","Object","Number","Error","undefined","null","true","false","process","document","navigator","screen","location","history","Temporal","LanguageModel","ai"];
@@ -6,11 +6,12 @@ const METHODS = ["push","pop","unshift","shift","slice","splice","filter","some"
 
 const WEBPACK_VARS = ["__webpack_require__", "__unused_webpack_module"];
 
+// 💡 複数行をまたぐための鉄壁の状態記憶ステーショナリー
 let s = 0, sC = '', c1 = 0, c2 = 0;
 let braceDepth = 0;
 
 export const JStheme = `
-  /* 💡 【元色完全死守】元々の美しい配色定義はそのまま100%残す！ */
+  /* 💡 元々の配色ルールを100%完全に死守 */
   .k { color: #569cd6; font-weight: bold; }
   .a { color: #ff007f; font-weight: bold; }
   .s { color: #f2c94c; font-weight: bold; }
@@ -28,15 +29,16 @@ export const JStheme = `
   .g-star { color: #ff453a; font-weight: bold; }
   .tmpl-var { color: #9cdcfe; font-weight: bold; }
   
-  /* 💡 【追加】18項目の極彩色カラークラス */
-  .cream { color: #fffdd0; }              /* 定義されてる変数、Webpack変数 */
-  .func-def-name { color: #4fc1ff; font-weight: bold; }      /* 定義する関数名（少し濃い水色） */
-  .func-def-body { color: #ebd2b6; font-weight: bold; }      /* 定義する関数（濃いクリーム色） */
-  .emerald { color: #2ecc71; font-weight: bold; } /* module.exports、importの* */
-  .lime-num { color: #00ff00; }            /* 数字のlime色 */
-  .green-dot { color: #27ae60; font-weight: bold; } /* 小数点、負のマイナス */
-  .purple-op { color: #8e44ad; font-weight: bold; }  /* オプショナルチェーン、&、掛け算* */
-  .import-at-color { color: #e74c3c; font-weight: bold; } /* import内の@ */
+  /* 💡 18項目の超複雑な極彩色カラークラス */
+  .cream { color: #fffdd0; }                      /* 定義されてる変数、Webpack変数 */
+  .func-call { color: #9cdcfe; }                  /* 定義されてる関数（薄い水色） */
+  .func-def-name { color: #4fc1ff; font-weight: bold; } /* 定義する関数名（少し濃い水色） */
+  .func-def-keyword { color: #ebd2b6; font-weight: bold; } /* 定義する関数キーワード（濃いクリーム色） */
+  .emerald { color: #2ecc71; font-weight: bold; }         /* module.exports、importの* */
+  .lime-num { color: #00ff00; }                    /* 数字のlime色 */
+  .green-dot { color: #27ae60; font-weight: bold; }         /* 小数点、負のマイナス */
+  .purple-op { color: #8e44ad; font-weight: bold; }          /* オプショナルチェーン、&、掛け算* */
+  .import-at-color { color: #e74c3c; font-weight: bold; }  /* import内の@ */
   
   /* 多重波カッコの深度グラデーション */
   .brace-depth-0 { color: #00ffaa; font-weight: bold; }
@@ -52,24 +54,29 @@ export function ResetJSState() {
 export function ApplyHighlighttoJS(t) {
   let idx = 0, res = '', w = '';
   let lastChar = '';
-  let isAfterDot = false;
-  let isAfterImport = false;
+  let isAfterVarLetConst = false;
+  let isInsideImport = false;
 
-  if (t.includes("import") && t.includes("from")) {
-    isAfterImport = true;
+  // 文脈トラッキング
+  if (t.includes("import")) {
+    isInsideImport = true;
   }
 
-  const flush = (isProperty = false) => {
+  const flush = (isProperty = false, nextChar = '') => {
     if (!w) return;
     let className = "";
     
-    // 1. キーワードやビルトインなどの「元の配色」を最優先で適用！
-    if (KEYWORDS.includes(w)) {
-      className = "k"; // functionやlet/constは元の美しい青（.k）を100%維持！
+    if (w === "function") {
+      className = "k"; // function自体は元の青色を絶対死守
     } else if (WEBPACK_VARS.includes(w)) {
-      className = "cream"; // Webpack変数はクリーム色に
+      className = "cream"; // __webpack_require__ や __unused_webpack_module はクリーム色
     } else if (w === "NaN") {
       className = "s"; // NaN対応
+    } else if (KEYWORDS.includes(w)) {
+      className = "k";
+      if (["var", "let", "const"].includes(w)) {
+        isAfterVarLetConst = true; // 次に来る単語を変数としてマークするフラグ
+      }
     } else if (NEON_PINK.includes(w)) {
       className = "a";
     } else if (GOLD.includes(w)) {
@@ -78,41 +85,59 @@ export function ApplyHighlighttoJS(t) {
       className = "b";
     } else if (METHODS.includes(w)) {
       className = "m";
+    } else if (nextChar === '(') {
+      // 後ろにカッコが来ている場合
+      if (lastChar === 'n' || lastChar === '*') {
+        className = "func-def-name"; // 定義する関数名は少し濃い水色に
+      } else {
+        className = "func-call"; // 定義されてる関数呼び出しは薄い水色に
+      }
     } else if (isProperty) {
       className = "prop";
+    } else if (isAfterVarLetConst) {
+      className = "cream"; // 定義された変数はクリーム色に
+      isAfterVarLetConst = false;
     } else {
-      className = "cream"; // それ以外の定義されてる変数はクリーム色に
+      className = "cream"; // デフォルトの一般変数もクリーム色で救出
     }
 
     if (className) {
       res += '<span class="' + className + '">' + w + '</span>';
-    } else { res += w; }
+    } else { 
+      res += w; 
+    }
     w = '';
   };
 
   while (idx < t.length) {
     const c = t[idx];
     
+    // コメントガード
     if (c1) { res += c; if (c === '\n') { res += '</span>'; c1 = 0 } idx++; continue }
     if (c2) { res += c; if (c === '*' && t[idx + 1] === '/') { res += '/</span>'; c2 = 0; idx += 2 } else idx++; continue }
     
+    // 💡 通常の1行文字列モード
     if (s === 1) {
       if (c === '\\') { res += c + (t[idx + 1] || ''); idx += 2; continue }
-      if (isAfterImport && c === '@') {
+      // import内の@の色変更
+      if (isInsideImport && c === '@') {
         res += '<span class="import-at-color">@</span>';
       } else {
-        res += c.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        res += c.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
       }
       if (c === sC) { res += '</span>'; s = 0 } idx++; continue;
     }
 
+    // 💡 テンプレートリテラル（複数行文字列）モード
     if (s === 2) {
       if (c === '\\') { res += c + (t[idx + 1] || ''); idx += 2; continue }
+      
       if (c === '\n') {
         res += '</span>\n<span class="tmpl-str">';
         idx++;
         continue;
       }
+
       if (c === '$' && t[idx + 1] === '{') {
         res += '</span><span class="o">${</span><span class="tmpl-var">';
         idx += 2;
@@ -121,12 +146,12 @@ export function ApplyHighlighttoJS(t) {
             res += '</span><span class="o">}</span><span class="tmpl-str">';
             idx++; break;
           }
-          res += t[idx].replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          res += t[idx].replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
           idx++;
         }
         continue;
       }
-      res += c.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      res += c.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
       if (c === '`') { res += '</span>'; s = 0 } idx++; continue;
     }
 
@@ -140,15 +165,16 @@ export function ApplyHighlighttoJS(t) {
       flush(); res += '<span class="tmpl-str">`'; s = 2; idx++; continue;
     }
 
-    // module.exports のエメラルドグリーン判定
+    // 💡 module.exports の一括エメラルドグリーン判定
     if (c === 'm' && t.slice(idx, idx + 14) === "module.exports") {
       flush();
       res += '<span class="emerald">module.exports</span>';
       idx += 14;
+      lastChar = 's';
       continue;
     }
 
-    // 負の数字判定
+    // 💡 負の数マイナス判定
     if (c === '-' && /[0-9]/.test(t[idx + 1] || '')) {
       flush();
       res += '<span class="green-dot">-</span>';
@@ -156,33 +182,46 @@ export function ApplyHighlighttoJS(t) {
       continue;
     }
 
-    if (/[a-zA-Z0-9_]/.test(c)) { 
+    // 💡 オプショナルチェーンの最優先結合判定 (?.)
+    if (c === '?' && t[idx + 1] === '.') {
+      flush();
+      res += '<span class="purple-op">?.</span>';
+      idx += 2;
+      lastChar = '.';
+      continue;
+    }
+
+    // 💡 小数点の判定 (直前が数字かつ直後が数字のピリオド)
+    if (c === '.' && /[0-9]/.test(t[idx - 1] || '') && /[0-9]/.test(t[idx + 1] || '')) {
+      res += '<span class="green-dot">.</span>';
+      idx++;
+      continue;
+    }
+
+    // 💡 & の二重エスケープ完全防止判定
+    if (c === '&') {
+      flush();
+      res += '<span class="purple-op">&amp;</span>'; // ここで完結させ、後ろの共通処理を通さない！
+      idx++;
+      lastChar = '&';
+      continue;
+    }
+
+    // 💡 数字のlime色判定 (アルファベットバッファwから数字を完全に分離！)
+    if (/[0-9]/.test(c)) {
+      flush();
+      res += '<span class="lime-num">' + c + '</span>';
+      idx++;
+      lastChar = c;
+      continue;
+    }
+
+    // 純粋な英文字・アンダースコアだけを単語バッファに蓄積
+    if (/[a-zA-Z_]/.test(c)) { 
       w += c; 
     } else {
       if (w) {
-        isAfterDot = (lastChar === '.');
-        
-        if (c === '(') {
-          if (lastChar === 'n' || KEYWORDS.includes(w) === false && METHODS.includes(w) === false && BUILTINS.includes(w) === false) {
-            // 💡 「定義する関数名」は少し濃い水色（.func-def-name）に！
-            res += '<span class="func-def-name">' + w + '</span>';
-          } else {
-            // それ以外の通常のメソッド呼び出しやキーワード
-            let className = METHODS.includes(w) ? "m" : (KEYWORDS.includes(w) ? "k" : "fn");
-            res += '<span class="' + className + '">' + w + '</span>';
-          }
-          w = '';
-        } else if (c === ':') { 
-          flush(true); 
-        } else { 
-          // 💡 アロー関数定義など、「定義する関数（全体・中身）」を濃いクリーム色（.func-def-body）にする文脈ハック
-          if (t.slice(idx).trim().startsWith("=>")) {
-            res += '<span class="func-def-body">' + w + '</span>';
-            w = '';
-          } else {
-            flush(isAfterDot); 
-          }
-        }
+        flush(lastChar === '.', c);
       }
       if (c.trim() !== '') lastChar = c;
 
@@ -203,37 +242,28 @@ export function ApplyHighlighttoJS(t) {
       } else if (c === '=' && t[idx + 1] === '>') {
         res += '<span class="a">=></span>'; idx++;
       } 
+      // 💡 ジェネレーター関数およびインポートの「*」打ち分け
       else if (c === '*') {
-        if (isAfterImport) res += '<span class="emerald">*</span>'; // import...*の*
-        else res += '<span class="purple-op">*</span>'; // 単純な掛け算
-      } 
-      // ピリオドの三段活用
-      else if (c === '.') {
-        if (lastChar === '?') {
-          res = res.slice(0, res.lastIndexOf('<span class="o">?</span>'));
-          res += '<span class="purple-op">?.</span>'; // オプショナルチェーン
-        } else if (/[0-9]/.test(t[idx - 1] || '') && /[0-9]/.test(t[idx + 1] || '')) {
-          res += '<span class="green-dot">.</span>'; // 小数点
+        if (isInsideImport || lastChar === 'n') {
+          res += '<span class="emerald">*</span>'; // function* や import * の * はエメラルドグリーン
         } else {
-          res += '<span class="o">.</span>'; // オブジェクト接続
+          res += '<span class="purple-op">*</span>'; // 単純な掛け算は紫
         }
-      }
-      else if (c === '&') {
-        res += '<span class="purple-op">&amp;</span>'; // &は紫
-      } else if (/[0-9]/.test(c)) {
-        res += '<span class="lime-num">' + c + '</span>'; // 数字はlime色
-      } else if (['+', '/', '=', '!', '<', '>', '?', '%', ':'].includes(c)) {
+      } 
+      else if (c === '.') {
+        res += '<span class="o">.</span>'; // オブジェクト接続のピリオドは白
+      } 
+      else if (['+', '/', '=', '!', '<', '>', '?', '%', ':'].includes(c)) {
         res += '<span class="o">' + c + '</span>';
       } else { 
-        res += c.replace(/&/g, '&amp;').replace(/&lt;/g, '<').replace(/&gt;/g, '>'); 
+        res += c.replace(/</g, '&lt;').replace(/>/g, '&gt;'); 
       }
     } 
     idx++;
   }
   
   if (w) {
-    isAfterDot = (lastChar === '.');
-    flush(isAfterDot);
+    flush(lastChar === '.');
   }
   
   return res;
