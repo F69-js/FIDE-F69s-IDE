@@ -3,14 +3,14 @@ import {_jala, _fjalu} from "./fjalu/index.js";
 import {TIDEPreParse} from "./linter/tide.js";
 import {Language, LanguageTable} from "./langs/i18n.js";
 let cursorIdx = 0;
-import {detectLanguageByExtension, applyFIDEHighlight,fideWorker,currentLang} from "./newtacs/highlighter.js";
+import {detectLanguageByExtension, applyFIDEHighlight,fideWorker,currentLang as currentLang2} from "./newtacs/highlighter.js";
 // 💡 【完璧なる直下ファイル分割】同じフォルダから ai.js と ui.js をダイレクト接続ロード！
 import {initBuiltInAI, sendBtnCheck} from "./ai.js";
 import {initUIListeners} from "./ui.js";
 Language.textlist = LanguageTable;
 fideWorker.addEventListener("message", (e) => {
-  var { type, currentLang: lang, themeCss, highlightedLines } = e.data;
-
+  var { type, themeCss, highlightedLines } = e.data;
+  let currentLang = currentLang2;
   if (type === "LANG_CHANGED") {
     // 💡 本当に言語が変わった時だけ処理を行うことで、無限ループと描画崩壊を阻止！
     if (currentLang !== lang || !document.getElementById("fide-dynamic-tacs-theme")) {
