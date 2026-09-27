@@ -1,42 +1,26 @@
-// FIDE JS Lexer (v27.1 Compact)
+// FIDE JS Lexer (v27.3 Balanced Compact)
 const K = [
-  "if","else","switch","case",
-  "break","return","typeof",
-  "instanceof","throw","for",
-  "let","const","var","class",
-  "export","constructor","new",
-  "import","from","try","catch",
-  "in","await","default","do",
-  "yield","function","extends",
-  "super","finally","with",
-  "arguments","interface",
-  "implements","package",
-  "private","protected","public",
-  "static","void","as"
+  "if","else","switch","case","break","return","typeof",
+  "instanceof","throw","for","let","const","var","class",
+  "export","constructor","new","import","from","try","catch",
+  "in","await","default","do","yield","function","extends",
+  "super","finally","with","arguments","interface","implements",
+  "package","private","protected","public","static","void","as"
 ];
 const A = ["async","while","continue","debugger","null"];
 const G = ["this","window","globalThis","super","self","global"];
 const B = [
-  "JSON","console","Math","Date",
-  "Promise","String","Map","Set",
-  "Object","Number","Error",
-  "undefined","null","true","false",
-  "process","document","navigator",
-  "screen","location","history",
+  "JSON","console","Math","Date","Promise","String","Map","Set",
+  "Object","Number","Error","undefined","null","true","false",
+  "process","document","navigator","screen","location","history",
   "Temporal","LanguageModel","ai"
 ];
 const M = [
-  "push","pop","unshift","shift",
-  "slice","splice","filter","some",
-  "findIndex","includes","join",
-  "split","match","replace",
-  "replaceAll","trim","startsWith",
-  "indexOf","lastIndexOf",
-  "substring","map","forEach",
-  "reduce","padStart","toFixed",
-  "has","get","set","delete",
-  "entries","add","then","catch",
-  "finally","log","warn","error",
+  "push","pop","unshift","shift","slice","splice","filter","some",
+  "findIndex","includes","join","split","match","replace","replaceAll",
+  "trim","startsWith","indexOf","lastIndexOf","substring","map",
+  "forEach","reduce","padStart","toFixed","has","get","set","delete",
+  "entries","add","then","catch","finally","log","warn","error",
   "defineProperty"
 ];
 const W = ["__webpack_require__","__unused_webpack_module"];
@@ -65,6 +49,11 @@ export function ResetJSState() {
 export function ApplyHighlighttoJS(t) {
   let idx = 0, res = '', w = '', lC = '';
   let aV = false, aF = false, iI = false, aA = false, iP = false;
+
+  // 💡 行頭での状態自動開通レール
+  if (c1 || c2) res += '<span class="c">';
+  else if (s === 1) res += '<span class="str">';
+  else if (s === 2) res += '<span class="tmpl-str">';
 
   if (t.includes("import")) iI = true;
 
@@ -102,14 +91,12 @@ export function ApplyHighlighttoJS(t) {
   while (idx < t.length) {
     const c = t[idx];
     
-    // 💡 【超大修正】複数行コメント内での行またぎ強制連動レール！
     if (c1) {
       res += c.replace(/</g,'&lt;').replace(/>/g,'&gt;');
       if (c === '\n') { res += '</span>'; c1 = 0; }
       idx++; continue;
     }
     if (c2) {
-      if (c === '\n') { res += '</span>\n<span class="c">'; idx++; continue; }
       res += c.replace(/</g,'&lt;').replace(/>/g,'&gt;');
       if (c === '*' && t[idx + 1] === '/') {
         res += '/</span>'; c2 = 0; idx += 2;
