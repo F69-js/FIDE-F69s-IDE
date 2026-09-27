@@ -119,20 +119,26 @@ self.addEventListener("message", (e) => {
     const highlightedLines = linkedCombinedHtml.split("\n");
     const total = highlightedLines.length;
 
-    // 💡 【新設・一括結合対応型進捗シミュレーター】
-    // 重たい文字列分解（split）が終わった直後に、
-    // 画面側の index.js へ現在の「行復元パルス」を高速で刻んで通知！
-    // 完全にスタンドアロンで進捗と残り時間の連動が動き出します！
-    for (let i = 0; i < total; i++) {
-      const current = i + 1;
-      if (current % 20 === 0 || current === total) {
-        self.postMessage({
-          type: "PROGRESS_UPDATE",
-          current: current,
-          total: total
-        });
-      }
-    }
+    self.postMessage({
+      type: "PROGRESS_UPDATE",
+      current: Math.floor(total * 0.5),
+      total: total
+    });
+
+    const linkedCombinedHtml = 
+      bindHyperlinksToDom(
+        highlightedCombinedHtml
+      );
+
+    const highlightedLines = 
+      linkedCombinedHtml.split("\n");
+
+    // 💡 完了直前に100%パルスを射出！
+    self.postMessage({
+      type: "PROGRESS_UPDATE",
+      current: total,
+      total: total
+    });
 
     self.postMessage({
       type: "HIGHLIGHT_COMPLETE",
