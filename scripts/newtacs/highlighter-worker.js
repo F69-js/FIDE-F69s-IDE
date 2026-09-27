@@ -3,13 +3,17 @@ import * as Gateway from "./langs/gateway.js";
 
 let currentLang = 'js';
 
+// worker.js の一番上に貼り付ける
 self.onerror = function(message, filename, lineno, colno, error) {
+  // メインスレッドにエラー情報を直接送信する
   self.postMessage({
-    isWorkerError: true,
-    message: message || (error && error.message) || 'Module Worker 内でのエラー'
+    type: 'WORKER_INTERNAL_ERROR',
+    message: message || (error && error.message) || '不明なエラー'
   });
-  return true; 
+  return true; // ブラウザの標準エラー出力を抑制したい場合
 };
+
+// --- ここから下に既存のコード ---
 
 const COMPONENT_THEMES = {
   js: Gateway.JStheme, json: Gateway.JSONtheme,
