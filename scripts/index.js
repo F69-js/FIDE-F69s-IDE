@@ -9,12 +9,12 @@ import {initBuiltInAI, sendBtnCheck} from "./ai.js";
 import {initUIListeners} from "./ui.js";
 Language.textlist = LanguageTable;
 let pStart = 0;
-fideWorker.addEventListener("error", (e) => {
-  error.innerText += e.message + "\n"
-})
 fideWorker.addEventListener("message", (e) => {
   var { type, themeCss, highlightedLines,type, current, total } = e.data;
   let currentLang = currentLang2;
+  if (type === "WORKER_INTERNAL_ERROR") {
+	    error.innerText += e.data.message + "\n"
+  }
   if (type === "LANG_CHANGED") {
     // 💡 本当に言語が変わった時だけ処理を行うことで、無限ループと描画崩壊を阻止！
     if (currentLang !== lang || !document.getElementById("fide-dynamic-tacs-theme")) {
