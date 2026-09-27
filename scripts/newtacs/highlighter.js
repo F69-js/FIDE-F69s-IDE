@@ -58,10 +58,10 @@ if (typeof document !== "undefined") {
   if (document.readyState === "loading") {
     // HTMLの構築が終わったら初期化を走らせる
     document.addEventListener("DOMContentLoaded", () => {
-      detectLanguageByExtension("");
+      detectLanguageByExtension("js");
     });
   } else {
-    detectLanguageByExtension("");
+    detectLanguageByExtension("js");
   }
 }
 updateLangIndicator("js")
