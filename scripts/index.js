@@ -9,6 +9,9 @@ import {initBuiltInAI, sendBtnCheck} from "./ai.js";
 import {initUIListeners} from "./ui.js";
 Language.textlist = LanguageTable;
 let pStart = 0;
+fideWorker.addEventListener("error", (e) => {
+  error.innerText += e.message + "\n"
+})
 fideWorker.addEventListener("message", (e) => {
   var { type, themeCss, highlightedLines,type, current, total } = e.data;
   let currentLang = currentLang2;
