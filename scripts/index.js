@@ -374,7 +374,8 @@ window.addEventListener('paste', async e => {
 			await DoEnter();
 		}
 	}
-	applyFIDEHighlight();
+	detectLanguageByExtension(filenamei ?.value || "");
+	applyFIDEHighlight()
 });
 
 function add(key) {
