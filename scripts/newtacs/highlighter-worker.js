@@ -3,6 +3,14 @@ import * as Gateway from "./langs/gateway.js";
 
 let currentLang = 'js';
 
+self.onerror = function(message, filename, lineno, colno, error) {
+  self.postMessage({
+    isWorkerError: true,
+    message: message || (error && error.message) || 'Module Worker 内でのエラー'
+  });
+  return true; 
+};
+
 const COMPONENT_THEMES = {
   js: Gateway.JStheme, json: Gateway.JSONtheme,
   html: Gateway.HTMLtheme, css: Gateway.CSStheme,
