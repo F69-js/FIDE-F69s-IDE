@@ -1,4 +1,4 @@
-// FIDE JS Lexer (v26.1 - Adaptive Balanced Layout)
+// FIDE JS Lexer (v26.2 - Ultimate Master Fixed)
 const KEYWORDS = [
   "if","else","switch","case","break","return","typeof","instanceof",
   "throw","for","let","const","var","class","export","constructor",
@@ -96,10 +96,24 @@ export function ApplyHighlighttoJS(t) {
     if (c1) { res += c; if (c === '\n') { res += '</span>'; c1 = 0; } idx++; continue; }
     if (c2) { res += c; if (c === '*' && t[idx + 1] === '/') { res += '/</span>'; c2 = 0; idx += 2; } else idx++; continue; }
     
+    // 💡 通常の1行文字列モード
     if (s === 1) {
       if (c === '\\') { res += c + (t[idx + 1] || ''); idx += 2; continue; }
-      if (isInsideImport && c === '@') res += '<span class="a">@</span>';
-      else res += c.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      
+      // 💡 【新設要件】import文の文字列内に「@」が出現した場合、クォーテーション以外の文字列全体をまとめてピンク（.a）に染め上げる！
+      if (isInsideImport && (c === '@' || t.slice(idx).includes(sC))) {
+        let strEndIdx = t.indexOf(sC, idx);
+        if (strEndIdx !== -1) {
+          let innerStr = t.slice(idx, strEndIdx);
+          if (c === '@' || innerStr.startsWith("@")) {
+            res += '<span class="a">' + innerStr.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</span>';
+            idx = strEndIdx;
+            continue;
+          }
+        }
+      }
+      
+      res += c.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
       if (c === sC) { res += '</span>'; s = 0; isInsideImport = false; }
       idx++; continue;
     }
@@ -119,14 +133,7 @@ export function ApplyHighlighttoJS(t) {
       if (c === '`') { res += '</span>'; s = 0; } idx++; continue;
     }
 
-    if (c === '/' && t[idx + 1] === '/') { flush(lastChar === '.'); res += '<span class="c">//'; c1 = 1; idx += 2; continue; }
-    if (c === '/' && t[idx + 1] === '*') { flush(lastChar === '.'); res += '<span class="c">/*'; c2 = 1; idx += 2; continue; }
-    if (c === "'" || c === '"') { flush(lastChar === '.'); sC = c; res += '<span class="str">' + c; s = 1; idx++; continue; }
-    if (c === '`') { flush(lastChar === '.'); res += '<span class="tmpl-str">`'; s = 2; idx++; continue; }
-
-    if (c === 'm' && t.slice(idx, idx + 14) === "module.exports") {
-      flush(lastChar === '.'); res += '<span class="b">module.exports</span>'; idx += 14; lastChar = 's'; continue;
-    }
+    // 💡 【最優先結合マース】単語バッファに吸い込まれる前に、論理演算子や記号の割り込みルートを徹底防衛！
     if (c === '&' && t[idx + 1] === '&') {
       flush(lastChar === '.'); res += '<span class="o">&amp;&amp;</span>'; idx += 2; lastChar = '&'; continue;
     }
@@ -135,6 +142,15 @@ export function ApplyHighlighttoJS(t) {
     }
     if (c === '&' && t[idx + 1] !== '&') {
       flush(lastChar === '.'); res += '<span class="o">&amp;</span>'; idx++; lastChar = '&'; continue;
+    }
+
+    if (c === '/' && t[idx + 1] === '/') { flush(lastChar === '.'); res += '<span class="c">//'; c1 = 1; idx += 2; continue; }
+    if (c === '/' && t[idx + 1] === '*') { flush(lastChar === '.'); res += '<span class="c">/*'; c2 = 1; idx += 2; continue; }
+    if (c === "'" || c === '"') { flush(lastChar === '.'); sC = c; res += '<span class="str">' + c; s = 1; idx++; continue; }
+    if (c === '`') { flush(lastChar === '.'); res += '<span class="tmpl-str">`'; s = 2; idx++; continue; }
+
+    if (c === 'm' && t.slice(idx, idx + 14) === "module.exports") {
+      flush(lastChar === '.'); res += '<span class="b">module.exports</span>'; idx += 14; lastChar = 's'; continue;
     }
     if (c === '-' && /[0-9]/.test(t[idx + 1] || '')) {
       flush(lastChar === '.'); res += '<span class="green-dot">-</span>'; idx++; continue;
@@ -145,8 +161,10 @@ export function ApplyHighlighttoJS(t) {
     if (c === '.' && /[0-9]/.test(t[idx - 1] || '') && /[0-9]/.test(t[idx + 1] || '')) {
       res += '<span class="green-dot">.</span>'; idx++; continue;
     }
+    
+    // 💡 【バグ完全修正】数字単体のパース直後に idx++ を二重で進める大罪を徹底排除！後ろのセミコロンやカンマへの色移り感染を物理的に完全根絶！
     if (/[0-9]/.test(c) && w.length === 0) {
-      res += '<span class="lime-num">' + c; idx++; lastChar = c; continue;
+      res += '<span class="lime-num">' + c + '</span>'; idx++; lastChar = c; continue;
     }
 
     if (/[a-zA-Z0-9_\\$]/.test(c)) {
