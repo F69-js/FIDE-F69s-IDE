@@ -11,22 +11,22 @@ let s = 0, sC = '', c1 = 0, c2 = 0;
 let braceDepth = 0;
 
 export const JStheme = `
-  .k { color: #569cd6; font-weight: bold; }
-  .a { color: #ff007f; font-weight: bold; }
-  .s { color: #f2c94c; font-weight: bold; }
+  .k { color: #569cd6; }
+  .a { color: #ff007f; }
+  .s { color: #f2c94c; }
   .b { color: #4ec9b0; }
   .m { color: #dcdcaa; }
-  .o { color: #c586c0; font-weight: bold; }
+  .o { color: #c586c0;}
   .str { color: #ce9178; }
-  .tmpl-str { color: #ff8c00; font-weight: bold; }
+  .tmpl-str { color: #ff8c00;}
   .prop { color: #9cdcfe; }
-  .c { color: #6a9955; font-style: italic; }
-  .fn { color: #dcdcaa; font-weight: bold; }
-  .br1 { color: #00ffaa; font-weight: bold; }
-  .br2 { color: #00ffff; font-weight: bold; }
-  .br3 { color: #ff00ff; font-weight: bold; }
-  .g-star { color: #ff453a; font-weight: bold; }
-  .tmpl-var { color: #9cdcfe; font-weight: bold; }
+  .c { color: #6a9955;  }
+  .fn { color: #dcdcaa; }
+  .br1 { color: #00ffaa;  }
+  .br2 { color: #00ffff; }
+  .br3 { color: #ff00ff;  }
+  .g-star { color: #ff453a;  }
+  .tmpl-var { color: #9cdcfe; }
 `;
 
 export function ResetJSState() {
