@@ -8,8 +8,9 @@ import {detectLanguageByExtension, applyFIDEHighlight,fideWorker,currentLang as 
 import {initBuiltInAI, sendBtnCheck} from "./ai.js";
 import {initUIListeners} from "./ui.js";
 Language.textlist = LanguageTable;
+let pStart = 0;
 fideWorker.addEventListener("message", (e) => {
-  var { type, themeCss, highlightedLines } = e.data;
+  var { type, themeCss, highlightedLines,type, current, total } = e.data;
   let currentLang = currentLang2;
   if (type === "LANG_CHANGED") {
     // 💡 本当に言語が変わった時だけ処理を行うことで、無限ループと描画崩壊を阻止！
@@ -94,6 +95,36 @@ fideWorker.addEventListener("message", (e) => {
     // 4. 正確な位置にカーソルを『1本だけ』再挿入して完全復活！
     cur.innerHTML = currentHTML.slice(0, finalInsertionIdx) + cursorHTML + currentHTML.slice(finalInsertionIdx);
   }
+
+  if (type === "PROGRESS_UPDATE") {
+  // 1. 進捗率（%）を計算
+  const pct = Math.floor(
+    (current / total) * 100
+  );
+  
+  // 2. 経過時間（秒）を算出
+  const elap = 
+    (performance.now() - pStart) / 1000;
+  
+  // 3. 1行あたりの平均パース速度を逆算
+  const avg = elap / current;
+  
+  // 4. 残り行数から、正確な「残り秒数」を割り出す！
+  const remLines = total - current;
+  const remSec = Math.ceil(
+    remLines * avg
+  );
+
+  // 5. 画面のUI要素（placeholder等）へパチッと反映！
+  const ui = document.getElementById(
+    "fide-progress"
+  );
+  if (ui) {
+    ui.innerText = 
+      `LOADING: ${pct}% ` +
+      `(残り ${remSec}s)`;
+  }
+}
 });
 let sec = location.search;
 function getParams(p) {
