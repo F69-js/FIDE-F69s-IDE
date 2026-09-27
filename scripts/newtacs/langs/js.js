@@ -57,37 +57,88 @@ export function ApplyHighlighttoJS(t) {
 
   if (t.includes("import")) iI = true;
 
-  const f = (isP = false, nC = '') => {
+}
+
+// 💡 【大復活】これが虚空に消えていた本物の flush 関数本体です！
+  const flush = (isP = false, nC = '') => {
     if (!w) return;
     let cN = "";
-    if (W.includes(w)) cN = "s";
-    else if (w === "NaN") cN = "s";
-    else if (w === "module" || w === "exports") cN = "b";
-    else if (w === "void" || w === "as" || K.includes(w)) {
+    if (W.includes(w)) {
+      cN = "s";
+    } else if (w === "NaN") {
+      cN = "s";
+    } else if (w === "module" ||
+               w === "exports") {
+      cN = "b";
+    } else if (w === "void" ||
+               w === "as" ||
+               K.includes(w)) {
       cN = "k";
-      if (["var","let","const"].includes(w)) aV = true;
+      if (["var","let","const"]
+          .includes(w)) {
+        aV = true;
+      }
       if (w === "import") iI = true;
       if (w === "as") aA = true;
-    } 
-    else if (A.includes(w)) cN = "a";
-    else if (G.includes(w)) cN = "s";
-    else if (B.includes(w)) cN = "b";
-    else if (M.includes(w)) cN = "m";
-    else if (nC === '(' || aF) { dF.add(w); cN = "func-def-name"; aF = false; } 
-    else if (aA) { cN = "prop"; aA = false; }
-    else if (aV) { dV.add(w); cN = "orange-cream"; aV = false; } 
-    else if (iP) { dA.add(w); cN = "arg-green"; }
-    else if (isP) cN = "prop";
-    else if (dF.has(w)) cN = "func-def-name";
-    else if (dA.has(w)) cN = "arg-green";
-    else if (dV.has(w)) cN = "orange-cream";
-    else cN = "";
+    } else if (A.includes(w)) {
+      cN = "a";
+    } else if (G.includes(w)) {
+      cN = "s";
+    } else if (B.includes(w)) {
+      cN = "b";
+    } else if (M.includes(w)) {
+      cN = "m";
+    } else if (nC === '(' || aF) {
+      dF.add(w);
+      cN = "func-def-name";
+      aF = false;
+    } else if (aA) {
+      cN = "prop";
+      aA = false;
+    } else if (aV) {
+      dV.add(w);
+      cN = "orange-cream";
+      aV = false;
+    } else if (iP) {
+      dA.add(w);
+      cN = "arg-green";
+    } else if (isP) {
+      cN = "prop";
+    } else if (dF.has(w)) {
+      cN = "func-def-name";
+    } else if (dA.has(w)) {
+      cN = "arg-green";
+    } else if (dV.has(w)) {
+      cN = "orange-cream";
+    } else {
+      cN = "";
+    }
 
-    if (cN) res += '<span class="' + cN + '">' + w + '</span>';
-    else res += w;
+    if (cN) {
+      res += '<span class="' +
+             cN + '">' + w + '</span>';
+    } else {
+      res += w;
+    }
     w = '';
   };
 
+const f = flush;
+
+  export function ApplyHighlighttoJS(t) {
+  let idx = 0, res = '', w = '';
+  let lC = '';
+  let aV = false, aF = false;
+  let iI = false, aA = false;
+  let iP = false;
+
+  if (c1 || c2) res += '<span class="c">';
+  else if (s === 1) res += '<span class="str">';
+  else if (s === 2) res += '<span class="tmpl-str">';
+
+  if (t.includes("import")) {
+    iI = true;
+  }
   while (idx < t.length) {
     const c = t[idx];
     
