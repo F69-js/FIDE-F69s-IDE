@@ -1,19 +1,16 @@
-// FIDE Worker (v35.1 Progress Fixed)
+// FIDE Worker (v35.1 Progress Fixed - Refactored)
 import * as Gateway from "./langs/gateway.js";
 
 let currentLang = 'js';
 
-// worker.js の一番上に貼り付ける
+// worker.js のエラーをメインスレッドに通知
 self.onerror = function(message, filename, lineno, colno, error) {
-  // メインスレッドにエラー情報を直接送信する
   self.postMessage({
     type: 'WORKER_INTERNAL_ERROR',
     message: message || (error && error.message) || '不明なエラー'
   });
-  return true; // ブラウザの標準エラー出力を抑制したい場合
+  return true; 
 };
-
-// --- ここから下に既存のコード ---
 
 const COMPONENT_THEMES = {
   js: Gateway.JStheme, json: Gateway.JSONtheme,
@@ -49,17 +46,13 @@ self.addEventListener("message", (e) => {
   const { type, filename, linesText, lang } = e.data;
 
   if (type === "DETECT_LANG") {
-    if (!filename || !filename.trim() || 
-        !filename.includes('.')) {
+    if (!filename || !filename.trim() || !filename.includes('.')) {
       currentLang = 'js';
     } else {
-      const ext = filename.split('.')
-                          .pop().toLowerCase();
-      if (COMPONENT_THEMES[ext] || 
-          ext === 'dockerfile') {
+      const ext = filename.split('.').pop().toLowerCase();
+      if (COMPONENT_THEMES[ext] || ext === 'dockerfile') {
         currentLang = ext;
-      } else if (filename.toLowerCase()
-                         .includes('dockerfile')) {
+      } else if (filename.toLowerCase().includes('dockerfile')) {
         currentLang = 'dockerfile';
       } else {
         currentLang = 'js';
@@ -68,8 +61,7 @@ self.addEventListener("message", (e) => {
     self.postMessage({
       type: "LANG_CHANGED",
       currentLang: currentLang,
-      themeCss: COMPONENT_THEMES[currentLang] || 
-                COMPONENT_THEMES['js']
+      themeCss: COMPONENT_THEMES[currentLang] || COMPONENT_THEMES['js']
     });
     return;
   }
@@ -113,33 +105,26 @@ self.addEventListener("message", (e) => {
       default:     highlightedCombinedHtml = Gateway.ApplyHighlighttoJS(fullCombinedText); break;
     }
 
+    // リンク化処理と行分解（重複宣言を削除して一本化）
     const linkedCombinedHtml = bindHyperlinksToDom(highlightedCombinedHtml);
-
-    // 💡 本物の改行コードを基準に行分解
     const highlightedLines = linkedCombinedHtml.split("\n");
     const total = highlightedLines.length;
 
+    // 50% 進行通知
     self.postMessage({
       type: "PROGRESS_UPDATE",
       current: Math.floor(total * 0.5),
       total: total
     });
 
-    const linkedCombinedHtml = 
-      bindHyperlinksToDom(
-        highlightedCombinedHtml
-      );
-
-    const highlightedLines = 
-      linkedCombinedHtml.split("\n");
-
-    // 💡 完了直前に100%パルスを射出！
+    // 100% 進行通知
     self.postMessage({
       type: "PROGRESS_UPDATE",
       current: total,
       total: total
     });
 
+    // 完了通知
     self.postMessage({
       type: "HIGHLIGHT_COMPLETE",
       highlightedLines: highlightedLines
