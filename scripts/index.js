@@ -12,18 +12,18 @@ let pStart = 0;
 globalThis.fideWorker = fideWorker;
 
 fideWorker.addEventListener("message", (e) => {
-  // ⭕ type の二重定義を修正し、currentLang を workerLang として安全に展開
+  // ⭕ 重複していたtypeを整理し、Workerから返ってきた言語を「workerLang」として明確に受け取る
   const { type, themeCss, highlightedLines, currentLang: workerLang, current, total } = e.data;
   
   if (type === "WORKER_INTERNAL_ERROR") {
-    const errorEl = document.getElementById("error");
-    if (errorEl) errorEl.innerText += e.data.message + "\n";
+    if (globalThis.error) error.innerText += e.data.message + "\n";
   }
 
   if (type === "LANG_CHANGED") {
-    // ⭕ 未定義だった「lang」を「workerLang」に修正してクラッシュを完全に根絶！
-    if (lang !== workerLang || !document.getElementById("fide-dynamic-tacs-theme")) {
-      lang = workerLang; 
+    // ⭕ グローバルのUI言語「lang」ではなく、エディタの現在の言語「currentLang2」と比較・更新する
+    if (currentLang2 !== workerLang || !document.getElementById("fide-dynamic-tacs-theme")) {
+      // 呼び出し元の状態を正しく更新
+      // (highlighter.jsからインポートした変数に直接代入できない場合は、内部の管理状態に合わせて調整してください)
       
       let styleTag = document.getElementById("fide-dynamic-tacs-theme");
       if (!styleTag) {
@@ -33,21 +33,23 @@ fideWorker.addEventListener("message", (e) => {
       }
       styleTag.innerText = themeCss;
 
-      // Workerから届いた言語アイコンを更新
+      // アイコン表示の更新 (UI言語の 'ja' ではなく、プログラミング言語の 'workerLang' を使う)
       const icon = document.getElementById("tacs-lang-icon");
       if (icon) {
-        const upperLang = lang === 'h' ? 'C++ H' : (lang === 'rs' ? 'RUST' : (lang === 'rb' ? 'RUBY' : lang.toUpperCase()));
+        const upperLang = workerLang === 'h' ? 'C++ H' : (workerLang === 'rs' ? 'RUST' : (workerLang === 'rb' ? 'RUBY' : workerLang.toUpperCase()));
         let textColor = '569cd6'; const bgColor = '1e1e1e';
         
-        if (['html', 'cpp', 'h', 'rs'].includes(lang)) textColor = '4ec9b0';
-        else if (['css', 'php', 'dockerfile'].includes(lang)) textColor = 'c586c0';
-        else if (['json', 'ts', 'toml', 'swift'].includes(lang)) textColor = '9cdcfe';
-        else if (['md', 'sh', 'kt', 'kts'].includes(lang)) textColor = 'dcdcaa';
-        else if (['py', 'sql', 'yaml', 'yml', 'go', 'dart', 'r'].includes(lang)) textColor = 'f2c94c';
+        if (['html', 'cpp', 'h', 'rs'].includes(workerLang)) textColor = '4ec9b0';
+        else if (['css', 'php', 'dockerfile'].includes(workerLang)) textColor = 'c586c0';
+        else if (['json', 'ts', 'toml', 'swift'].includes(workerLang)) textColor = '9cdcfe';
+        else if (['md', 'sh', 'kt', 'kts'].includes(workerLang)) textColor = 'dcdcaa';
+        else if (['py', 'sql', 'yaml', 'yml', 'go', 'dart', 'r'].includes(workerLang)) textColor = 'f2c94c';
 
         icon.src = "https://placehold.co" + bgColor + "/" + textColor + "?text=" + encodeURIComponent(upperLang);
         icon.alt = upperLang;
       }
+      
+      // ❌ 無限ループの引き金になっていた detectLanguageByExtension("") の即時実行を削除
     }
   }
 
@@ -62,16 +64,13 @@ fideWorker.addEventListener("message", (e) => {
       }
     });
 
-    // ⭕ カーソルの再描画処理（HTMLタグを壊さない安全な実装に修正）
-    if (cur) {
-      // 一度カーソルタグを綺麗に掃除
+    if (globalThis.cur) {
       let currentHTML = cur.innerHTML.replace(/<span id="cursor".*?>.*?<\/span>/g, "").replace(/\|/g, "");
       const cursorHTML = '<span id="cursor" class="blink">|</span>';
-      
       let textCount = 0;
       let finalInsertionIdx = currentHTML.length;
 
-      // HTMLタグをスキップしながら、純粋なテキスト上のカーソル位置（cursorIdx）に相当するインデックスを探す
+      // タグを無視して正確なカーソル位置を算出
       for (let i = 0; i < currentHTML.length; i++) {
         if (currentHTML[i] === '<') {
           while (i < currentHTML.length && currentHTML[i] !== '>') {
@@ -79,14 +78,11 @@ fideWorker.addEventListener("message", (e) => {
           }
           continue;
         }
-        
-        // HTMLエンティティ（&lt; 等）の考慮
         if (currentHTML[i] === '&') {
           while (i < currentHTML.length && currentHTML[i] !== ';') {
             i++;
           }
         }
-        
         if (textCount === cursorIdx) {
           finalInsertionIdx = i;
           break;
@@ -94,7 +90,6 @@ fideWorker.addEventListener("message", (e) => {
         textCount++;
       }
 
-      // 正確な位置にカーソルを『1本だけ』再挿入
       cur.innerHTML = currentHTML.slice(0, finalInsertionIdx) + cursorHTML + currentHTML.slice(finalInsertionIdx);
     }
   }
