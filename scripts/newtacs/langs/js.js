@@ -1,4 +1,4 @@
-// FIDE JS Lexer (v27.3 Balanced Compact)
+// FIDE JS Lexer (v27.4 Balanced Compact - Refactored)
 const K = [
   "if","else","switch","case","break","return","typeof",
   "instanceof","throw","for","let","const","var","class",
@@ -50,16 +50,7 @@ export function ApplyHighlighttoJS(t) {
   let idx = 0, res = '', w = '', lC = '';
   let aV = false, aF = false, iI = false, aA = false, iP = false;
 
-  // 💡 行頭での状態自動開通レール
-  if (c1 || c2) res += '<span class="c">';
-  else if (s === 1) res += '<span class="str">';
-  else if (s === 2) res += '<span class="tmpl-str">';
-
-  if (t.includes("import")) iI = true;
-
-}
-
-// 💡 【大復活】これが虚空に消えていた本物の flush 関数本体です！
+  // 💡 【スコープ内へ安全に統合】状態に応じた一元管理型のフラッシュ関数
   const flush = (isP = false, nC = '') => {
     if (!w) return;
     let cN = "";
@@ -67,17 +58,11 @@ export function ApplyHighlighttoJS(t) {
       cN = "s";
     } else if (w === "NaN") {
       cN = "s";
-    } else if (w === "module" ||
-               w === "exports") {
+    } else if (w === "module" || w === "exports") {
       cN = "b";
-    } else if (w === "void" ||
-               w === "as" ||
-               K.includes(w)) {
+    } else if (w === "void" || w === "as" || K.includes(w)) {
       cN = "k";
-      if (["var","let","const"]
-          .includes(w)) {
-        aV = true;
-      }
+      if (["var","let","const"].includes(w)) aV = true;
       if (w === "import") iI = true;
       if (w === "as") aA = true;
     } else if (A.includes(w)) {
@@ -110,35 +95,23 @@ export function ApplyHighlighttoJS(t) {
       cN = "arg-green";
     } else if (dV.has(w)) {
       cN = "orange-cream";
-    } else {
-      cN = "";
     }
 
     if (cN) {
-      res += '<span class="' +
-             cN + '">' + w + '</span>';
+      res += '<span class="' + cN + '">' + w.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</span>';
     } else {
-      res += w;
+      res += w.replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
     w = '';
   };
 
-const f = flush;
-
-  export function ApplyHighlighttoJS(t) {
-  let idx = 0, res = '', w = '';
-  let lC = '';
-  let aV = false, aF = false;
-  let iI = false, aA = false;
-  let iP = false;
-
+  // 💡 行頭での状態自動開通レール
   if (c1 || c2) res += '<span class="c">';
   else if (s === 1) res += '<span class="str">';
   else if (s === 2) res += '<span class="tmpl-str">';
 
-  if (t.includes("import")) {
-    iI = true;
-  }
+  if (t.includes("import")) iI = true;
+
   while (idx < t.length) {
     const c = t[idx];
     
@@ -221,7 +194,7 @@ const f = flush;
     if (c === '`') { flush(lC === '.'); res += '<span class="tmpl-str">`'; s = 2; idx++; continue; }
 
     if (c === 'm' && t.slice(idx, idx + 14) === "module.exports") {
-      flush(lC === '.'); res += '<span class="b">module.exports</span>'; idx += 14; lastChar = 's'; continue;
+      flush(lC === '.'); res += '<span class="b">module.exports</span>'; idx += 14; lC = 's'; continue;
     }
     if (c === '-' && /[0-9]/.test(t[idx + 1] || '')) {
       flush(lC === '.'); res += '<span class="green-dot">-</span>'; idx++; continue;
@@ -241,11 +214,12 @@ const f = flush;
     } else {
       if (w) {
         if (c === ':') flush(true, c);
-        else flush(lastChar === '.', c);
+        // ⭕ 未定義だった lastChar を正しい変数 lC に修正！
+        else flush(lC === '.', c);
       }
       if (c.trim() !== '') lC = c;
 
-      if (c === '(' && (lastChar === 'n' || lastChar === 't' || w === '')) iP = true;
+      if (c === '(' && (lC === 'n' || lC === 't' || w === '')) iP = true;
       if (c === ')') iP = false;
 
       if (c === '{') {
@@ -271,6 +245,6 @@ const f = flush;
     }
     idx++;
   }
-  if (w) flush(lastChar === '.');
+  if (w) flush(lC === '.');
   return res;
 }
