@@ -10,16 +10,20 @@ import {initUIListeners} from "./ui.js";
 Language.textlist = LanguageTable;
 let pStart = 0;
 globalThis.fideWorker = fideWorker;
+
 fideWorker.addEventListener("message", (e) => {
-  var { type, themeCss, highlightedLines,type, current, total } = e.data;
-  let currentLang = currentLang2;
+  // ⭕ type の二重定義を修正し、currentLang を workerLang として安全に展開
+  const { type, themeCss, highlightedLines, currentLang: workerLang, current, total } = e.data;
+  
   if (type === "WORKER_INTERNAL_ERROR") {
-	    error.innerText += e.data.message + "\n"
+    const errorEl = document.getElementById("error");
+    if (errorEl) errorEl.innerText += e.data.message + "\n";
   }
+
   if (type === "LANG_CHANGED") {
-    // 💡 本当に言語が変わった時だけ処理を行うことで、無限ループと描画崩壊を阻止！
-    if (currentLang !== lang || !document.getElementById("fide-dynamic-tacs-theme")) {
-      currentLang = lang;
+    // ⭕ 未定義だった「lang」を「workerLang」に修正してクラッシュを完全に根絶！
+    if (lang !== workerLang || !document.getElementById("fide-dynamic-tacs-theme")) {
+      lang = workerLang; 
       
       let styleTag = document.getElementById("fide-dynamic-tacs-theme");
       if (!styleTag) {
@@ -29,8 +33,7 @@ fideWorker.addEventListener("message", (e) => {
       }
       styleTag.innerText = themeCss;
 
-      // ⭕ 【ここに用があった！】
-      // Workerから届いた「lang」を元に、画面の隅の<img>要素を直接上書きしてアイコンを大出現させる！
+      // Workerから届いた言語アイコンを更新
       const icon = document.getElementById("tacs-lang-icon");
       if (icon) {
         const upperLang = lang === 'h' ? 'C++ H' : (lang === 'rs' ? 'RUST' : (lang === 'rb' ? 'RUBY' : lang.toUpperCase()));
@@ -45,91 +48,71 @@ fideWorker.addEventListener("message", (e) => {
         icon.src = "https://placehold.co" + bgColor + "/" + textColor + "?text=" + encodeURIComponent(upperLang);
         icon.alt = upperLang;
       }
-
-      if (typeof document !== "undefined") {
-        if (document.readyState === "loading") {
-          // HTMLの構築が終わったら初期化を走らせる
-          document.addEventListener("DOMContentLoaded", () => {
-            detectLanguageByExtension("");
-          });
-        } else {
-          detectLanguageByExtension("");
-        }
-      }
     }
   }
 
-
-  // 2. 💡【大復活】ハイライトパースがすべて完了して返ってきた時
+  // 2. 💡 ハイライトパースがすべて完了して返ってきた時
   if (type === "HIGHLIGHT_COMPLETE" && highlightedLines) {
     const lines = document.querySelectorAll(".line");
     
-    // ⭕ 計算済みの極彩色HTMLを安全にフラッシュ反映！（ここで一旦古いカーソルは消滅）
+    // 計算済みの極彩色HTMLをフラッシュ反映
     lines.forEach((line, idx) => {
       if (highlightedLines[idx] !== undefined && line) {
         line.innerHTML = highlightedLines[idx];
       }
     });
 
-    // ⭕【カーソル2本分裂の暗殺＆1本化ロジック】
-    // ハイライトが当たった直後の画面から、ダブって残ってしまった古いカーソルタグや縦棒（|）をすべて綺麗に抹消！
-    let currentHTML = cur.innerHTML.replace(/<span id="cursor".*?>.*?<\/span>/g, "").replace(/\|/g, "");
-    
-    const cursorHTML = '<span id="cursor" class="blink">|</span>';
-    let textCount = 0;
-    // 💡 変数の宣言漏れを絶対に防ぐために、ここで明示的に初期化
-    let finalInsertionIdx = currentHTML.length;
-
-    // 3. HTMLタグを避けて、同じファイル内にある本物の「cursorIdx」の位置を正確に計算
-    for (let i = 0; i < currentHTML.length; i++) {
-      if (currentHTML[i] === '<') {
-        while (i < currentHTML.length && currentHTML[i] !== '>') {
-          i++;
-        }
-        continue;
-      }
+    // ⭕ カーソルの再描画処理（HTMLタグを壊さない安全な実装に修正）
+    if (cur) {
+      // 一度カーソルタグを綺麗に掃除
+      let currentHTML = cur.innerHTML.replace(/<span id="cursor".*?>.*?<\/span>/g, "").replace(/\|/g, "");
+      const cursorHTML = '<span id="cursor" class="blink">|</span>';
       
-      if (textCount === cursorIdx) {
-        finalInsertionIdx = i;
-        break;
+      let textCount = 0;
+      let finalInsertionIdx = currentHTML.length;
+
+      // HTMLタグをスキップしながら、純粋なテキスト上のカーソル位置（cursorIdx）に相当するインデックスを探す
+      for (let i = 0; i < currentHTML.length; i++) {
+        if (currentHTML[i] === '<') {
+          while (i < currentHTML.length && currentHTML[i] !== '>') {
+            i++;
+          }
+          continue;
+        }
+        
+        // HTMLエンティティ（&lt; 等）の考慮
+        if (currentHTML[i] === '&') {
+          while (i < currentHTML.length && currentHTML[i] !== ';') {
+            i++;
+          }
+        }
+        
+        if (textCount === cursorIdx) {
+          finalInsertionIdx = i;
+          break;
+        }
+        textCount++;
       }
-      textCount++;
+
+      // 正確な位置にカーソルを『1本だけ』再挿入
+      cur.innerHTML = currentHTML.slice(0, finalInsertionIdx) + cursorHTML + currentHTML.slice(finalInsertionIdx);
     }
-
-    // 4. 正確な位置にカーソルを『1本だけ』再挿入して完全復活！
-    cur.innerHTML = currentHTML.slice(0, finalInsertionIdx) + cursorHTML + currentHTML.slice(finalInsertionIdx);
   }
 
-  if (type === "PROGRESS_UPDATE") {
-  // 1. 進捗率（%）を計算
-  const pct = Math.floor(
-    (current / total) * 100
-  );
-  
-  // 2. 経過時間（秒）を算出
-  const elap = 
-    (performance.now() - pStart) / 1000;
-  
-  // 3. 1行あたりの平均パース速度を逆算
-  const avg = elap / current;
-  
-  // 4. 残り行数から、正確な「残り秒数」を割り出す！
-  const remLines = total - current;
-  const remSec = Math.ceil(
-    remLines * avg
-  );
+  if (type === "PROGRESS_UPDATE" && total > 0) {
+    const pct = Math.floor((current / total) * 100);
+    const elap = (performance.now() - pStart) / 1000;
+    const avg = current > 0 ? elap / current : 0;
+    const remLines = total - current;
+    const remSec = Math.ceil(remLines * avg);
 
-  // 5. 画面のUI要素（placeholder等）へパチッと反映！
-  const ui = document.getElementById(
-    "fide-progress"
-  );
-  if (ui) {
-    ui.innerText = 
-      `LOADING: ${pct}% ` +
-      `(残り ${remSec}s)`;
+    const ui = document.getElementById("fide-progress");
+    if (ui) {
+      ui.innerText = `LOADING: ${pct}% (残り ${remSec}s)`;
+    }
   }
-}
 });
+
 let sec = location.search;
 function getParams(p) {
 	let c = {};
@@ -428,7 +411,7 @@ window.addEventListener("keydown", async e => {
 					if (!raw) break;
 					undoStack.push(raw);
 					redoStack = [];
-					raw = raw.replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*\$/gm, '\$1');
+					raw = raw.replace(/\/\*[\s\S]*?\*\/\|([^\\:]|^)\/\/.*\$/gm, '\$1');
 					const lines = raw.split(/\r?\n/);
 					maincontainer.innerHTML =
 						`<div id="lineGroup0" class="group"><div id="lineno0" class="lineno">1</div><div id="line0" class="line">\${lines || ""}</div><div id="cursol0" class="cursol"></div></div>`;
@@ -538,10 +521,10 @@ window.addEventListener("keydown", async e => {
 			break;
 		case "ArrowUp":
 			if (lineID > 0) {
-				cur.innerText = cur.innerText.replace(/|/g, "");
+				cur.innerText = cur.innerText.replace(/\|/g, "");
 				lineID--;
 				cur = document.querySelector("#line" + lineID);
-				let len = cur.innerText.replace(/|/g, "").length;
+				let len = cur.innerText.replace(/\|/g, "").length;
 				if (cursorIdx > len) cursorIdx = len;
 				refreshLineUI()
 			}
@@ -549,10 +532,10 @@ window.addEventListener("keydown", async e => {
 		case "ArrowDown":
 			let next = document.querySelector("#line" + String(lineID + 1));
 			if (next) {
-				cur.innerText = cur.innerText.replace(/|/g, "");
+				cur.innerText = cur.innerText.replace(/\|/g, "");
 				lineID++;
 				cur = next;
-				let len = cur.innerText.replace(/|/g, "").length;
+				let len = cur.innerText.replace(/\|/g, "").length;
 				if (cursorIdx > len) cursorIdx = len;
 				refreshLineUI()
 			}
