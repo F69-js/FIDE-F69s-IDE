@@ -55,7 +55,7 @@ export async function initBuiltInAI() {
   } 
 }
 
-// ⭕ ストリーミング（1トークンずつの描画）に完全対応させたメイン関数
+// ⭕ ストリーミング（1トークンずつの描画）に完全対応させたメイン関数（自爆バグ修正版）
 export async function sendBtnCheck(getRawTextFn, setRawTextFn, doEnterFn, undoStackRef) { 
   if (globalThis.aienable && !globalThis.aienable.checked) { 
     if (globalThis.aioutput) aioutput.innerText = "AI機能は設定で無効化されています。"; 
@@ -69,7 +69,7 @@ export async function sendBtnCheck(getRawTextFn, setRawTextFn, doEnterFn, undoSt
   if (!promptText) return; 
   
   if (globalThis.aioutput) aioutput.innerText = "AIが思考中..."; 
-  if (globalThis.aiinput) aiinput.value = ""; // 入力欄をクリアしてUX向上
+  if (globalThis.aiinput) aiinput.value = ""; 
 
   let session = null;
   try { 
@@ -82,21 +82,25 @@ export async function sendBtnCheck(getRawTextFn, setRawTextFn, doEnterFn, undoSt
     const currentFileName = globalThis.filenamei ? (filenamei.value || "F69sIDE.js") : "F69sIDE.js"; 
     const fullPrompt = `[!PROMPT]\n${promptText}\n\n[!RAWCODE]\n[!code_editor ${currentFileName}]\n${getRawTextFn()}`.trim(); 
     
-    // ⭕ 【本物のストリーミング実装】1トークンずつデータを受け取る非同期ループ
+    // 【ストリーミング実行】
     const stream = await session.promptStreaming(fullPrompt);
     let fullResponse = "";
 
     for await (const chunk of stream) {
-      fullResponse = chunk; // 最新の蓄積テキストに更新
+      fullResponse = chunk; 
       if (globalThis.aioutput) {
-        aioutput.innerText = fullResponse; // リアルタイムに画面へ出力（カタカタ描画）
+        aioutput.innerText = fullResponse; // リアルタイムに1文字ずつカタカタ描画！
       }
     }
 
-    // AIからの最終回答テキスト
+    // ⭕ 【安全地帯】ループが完全に終わり、最後の1文字まで出力しきった後にセッションを破棄する
+    try { session.destroy(); } catch(e) {}
+    session = null;
+
+    // AIからの最終回答テキストを元にコード置換処理へ進む
     let explanation = fullResponse; 
     
-    // コード置換ロジックのバグを安全に修正
+    // コード置換ロジック
     const codeBlockRegex = /\[!code_editor\s+([^\]]+)\]([\s\S]*?)(?:\$)/; 
     const match = explanation.match(codeBlockRegex); 
     
@@ -128,7 +132,7 @@ export async function sendBtnCheck(getRawTextFn, setRawTextFn, doEnterFn, undoSt
   } catch (err) { 
     console.error(err); 
     if (globalThis.aioutput) aioutput.innerText = "AI実行エラー: " + err.message; 
-  } finally {
+    // エラー時もセッションが残っていれば安全に片付ける
     if (session) {
       try { session.destroy(); } catch(e) {}
     }
